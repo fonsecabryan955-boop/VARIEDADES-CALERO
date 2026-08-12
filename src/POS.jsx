@@ -7,6 +7,7 @@ export default function POS({ user, onBack }) {
   const [cart, setCart] = useState([])
   const [checkingOut, setCheckingOut] = useState(false)
   const [message, setMessage] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('cash')
 
   const loadVariants = async () => {
     setLoading(true)
@@ -67,7 +68,7 @@ export default function POS({ user, onBack }) {
         order_type: 'in_store',
         status: 'delivered',
         payment_status: 'paid',
-        payment_method: 'cash',
+        payment_method: paymentMethod,
         subtotal,
         discount: 0,
         total: subtotal,
@@ -100,6 +101,7 @@ export default function POS({ user, onBack }) {
 
     setMessage('✅ Venta registrada correctamente')
     setCart([])
+    setPaymentMethod('cash')
     setCheckingOut(false)
     loadVariants()
   }
@@ -188,6 +190,27 @@ export default function POS({ user, onBack }) {
           <div style={styles.totalRow}>
             <span>Total</span>
             <span style={styles.totalValue}>${total.toFixed(2)}</span>
+          </div>
+
+          <div style={styles.paymentMethods}>
+            <button
+              style={paymentMethod === 'cash' ? styles.paymentBtnActive : styles.paymentBtn}
+              onClick={() => setPaymentMethod('cash')}
+            >
+              💵 Efectivo
+            </button>
+            <button
+              style={paymentMethod === 'card' ? styles.paymentBtnActive : styles.paymentBtn}
+              onClick={() => setPaymentMethod('card')}
+            >
+              💳 Tarjeta
+            </button>
+            <button
+              style={paymentMethod === 'transfer' ? styles.paymentBtnActive : styles.paymentBtn}
+              onClick={() => setPaymentMethod('transfer')}
+            >
+              🏦 Transferencia
+            </button>
           </div>
 
           {message && <p style={styles.message}>{message}</p>}
@@ -368,6 +391,32 @@ const styles = {
   },
   totalValue: {
     color: '#d4af37',
+  },
+  paymentMethods: {
+    display: 'flex',
+    gap: 6,
+    marginBottom: 12,
+  },
+  paymentBtn: {
+    flex: 1,
+    background: '#242424',
+    color: '#ccc',
+    border: '1px solid #333',
+    borderRadius: 8,
+    padding: '8px 4px',
+    fontSize: 11,
+    cursor: 'pointer',
+  },
+  paymentBtnActive: {
+    flex: 1,
+    background: '#d4af37',
+    color: '#0f0f0f',
+    border: '1px solid #d4af37',
+    borderRadius: 8,
+    padding: '8px 4px',
+    fontSize: 11,
+    fontWeight: 'bold',
+    cursor: 'pointer',
   },
   checkoutBtn: {
     width: '100%',
