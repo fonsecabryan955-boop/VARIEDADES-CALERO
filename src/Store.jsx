@@ -548,6 +548,36 @@ export default function Store() {
     load()
   }, [])
 
+  // Makes /tienda installable as its own app (separate icon, name and start
+  // screen from the admin panel), by swapping the manifest + title/theme
+  // tags that live in index.html for tienda-specific ones at runtime.
+  useEffect(() => {
+    document.title = 'Variedades Calero — Tienda'
+
+    const setLink = (rel, href) => {
+      let el = document.querySelector(`link[rel="${rel}"]`)
+      if (!el) {
+        el = document.createElement('link')
+        el.rel = rel
+        document.head.appendChild(el)
+      }
+      el.href = href
+    }
+    const setMeta = (name, content) => {
+      let el = document.querySelector(`meta[name="${name}"]`)
+      if (!el) {
+        el = document.createElement('meta')
+        el.name = name
+        document.head.appendChild(el)
+      }
+      el.content = content
+    }
+
+    setLink('manifest', '/tienda-manifest.json')
+    setMeta('theme-color', '#0e0d0c')
+    setMeta('apple-mobile-web-app-title', 'Var. Calero')
+  }, [])
+
   // group variants into products
   const products = useMemo(() => {
     const map = new Map()
