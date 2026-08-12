@@ -4,6 +4,7 @@ import Products from './Products.jsx'
 import POS from './POS.jsx'
 import Store from './Store.jsx'
 import Orders from './Orders.jsx'
+import Cash from './Cash.jsx'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -58,6 +59,10 @@ export default function App() {
     return <Orders onBack={() => setView('home')} />
   }
 
+  if (view === 'cash') {
+    return <Cash user={user} onBack={() => setView('home')} />
+  }
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -103,6 +108,13 @@ export default function App() {
           style={cardBtnStyle}
         >
           🛒 Punto de venta
+        </button>
+
+        <button
+          onClick={() => setView('cash')}
+          style={cardBtnStyle}
+        >
+          💰 Caja
         </button>
 
         {user.role === 'admin' && (
