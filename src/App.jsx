@@ -7,6 +7,7 @@ import Orders from './Orders.jsx'
 import Cash from './Cash.jsx'
 import Reports from './Reports.jsx'
 import Receivables from './Receivables.jsx'
+import Clients from './Clients.jsx'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -71,6 +72,10 @@ export default function App() {
 
   if (view === 'receivables') {
     return <Receivables onBack={() => setView('home')} />
+  }
+
+  if (view === 'clients') {
+    return <Clients onBack={() => setView('home')} />
   }
 
   return (
@@ -140,6 +145,9 @@ export default function App() {
             </button>
             <button onClick={() => setView('receivables')} style={cardBtnStyle}>
               🧾 Cuentas por Cobrar
+            </button>
+            <button onClick={() => setView('clients')} style={cardBtnStyle}>
+              👥 Clientes
             </button>
           </>
         )}
