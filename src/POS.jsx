@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from './supabaseClient'
 
+const paymentLabelsMap = { cash: 'Efectivo', card: 'Tarjeta', transfer: 'Transferencia' }
+
 export default function POS({ user, onBack }) {
   const [variants, setVariants] = useState([])
   const [loading, setLoading] = useState(true)
@@ -8,6 +10,10 @@ export default function POS({ user, onBack }) {
   const [checkingOut, setCheckingOut] = useState(false)
   const [message, setMessage] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('cash')
+  const [clientName, setClientName] = useState('')
+  const [clientPhone, setClientPhone] = useState('')
+  const [amountPaid, setAmountPaid] = useState('')
+  const [receipt, setReceipt] = useState(null)
 
   const loadVariants = async () => {
     setLoading(true)
@@ -61,14 +67,50 @@ export default function POS({ user, onBack }) {
     setMessage('')
 
     const subtotal = total
+    const paidInput = amountPaid.trim()
+    const finalPaid = paidInput === '' ? subtotal : (isNaN(parseFloat(paidInput)) ? subtotal : parseFloat(paidInput))
+    const paymentStatus = finalPaid >= subtotal ? 'paid' : 'partial'
+
+    let clientId = null
+    let clientBalance = 0
+
+    if (clientName.trim()) {
+      let existingClient = null
+      if (clientPhone.trim()) {
+        const { data: found } = await supabase
+          .from('clients')
+          .select('id')
+          .eq('phone', clientPhone.trim())
+          .maybeSingle()
+        existingClient = found
+      }
+
+      if (existingClient) {
+        clientId = existingClient.id
+      } else {
+        const { data: newClient, error: clientErr } = await supabase
+          .from('clients')
+          .insert({ name: clientName.trim(), phone: clientPhone.trim() || null })
+          .select('id')
+          .single()
+        if (clientErr) {
+          setMessage('Error al guardar cliente: ' + clientErr.message)
+          setCheckingOut(false)
+          return
+        }
+        clientId = newClient.id
+      }
+    }
 
     const { data: order, error: orderErr } = await supabase
       .from('orders')
       .insert({
         order_type: 'in_store',
+        client_id: clientId,
         status: 'delivered',
-        payment_status: 'paid',
+        payment_status: paymentStatus,
         payment_method: paymentMethod,
+        amount_paid: finalPaid,
         subtotal,
         discount: 0,
         total: subtotal,
@@ -99,11 +141,99 @@ export default function POS({ user, onBack }) {
       return
     }
 
-    setMessage('✅ Venta registrada correctamente')
+    if (clientId) {
+      const { data: pending } = await supabase
+        .from('orders')
+        .select('total, amount_paid')
+        .eq('client_id', clientId)
+        .neq('payment_status', 'paid')
+      clientBalance = (pending || []).reduce(
+        (s, o) => s + (Number(o.total) - Number(o.amount_paid)),
+        0
+      )
+    }
+
+    setReceipt({
+      items: cart,
+      subtotal,
+      total: subtotal,
+      paid: finalPaid,
+      remaining: subtotal - finalPaid,
+      clientName: clientName.trim(),
+      clientBalance,
+      paymentMethod,
+      date: new Date(),
+      soldBy: user.name,
+    })
+
     setCart([])
     setPaymentMethod('cash')
+    setClientName('')
+    setClientPhone('')
+    setAmountPaid('')
     setCheckingOut(false)
     loadVariants()
+  }
+
+  if (receipt) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.receiptWrap}>
+          <div style={styles.receiptBox} id="receipt-print">
+            <h2 style={styles.brand}>VARIEDADES CALERO</h2>
+            <p style={styles.muted}>{receipt.date.toLocaleString()}</p>
+            <p style={styles.muted}>Vendido por: {receipt.soldBy}</p>
+            {receipt.clientName && <p style={styles.muted}>Cliente: {receipt.clientName}</p>}
+
+            <div style={styles.receiptDivider} />
+
+            {receipt.items.map((i) => (
+              <div key={i.id} style={styles.receiptLine}>
+                <span>{i.products?.name} x{i.qty}</span>
+                <span>${((i.price ?? i.products?.base_price ?? 0) * i.qty).toFixed(2)}</span>
+              </div>
+            ))}
+
+            <div style={styles.receiptDivider} />
+
+            <div style={styles.receiptLine}>
+              <span>Total</span>
+              <span>${receipt.total.toFixed(2)}</span>
+            </div>
+            <div style={styles.receiptLine}>
+              <span>Abonado ({paymentLabelsMap[receipt.paymentMethod]})</span>
+              <span>${receipt.paid.toFixed(2)}</span>
+            </div>
+            <div style={{ ...styles.receiptLine, fontWeight: 'bold', color: receipt.remaining > 0 ? '#ff9b9b' : '#7fd88f' }}>
+              <span>{receipt.remaining > 0 ? 'Resta de esta compra' : 'Pagado completo'}</span>
+              <span>${receipt.remaining.toFixed(2)}</span>
+            </div>
+
+            {receipt.clientName && receipt.clientBalance > 0 && (
+              <>
+                <div style={styles.receiptDivider} />
+                <div style={{ ...styles.receiptLine, fontWeight: 'bold', color: '#ff9b9b' }}>
+                  <span>Total pendiente del cliente</span>
+                  <span>${receipt.clientBalance.toFixed(2)}</span>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div style={styles.receiptActions}>
+            <button style={styles.primaryBtnFull} onClick={() => window.print()}>
+              🖨️ Imprimir recibo
+            </button>
+            <button style={styles.linkBtnFull} onClick={() => setReceipt(null)}>
+              Nueva venta
+            </button>
+            <button style={styles.linkBtnFull} onClick={onBack}>
+              Volver al menú
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -211,6 +341,30 @@ export default function POS({ user, onBack }) {
             >
               🏦 Transferencia
             </button>
+          </div>
+
+          <div style={styles.creditSection}>
+            <p style={styles.creditLabel}>Cliente (opcional, para ventas al crédito)</p>
+            <input
+              style={styles.smallInput}
+              placeholder="Nombre del cliente"
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+            />
+            <input
+              style={styles.smallInput}
+              placeholder="Teléfono"
+              value={clientPhone}
+              onChange={(e) => setClientPhone(e.target.value)}
+            />
+            <input
+              style={styles.smallInput}
+              type="number"
+              step="0.01"
+              placeholder={`Monto abonado (dejar vacío = paga todo $${total.toFixed(2)})`}
+              value={amountPaid}
+              onChange={(e) => setAmountPaid(e.target.value)}
+            />
           </div>
 
           {message && <p style={styles.message}>{message}</p>}
@@ -435,5 +589,74 @@ const styles = {
   },
   muted: {
     color: '#777',
+  },
+  creditSection: {
+    borderTop: '1px solid #2a2a2a',
+    paddingTop: 12,
+    marginBottom: 12,
+  },
+  creditLabel: {
+    fontSize: 11,
+    color: '#999',
+    marginBottom: 8,
+  },
+  smallInput: {
+    width: '100%',
+    background: '#242424',
+    color: '#f5f5f5',
+    border: '1px solid #333',
+    borderRadius: 8,
+    padding: '8px 10px',
+    marginBottom: 8,
+    fontSize: 13,
+    boxSizing: 'border-box',
+  },
+  receiptWrap: {
+    maxWidth: 380,
+    margin: '0 auto',
+  },
+  brand: {
+    color: '#d4af37',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  receiptBox: {
+    background: '#1a1a1a',
+    border: '1px solid #2a2a2a',
+    borderRadius: 12,
+    padding: 20,
+  },
+  receiptDivider: {
+    borderTop: '1px dashed #333',
+    margin: '10px 0',
+  },
+  receiptLine: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    fontSize: 14,
+    marginBottom: 6,
+  },
+  receiptActions: {
+    marginTop: 16,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+  },
+  primaryBtnFull: {
+    background: '#d4af37',
+    color: '#0f0f0f',
+    border: 'none',
+    borderRadius: 8,
+    padding: '12px 0',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+  },
+  linkBtnFull: {
+    background: 'transparent',
+    color: '#999',
+    border: '1px solid #333',
+    borderRadius: 8,
+    padding: '10px 0',
+    cursor: 'pointer',
   },
 }
