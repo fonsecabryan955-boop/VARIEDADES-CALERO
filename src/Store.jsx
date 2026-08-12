@@ -14,6 +14,11 @@ export default function Store() {
   const [notes, setNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [createdOrderId, setCreatedOrderId] = useState(null)
+  const [proofFile, setProofFile] = useState(null)
+  const [proofPreview, setProofPreview] = useState(null)
+  const [uploadingProof, setUploadingProof] = useState(false)
+  const [proofUploaded, setProofUploaded] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -117,7 +122,52 @@ export default function Store() {
     }
 
     setSubmitting(false)
+    setCreatedOrderId(order.id)
     setStep('confirmed')
+  }
+
+  const handleProofChange = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setProofFile(file)
+    setProofPreview(URL.createObjectURL(file))
+  }
+
+  const handleUploadProof = async () => {
+    if (!proofFile || !createdOrderId) return
+    setUploadingProof(true)
+    setError('')
+
+    const fileExt = proofFile.name.split('.').pop()
+    const fileName = `${createdOrderId}-${Date.now()}.${fileExt}`
+
+    const { error: uploadErr } = await supabase.storage
+      .from('payment-proofs')
+      .upload(fileName, proofFile)
+
+    if (uploadErr) {
+      setError('Error al subir el comprobante: ' + uploadErr.message)
+      setUploadingProof(false)
+      return
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from('payment-proofs')
+      .getPublicUrl(fileName)
+
+    const { error: updateErr } = await supabase
+      .from('orders')
+      .update({ payment_proof_url: publicUrlData.publicUrl })
+      .eq('id', createdOrderId)
+
+    if (updateErr) {
+      setError('Error al guardar el comprobante: ' + updateErr.message)
+      setUploadingProof(false)
+      return
+    }
+
+    setUploadingProof(false)
+    setProofUploaded(true)
   }
 
   if (step === 'confirmed') {
@@ -139,11 +189,33 @@ export default function Store() {
                 <div>Titular: {a.account_holder}</div>
               </div>
             ))}
-            <p style={styles.muted}>
-              Una vez realizada la transferencia, enviá el comprobante por WhatsApp para confirmar tu pedido.
-            </p>
+
+            {proofUploaded ? (
+              <p style={{ color: '#7fd88f', fontWeight: 'bold', marginTop: 12 }}>
+                ✅ Comprobante recibido. ¡Gracias! Vamos a confirmar tu pago pronto.
+              </p>
+            ) : (
+              <div style={styles.proofSection}>
+                <p style={styles.muted}>
+                  Subí la foto o captura del comprobante de tu transferencia acá mismo:
+                </p>
+                {proofPreview && (
+                  <img src={proofPreview} alt="comprobante" style={styles.proofPreview} />
+                )}
+                <label style={styles.uploadLabel}>
+                  {proofFile ? 'Cambiar foto' : '📎 Subir comprobante'}
+                  <input type="file" accept="image/*" onChange={handleProofChange} style={{ display: 'none' }} />
+                </label>
+                {error && <p style={styles.error}>{error}</p>}
+                {proofFile && (
+                  <button style={styles.primaryBtn} onClick={handleUploadProof} disabled={uploadingProof}>
+                    {uploadingProof ? 'Subiendo...' : 'Enviar comprobante'}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
-          <button style={styles.primaryBtn} onClick={() => window.location.reload()}>
+          <button style={styles.linkBtn} onClick={() => window.location.reload()}>
             Volver a la tienda
           </button>
         </div>
@@ -403,5 +475,28 @@ const styles = {
     marginTop: 10,
     fontSize: 14,
     lineHeight: 1.6,
+  },
+  proofSection: {
+    marginTop: 14,
+    borderTop: '1px dashed #333',
+    paddingTop: 14,
+  },
+  proofPreview: {
+    width: '100%',
+    maxWidth: 200,
+    borderRadius: 8,
+    marginBottom: 10,
+    display: 'block',
+  },
+  uploadLabel: {
+    display: 'inline-block',
+    background: '#242424',
+    color: '#f5f5f5',
+    border: '1px solid #333',
+    borderRadius: 8,
+    padding: '10px 16px',
+    fontSize: 13,
+    cursor: 'pointer',
+    marginBottom: 10,
   },
 }
