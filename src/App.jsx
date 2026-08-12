@@ -5,6 +5,7 @@ import POS from './POS.jsx'
 import Store from './Store.jsx'
 import Orders from './Orders.jsx'
 import Cash from './Cash.jsx'
+import Reports from './Reports.jsx'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -61,6 +62,10 @@ export default function App() {
 
   if (view === 'cash') {
     return <Cash user={user} onBack={() => setView('home')} />
+  }
+
+  if (view === 'reports') {
+    return <Reports onBack={() => setView('home')} />
   }
 
   return (
@@ -124,6 +129,9 @@ export default function App() {
             </button>
             <button onClick={() => setView('orders')} style={cardBtnStyle}>
               🌐 Pedidos Online
+            </button>
+            <button onClick={() => setView('reports')} style={cardBtnStyle}>
+              📊 Reportes
             </button>
           </>
         )}
