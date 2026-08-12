@@ -1,174 +1,180 @@
 import React, { useState, useEffect } from 'react'
-import Login from './Login.jsx'
-import Products from './Products.jsx'
-import POS from './POS.jsx'
-import Store from './Store.jsx'
-import Orders from './Orders.jsx'
-import Cash from './Cash.jsx'
-import Reports from './Reports.jsx'
-import Receivables from './Receivables.jsx'
-import Clients from './Clients.jsx'
+import { supabase } from './supabaseClient'
 
-export default function App() {
-  const [user, setUser] = useState(null)
-  const [checking, setChecking] = useState(true)
-  const [view, setView] = useState('home')
-  const [isPublicStore, setIsPublicStore] = useState(false)
+const TIERS = [
+  { name: 'Oro', min: 150, color: '#d4af37', icon: '🥇' },
+  { name: 'Plata', min: 50, color: '#c0c0c0', icon: '🥈' },
+  { name: 'Bronce', min: 0, color: '#cd7f32', icon: '🥉' },
+]
+
+function getTier(totalSpent) {
+  return TIERS.find((t) => totalSpent >= t.min)
+}
+
+export default function Clients({ onBack }) {
+  const [clients, setClients] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [expanded, setExpanded] = useState(null)
+
+  const loadClients = async () => {
+    setLoading(true)
+    const { data: clientRows } = await supabase.from('clients').select('*')
+
+    const { data: orderRows } = await supabase
+      .from('orders')
+      .select('client_id, total, status, created_at, order_type')
+      .neq('status', 'cancelled')
+      .not('client_id', 'is', null)
+
+    const merged = (clientRows || []).map((c) => {
+      const clientOrders = (orderRows || []).filter((o) => o.client_id === c.id)
+      const totalSpent = clientOrders.reduce((s, o) => s + Number(o.total), 0)
+      const lastOrder = clientOrders.sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      )[0]
+      return {
+        ...c,
+        orderCount: clientOrders.length,
+        totalSpent,
+        lastOrderDate: lastOrder?.created_at || null,
+        orders: clientOrders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
+      }
+    })
+
+    merged.sort((a, b) => b.totalSpent - a.totalSpent)
+    setClients(merged)
+    setLoading(false)
+  }
 
   useEffect(() => {
-    const path = window.location.pathname
-    if (path.startsWith('/tienda')) {
-      setIsPublicStore(true)
-      setChecking(false)
-      return
-    }
-
-    const saved = localStorage.getItem('vc_user')
-    if (saved) {
-      try {
-        setUser(JSON.parse(saved))
-      } catch {
-        localStorage.removeItem('vc_user')
-      }
-    }
-    setChecking(false)
+    loadClients()
   }, [])
 
-  const handleLogout = () => {
-    localStorage.removeItem('vc_user')
-    setUser(null)
-    setView('home')
-  }
-
-  if (checking) return null
-
-  if (isPublicStore) {
-    return <Store />
-  }
-
-  if (!user) {
-    return <Login onLogin={setUser} />
-  }
-
-  if (view === 'products') {
-    return <Products onBack={() => setView('home')} />
-  }
-
-  if (view === 'pos') {
-    return <POS user={user} onBack={() => setView('home')} />
-  }
-
-  if (view === 'orders') {
-    return <Orders onBack={() => setView('home')} />
-  }
-
-  if (view === 'cash') {
-    return <Cash user={user} onBack={() => setView('home')} />
-  }
-
-  if (view === 'reports') {
-    return <Reports onBack={() => setView('home')} />
-  }
-
-  if (view === 'receivables') {
-    return <Receivables onBack={() => setView('home')} />
-  }
-
-  if (view === 'clients') {
-    return <Clients onBack={() => setView('home')} />
-  }
+  const filtered = clients.filter(
+    (c) =>
+      c.name?.toLowerCase().includes(search.toLowerCase()) ||
+      c.phone?.includes(search)
+  )
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#0f0f0f',
-      color: '#f5f5f5',
-      fontFamily: 'system-ui, sans-serif',
-      padding: 24,
-    }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 24,
-        borderBottom: '1px solid #2a2a2a',
-        paddingBottom: 16,
-      }}>
-        <div>
-          <h1 style={{ color: '#d4af37', fontSize: 20, margin: 0 }}>
-            VARIEDADES CALERO
-          </h1>
-          <p style={{ color: '#999', fontSize: 13, marginTop: 4 }}>
-            {user.name} · {user.role === 'admin' ? 'Administrador' : 'Empleado'}
-          </p>
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <button onClick={onBack} style={styles.backBtn}>← Volver</button>
+        <h2 style={styles.title}>Clientes</h2>
+        <div style={{ width: 90 }} />
+      </div>
+
+      <input
+        style={styles.search}
+        placeholder="Buscar por nombre o teléfono..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      {loading ? (
+        <p style={styles.muted}>Cargando...</p>
+      ) : filtered.length === 0 ? (
+        <p style={styles.muted}>No hay clientes todavía. Se registran automáticamente al vender a crédito o al recibir pedidos online.</p>
+      ) : (
+        <div style={styles.list}>
+          {filtered.map((c) => {
+            const tier = getTier(c.totalSpent)
+            return (
+              <div key={c.id} style={styles.card}>
+                <div
+                  style={styles.cardHeader}
+                  onClick={() => setExpanded(expanded === c.id ? null : c.id)}
+                >
+                  <div style={styles.clientInfo}>
+                    <div style={styles.clientName}>
+                      {c.name} <span style={{ ...styles.tierBadge, color: tier.color, borderColor: tier.color }}>{tier.icon} {tier.name}</span>
+                    </div>
+                    <div style={styles.muted}>
+                      {c.phone} {c.address ? `· ${c.address}` : ''}
+                    </div>
+                    <div style={styles.muted}>
+                      {c.orderCount} compra{c.orderCount !== 1 ? 's' : ''}
+                      {c.lastOrderDate ? ` · Última: ${new Date(c.lastOrderDate).toLocaleDateString()}` : ''}
+                    </div>
+                  </div>
+                  <div style={styles.spent}>${c.totalSpent.toFixed(2)}</div>
+                </div>
+
+                {expanded === c.id && (
+                  <div style={styles.ordersList}>
+                    {c.orders.length === 0 ? (
+                      <p style={styles.muted}>Sin compras registradas.</p>
+                    ) : (
+                      c.orders.map((o, idx) => (
+                        <div key={idx} style={styles.orderRow}>
+                          <span>
+                            {new Date(o.created_at).toLocaleDateString()} · {o.order_type === 'online' ? '🌐 Online' : '🛒 Tienda'}
+                          </span>
+                          <span>${Number(o.total).toFixed(2)}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
-        <button
-          onClick={handleLogout}
-          style={{
-            background: 'transparent',
-            color: '#999',
-            border: '1px solid #333',
-            borderRadius: 8,
-            padding: '8px 16px',
-            cursor: 'pointer',
-          }}
-        >
-          Salir
-        </button>
-      </div>
-
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-        <button
-          onClick={() => setView('pos')}
-          style={cardBtnStyle}
-        >
-          🛒 Punto de venta
-        </button>
-
-        <button
-          onClick={() => setView('cash')}
-          style={cardBtnStyle}
-        >
-          💰 Caja
-        </button>
-
-        {user.role === 'admin' && (
-          <>
-            <button onClick={() => setView('products')} style={cardBtnStyle}>
-              📦 Productos
-            </button>
-            <button onClick={() => setView('orders')} style={cardBtnStyle}>
-              🌐 Pedidos Online
-            </button>
-            <button onClick={() => setView('reports')} style={cardBtnStyle}>
-              📊 Reportes
-            </button>
-            <button onClick={() => setView('receivables')} style={cardBtnStyle}>
-              🧾 Cuentas por Cobrar
-            </button>
-            <button onClick={() => setView('clients')} style={cardBtnStyle}>
-              👥 Clientes
-            </button>
-          </>
-        )}
-      </div>
-
-      {user.role === 'admin' && (
-        <p style={{ opacity: 0.5, marginTop: 24, fontSize: 13 }}>
-          Tienda pública: {window.location.origin}/tienda
-        </p>
       )}
     </div>
   )
 }
 
-const cardBtnStyle = {
-  background: '#1a1a1a',
-  border: '1px solid #2a2a2a',
-  borderRadius: 12,
-  padding: '24px 32px',
-  color: '#f5f5f5',
-  cursor: 'pointer',
-  fontSize: 16,
-  fontWeight: 'bold',
+const styles = {
+  container: { minHeight: '100vh', background: '#0f0f0f', color: '#f5f5f5', fontFamily: 'system-ui, sans-serif', padding: 24 },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  backBtn: { background: 'transparent', color: '#999', border: '1px solid #333', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' },
+  title: { color: '#d4af37', margin: 0, fontSize: 20 },
+  muted: { color: '#999', fontSize: 13 },
+  search: {
+    width: '100%',
+    background: '#1a1a1a',
+    color: '#f5f5f5',
+    border: '1px solid #2a2a2a',
+    borderRadius: 8,
+    padding: '10px 14px',
+    marginBottom: 20,
+    fontSize: 14,
+    boxSizing: 'border-box',
+  },
+  list: { display: 'flex', flexDirection: 'column', gap: 12 },
+  card: { background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, overflow: 'hidden' },
+  cardHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    cursor: 'pointer',
+    gap: 10,
+  },
+  clientInfo: { flex: 1 },
+  clientName: { fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  tierBadge: {
+    fontSize: 11,
+    border: '1px solid',
+    borderRadius: 20,
+    padding: '2px 8px',
+  },
+  spent: { color: '#d4af37', fontWeight: 'bold', fontSize: 16 },
+  ordersList: {
+    borderTop: '1px solid #2a2a2a',
+    padding: 16,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+  },
+  orderRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    fontSize: 13,
+    background: '#0f0f0f',
+    borderRadius: 8,
+    padding: '8px 12px',
+  },
 }
