@@ -18,7 +18,7 @@ export default function Orders({ onBack }) {
     setLoading(true)
     const { data } = await supabase
       .from('orders')
-      .select('id, status, payment_status, total, notes, created_at, clients(name, phone, address), order_items(quantity, unit_price, product_variants(size, color, products(name)))')
+      .select('id, status, payment_status, total, notes, payment_proof_url, created_at, clients(name, phone, address), order_items(quantity, unit_price, product_variants(size, color, products(name)))')
       .eq('order_type', 'online')
       .order('created_at', { ascending: false })
     setOrders(data || [])
@@ -27,6 +27,8 @@ export default function Orders({ onBack }) {
 
   useEffect(() => {
     loadOrders()
+    const interval = setInterval(loadOrders, 5000)
+    return () => clearInterval(interval)
   }, [])
 
   const updateStatus = async (id, status) => {
@@ -73,6 +75,13 @@ export default function Orders({ onBack }) {
               </div>
 
               {o.notes && <div style={styles.notes}>Nota: {o.notes}</div>}
+
+              {o.payment_proof_url && (
+                <a href={o.payment_proof_url} target="_blank" rel="noreferrer" style={styles.proofLink}>
+                  <img src={o.payment_proof_url} alt="comprobante" style={styles.proofThumb} />
+                  Ver comprobante completo
+                </a>
+              )}
 
               <div style={styles.badges}>
                 <span style={styles.statusBadge}>{statusLabels[o.status] || o.status}</span>
@@ -142,4 +151,22 @@ const styles = {
   actions: { display: 'flex', gap: 8, flexWrap: 'wrap' },
   actionBtn: { background: '#d4af37', color: '#0f0f0f', border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 'bold', cursor: 'pointer' },
   cancelBtn: { background: 'transparent', color: '#ff6b6b', border: '1px solid #ff6b6b', borderRadius: 8, padding: '6px 14px', fontSize: 12, cursor: 'pointer' },
+  proofLink: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    color: '#d4af37',
+    fontSize: 12,
+    textDecoration: 'none',
+    marginBottom: 10,
+    background: '#0f0f0f',
+    borderRadius: 8,
+    padding: 8,
+  },
+  proofThumb: {
+    width: 40,
+    height: 40,
+    objectFit: 'cover',
+    borderRadius: 6,
+  },
 }
