@@ -229,6 +229,13 @@ export default function Products({ onBack }) {
 
   const PERMISSION_HINT = 'Puede que falte el permiso de eliminar en Supabase (RLS). Corré el SQL "permitir_eliminar.sql" en el SQL Editor de Supabase.'
 
+  const friendlyDbError = (rawMessage) => {
+    if (rawMessage && rawMessage.includes('foreign key constraint')) {
+      return 'No se puede eliminar porque ya tiene pedidos asociados. Corré el SQL "permitir_eliminar_con_pedidos.sql" en Supabase para poder eliminarlo conservando el historial de esos pedidos.'
+    }
+    return rawMessage
+  }
+
   const confirmDeleteAction = async () => {
     if (!confirmDelete) return
     setDeleting(true)
@@ -242,7 +249,7 @@ export default function Products({ onBack }) {
         .eq('product_id', product.id)
         .select('id')
       if (delVarErr) {
-        setActionError('Error al eliminar variantes: ' + delVarErr.message)
+        setActionError('Error al eliminar variantes: ' + friendlyDbError(delVarErr.message))
         setDeleting(false)
         return
       }
@@ -252,7 +259,7 @@ export default function Products({ onBack }) {
         .eq('id', product.id)
         .select('id')
       if (delProdErr) {
-        setActionError('Error al eliminar producto: ' + delProdErr.message)
+        setActionError('Error al eliminar producto: ' + friendlyDbError(delProdErr.message))
         setDeleting(false)
         return
       }
@@ -271,7 +278,7 @@ export default function Products({ onBack }) {
         .eq('id', confirmDelete.variantId)
         .select('id')
       if (delErr) {
-        setActionError('Error al eliminar: ' + delErr.message)
+        setActionError('Error al eliminar: ' + friendlyDbError(delErr.message))
         setDeleting(false)
         return
       }
