@@ -227,6 +227,8 @@ export default function Products({ onBack }) {
   const askDeleteProduct = (product) => setConfirmDelete({ type: 'product', product })
   const askDeleteVariant = (product, variantId) => setConfirmDelete({ type: 'variant', product, variantId })
 
+  const PERMISSION_HINT = 'Puede que falte el permiso de eliminar en Supabase (RLS). Corré el SQL "permitir_eliminar.sql" en el SQL Editor de Supabase.'
+
   const confirmDeleteAction = async () => {
     if (!confirmDelete) return
     setDeleting(true)
@@ -234,23 +236,47 @@ export default function Products({ onBack }) {
 
     if (confirmDelete.type === 'product') {
       const { product } = confirmDelete
-      const { error: delVarErr } = await supabase.from('product_variants').delete().eq('product_id', product.id)
+      const { data: delVarData, error: delVarErr } = await supabase
+        .from('product_variants')
+        .delete()
+        .eq('product_id', product.id)
+        .select('id')
       if (delVarErr) {
         setActionError('Error al eliminar variantes: ' + delVarErr.message)
         setDeleting(false)
         return
       }
-      const { error: delProdErr } = await supabase.from('products').delete().eq('id', product.id)
+      const { data: delProdData, error: delProdErr } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', product.id)
+        .select('id')
       if (delProdErr) {
         setActionError('Error al eliminar producto: ' + delProdErr.message)
         setDeleting(false)
         return
       }
+      // Supabase can return success with 0 rows affected when RLS silently
+      // blocks the delete (no matching policy) instead of raising an error.
+      if (!delProdData || delProdData.length === 0) {
+        setActionError('No se eliminó nada — el producto sigue ahí. ' + PERMISSION_HINT)
+        setDeleting(false)
+        return
+      }
       flashSuccess(`"${product.name}" fue eliminado`)
     } else {
-      const { error: delErr } = await supabase.from('product_variants').delete().eq('id', confirmDelete.variantId)
+      const { data: delData, error: delErr } = await supabase
+        .from('product_variants')
+        .delete()
+        .eq('id', confirmDelete.variantId)
+        .select('id')
       if (delErr) {
         setActionError('Error al eliminar: ' + delErr.message)
+        setDeleting(false)
+        return
+      }
+      if (!delData || delData.length === 0) {
+        setActionError('No se eliminó nada. ' + PERMISSION_HINT)
         setDeleting(false)
         return
       }
