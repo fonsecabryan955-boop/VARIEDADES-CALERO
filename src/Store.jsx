@@ -126,24 +126,138 @@ function GlobalStyle() {
         padding: 0 4px;
       }
 
-      /* intro band */
-      .vc-intro {
-        padding: 28px 20px 8px;
-        max-width: 1180px;
-        margin: 0 auto;
+      /* header monogram */
+      .vc-monogram {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 1px solid var(--vc-gold);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Fraunces', serif;
+        font-style: italic;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--vc-gold);
+        flex: none;
       }
-      .vc-intro h1 {
+      .vc-header-left { display: flex; align-items: center; gap: 12px; }
+
+      /* hero */
+      .vc-hero {
+        position: relative;
+        padding: 64px 20px 56px;
+        text-align: center;
+        overflow: hidden;
+        border-bottom: 1px solid var(--vc-border);
+      }
+      .vc-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 60% 70% at 50% 0%, rgba(212,175,55,0.16), transparent 70%);
+        pointer-events: none;
+      }
+      .vc-hero::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        opacity: 0.5;
+        pointer-events: none;
+        background-image: repeating-linear-gradient(
+          115deg,
+          transparent 0px,
+          transparent 38px,
+          rgba(212,175,55,0.07) 38px,
+          rgba(212,175,55,0.07) 39px
+        );
+        mask-image: radial-gradient(ellipse 70% 60% at 50% 20%, black, transparent 75%);
+      }
+      .vc-hero-inner { position: relative; max-width: 640px; margin: 0 auto; }
+      .vc-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        letter-spacing: 2.2px;
+        text-transform: uppercase;
+        color: var(--vc-gold);
+        font-weight: 600;
+        margin-bottom: 18px;
+      }
+      .vc-eyebrow::before, .vc-eyebrow::after {
+        content: '';
+        width: 20px;
+        height: 1px;
+        background: var(--vc-gold);
+        opacity: 0.6;
+      }
+      .vc-hero h1 {
         font-family: 'Fraunces', serif;
         font-weight: 400;
-        font-size: clamp(26px, 4vw, 38px);
-        margin: 0 0 6px;
+        font-style: italic;
+        font-size: clamp(32px, 6vw, 54px);
+        line-height: 1.08;
+        margin: 0 0 18px;
         color: var(--vc-cream);
       }
-      .vc-intro p {
+      .vc-hero p {
         color: var(--vc-muted);
-        font-size: 14px;
-        margin: 0;
+        font-size: 15px;
+        line-height: 1.6;
+        max-width: 440px;
+        margin: 0 auto 28px;
       }
+      .vc-hero-cta {
+        background: transparent;
+        border: 1px solid var(--vc-gold);
+        color: var(--vc-gold);
+        padding: 13px 28px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.4px;
+        cursor: pointer;
+        transition: background .2s, color .2s, transform .15s;
+      }
+      .vc-hero-cta:hover { background: var(--vc-gold); color: #1a1608; transform: translateY(-1px); }
+
+      /* stitch divider - the signature flourish */
+      .vc-stitch {
+        width: 100%;
+        height: 9px;
+        margin: 0 auto;
+        background-image: repeating-linear-gradient(
+          90deg,
+          var(--vc-gold) 0px,
+          var(--vc-gold) 7px,
+          transparent 7px,
+          transparent 15px
+        );
+        opacity: 0.55;
+      }
+
+      /* catalog section head */
+      .vc-section-head {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 40px 20px 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .vc-section-head .vc-eyebrow { margin-bottom: 8px; }
+      .vc-section-head h2 {
+        font-family: 'Fraunces', serif;
+        font-weight: 500;
+        font-size: clamp(20px, 3vw, 26px);
+        margin: 0;
+        color: var(--vc-cream);
+      }
+      .vc-section-count { color: var(--vc-muted); font-size: 13px; }
 
       /* category chips */
       .vc-chips {
@@ -183,6 +297,23 @@ function GlobalStyle() {
         grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
         gap: 18px;
       }
+      .vc-grid .vc-card {
+        opacity: 0;
+        animation: vc-card-in .5s ease forwards;
+      }
+      @keyframes vc-card-in {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .vc-grid .vc-card:nth-child(1) { animation-delay: .02s; }
+      .vc-grid .vc-card:nth-child(2) { animation-delay: .07s; }
+      .vc-grid .vc-card:nth-child(3) { animation-delay: .12s; }
+      .vc-grid .vc-card:nth-child(4) { animation-delay: .17s; }
+      .vc-grid .vc-card:nth-child(5) { animation-delay: .22s; }
+      .vc-grid .vc-card:nth-child(6) { animation-delay: .27s; }
+      .vc-grid .vc-card:nth-child(7) { animation-delay: .32s; }
+      .vc-grid .vc-card:nth-child(8) { animation-delay: .37s; }
+      .vc-grid .vc-card:nth-child(n+9) { animation-delay: .4s; }
 
       .vc-card {
         background: var(--vc-panel);
@@ -487,6 +618,34 @@ function GlobalStyle() {
       .vc-upload-label:hover { border-color: var(--vc-gold); }
       .vc-proof-preview { width: 100%; max-width: 220px; border-radius: 10px; margin: 0 auto 12px; display: block; }
 
+      /* footer */
+      .vc-footer {
+        max-width: 1180px;
+        margin: 20px auto 0;
+        padding: 46px 20px 50px;
+        border-top: 1px solid var(--vc-border);
+        text-align: center;
+      }
+      .vc-footer .vc-monogram { margin: 0 auto 14px; }
+      .vc-footer-brand {
+        font-family: 'Fraunces', serif;
+        font-style: italic;
+        color: var(--vc-gold);
+        font-size: 17px;
+        margin-bottom: 6px;
+      }
+      .vc-footer-tag { color: var(--vc-muted); font-size: 13px; margin-bottom: 22px; }
+      .vc-trust-row {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 22px;
+        font-size: 12px;
+        color: var(--vc-muted);
+      }
+      .vc-trust-row span { display: flex; align-items: center; gap: 6px; }
+      .vc-trust-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--vc-gold); }
+
       @media (prefers-reduced-motion: reduce) {
         .vc-store *, .vc-store *::before, .vc-store *::after {
           animation-duration: 0.001ms !important;
@@ -504,6 +663,7 @@ function GlobalStyle() {
         .vc-modal.open { transform: translate(0,0); }
         .vc-modal-imgwrap { aspect-ratio: 4/3; }
         .vc-drawer { width: 100vw; }
+        .vc-hero { padding: 48px 20px 40px; }
       }
     `}</style>
   )
@@ -799,6 +959,7 @@ export default function Store() {
         <GlobalStyle />
         <div className="vc-checkout-wrap">
           <div className="vc-checkout-box vc-confirm-wrap">
+            <div className="vc-monogram" style={{ margin: '0 auto 14px' }}>VC</div>
             <p className="vc-logo" style={{ marginBottom: 22 }}>Variedades Calero</p>
             <div className="vc-confirm-icon"><IconCheck /></div>
             <h2 className="vc-serif" style={{ fontWeight: 500, margin: '0 0 8px' }}>¡Pedido recibido!</h2>
@@ -907,9 +1068,12 @@ export default function Store() {
       <GlobalStyle />
 
       <header className="vc-header">
-        <div>
-          <p className="vc-logo">Variedades Calero</p>
-          <p className="vc-logo-sub">Tienda online</p>
+        <div className="vc-header-left">
+          <div className="vc-monogram">VC</div>
+          <div>
+            <p className="vc-logo">Variedades Calero</p>
+            <p className="vc-logo-sub">Tienda online</p>
+          </div>
         </div>
         <button className="vc-cart-btn" onClick={() => setDrawerOpen(true)} aria-label="Ver carrito">
           <IconBag />
@@ -917,9 +1081,27 @@ export default function Store() {
         </button>
       </header>
 
-      <div className="vc-intro">
-        <h1>Ropa y variedades para vos</h1>
-        <p>Elegí tus prendas favoritas, agregalas al carrito y coordinamos la entrega.</p>
+      <section className="vc-hero">
+        <div className="vc-hero-inner">
+          <div className="vc-eyebrow">Masatepe, Nicaragua</div>
+          <h1>Piezas que se notan.</h1>
+          <p>Ropa, calzado y accesorios elegidos con cuidado. Pedí en línea y coordinamos la entrega directo con vos.</p>
+          <button
+            className="vc-hero-cta"
+            onClick={() => document.getElementById('vc-catalog')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          >
+            Explorar catálogo
+          </button>
+        </div>
+      </section>
+      <div className="vc-stitch" />
+
+      <div className="vc-section-head" id="vc-catalog">
+        <div>
+          <div className="vc-eyebrow" style={{ marginBottom: 8 }}>Catálogo</div>
+          <h2>Todo lo disponible ahora</h2>
+        </div>
+        {!loading && <span className="vc-section-count">{filteredProducts.length} artículo{filteredProducts.length !== 1 ? 's' : ''}</span>}
       </div>
 
       {categories.length > 1 && (
@@ -972,6 +1154,17 @@ export default function Store() {
           </div>
         )}
       </main>
+
+      <footer className="vc-footer">
+        <div className="vc-monogram">VC</div>
+        <div className="vc-footer-brand">Variedades Calero</div>
+        <p className="vc-footer-tag">Hecho con cariño en Masatepe, Nicaragua.</p>
+        <div className="vc-trust-row">
+          <span><span className="vc-trust-dot" />Pago por transferencia</span>
+          <span><span className="vc-trust-dot" />Entrega coordinada</span>
+          <span><span className="vc-trust-dot" />Atención personalizada</span>
+        </div>
+      </footer>
 
       {/* product modal */}
       <div className={`vc-overlay ${selectedProduct ? 'open' : ''}`} onClick={closeProduct} />
