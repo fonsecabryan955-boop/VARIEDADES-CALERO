@@ -212,7 +212,9 @@ function GlobalStyle() {
         object-fit: cover;
         transition: transform .5s ease;
       }
-      .vc-card:hover .vc-card-imgwrap img { transform: scale(1.07); }
+      @media (hover: hover) {
+        .vc-card:hover .vc-card-imgwrap img { transform: scale(1.03); }
+      }
       .vc-card-imgwrap .vc-noimg {
         width: 100%; height: 100%;
         display: flex; align-items: center; justify-content: center;
@@ -318,8 +320,8 @@ function GlobalStyle() {
         grid-template-columns: 1fr 1fr;
       }
       .vc-modal.open { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
-      .vc-modal-imgwrap { background: var(--vc-panel-raised); aspect-ratio: 1; }
-      .vc-modal-imgwrap img { width: 100%; height: 100%; object-fit: cover; }
+      .vc-modal-imgwrap { background: var(--vc-panel-raised); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
+      .vc-modal-imgwrap img { width: 100%; height: 100%; object-fit: contain; }
       .vc-modal-imgwrap .vc-noimg { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 48px; color: var(--vc-border); }
       .vc-modal-body { padding: 26px 26px 22px; position: relative; display: flex; flex-direction: column; }
       .vc-modal-close {
