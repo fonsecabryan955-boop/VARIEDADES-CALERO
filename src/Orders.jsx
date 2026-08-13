@@ -41,6 +41,24 @@ export default function Orders({ onBack }) {
     loadOrders()
   }
 
+  const handleDeleteOrder = async (order) => {
+    const ok = window.confirm(
+      `¿Eliminar el pedido de ${order.clients?.name || 'este cliente'} por $${Number(order.total).toFixed(2)}? Esta acción no se puede deshacer.`
+    )
+    if (!ok) return
+    const { error: itemsErr } = await supabase.from('order_items').delete().eq('order_id', order.id)
+    if (itemsErr) {
+      alert('Error al eliminar artículos del pedido: ' + itemsErr.message)
+      return
+    }
+    const { error: orderErr } = await supabase.from('orders').delete().eq('id', order.id)
+    if (orderErr) {
+      alert('Error al eliminar el pedido: ' + orderErr.message)
+      return
+    }
+    loadOrders()
+  }
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
@@ -121,6 +139,9 @@ export default function Orders({ onBack }) {
                     Cancelar
                   </button>
                 )}
+                <button style={styles.deleteBtn} onClick={() => handleDeleteOrder(o)}>
+                  🗑️ Eliminar
+                </button>
               </div>
             </div>
           ))}
@@ -151,6 +172,7 @@ const styles = {
   actions: { display: 'flex', gap: 8, flexWrap: 'wrap' },
   actionBtn: { background: '#d4af37', color: '#0f0f0f', border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 'bold', cursor: 'pointer' },
   cancelBtn: { background: 'transparent', color: '#ff6b6b', border: '1px solid #ff6b6b', borderRadius: 8, padding: '6px 14px', fontSize: 12, cursor: 'pointer' },
+  deleteBtn: { background: 'transparent', color: '#ff6b6b', border: '1px solid #5a2323', borderRadius: 8, padding: '6px 14px', fontSize: 12, cursor: 'pointer' },
   proofLink: {
     display: 'flex',
     alignItems: 'center',
