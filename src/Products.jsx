@@ -209,30 +209,56 @@ export default function Products({ onBack }) {
   }
 
   // ---------- delete product / variant ----------
-  const handleDeleteProduct = async (product) => {
-    const ok = window.confirm(`¿Eliminar "${product.name}" y todas sus variantes (${product.variants.length})? Esta acción no se puede deshacer.`)
-    if (!ok) return
-    const { error: delVarErr } = await supabase.from('product_variants').delete().eq('product_id', product.id)
-    if (delVarErr) {
-      alert('Error al eliminar variantes: ' + delVarErr.message)
-      return
-    }
-    const { error: delProdErr } = await supabase.from('products').delete().eq('id', product.id)
-    if (delProdErr) {
-      alert('Error al eliminar producto: ' + delProdErr.message)
-      return
-    }
-    loadProducts()
+  // NOTE: window.confirm()/alert() are unreliable when the site runs as an
+  // installed app (Add to Home Screen) — many WebViews silently block
+  // native JS dialogs, so the button appears to "flash" and nothing
+  // happens. We use our own confirmation panel + inline banner instead,
+  // which always works regardless of how the page is launched.
+  const [confirmDelete, setConfirmDelete] = useState(null) // { type: 'product'|'variant', product, variantId }
+  const [deleting, setDeleting] = useState(false)
+  const [actionError, setActionError] = useState('')
+  const [actionSuccess, setActionSuccess] = useState('')
+
+  const flashSuccess = (msg) => {
+    setActionSuccess(msg)
+    setTimeout(() => setActionSuccess(''), 2500)
   }
 
-  const handleDeleteVariant = async (variantId, productName) => {
-    const ok = window.confirm(`¿Eliminar esta variante de "${productName}"?`)
-    if (!ok) return
-    const { error: delErr } = await supabase.from('product_variants').delete().eq('id', variantId)
-    if (delErr) {
-      alert('Error al eliminar: ' + delErr.message)
-      return
+  const askDeleteProduct = (product) => setConfirmDelete({ type: 'product', product })
+  const askDeleteVariant = (product, variantId) => setConfirmDelete({ type: 'variant', product, variantId })
+
+  const confirmDeleteAction = async () => {
+    if (!confirmDelete) return
+    setDeleting(true)
+    setActionError('')
+
+    if (confirmDelete.type === 'product') {
+      const { product } = confirmDelete
+      const { error: delVarErr } = await supabase.from('product_variants').delete().eq('product_id', product.id)
+      if (delVarErr) {
+        setActionError('Error al eliminar variantes: ' + delVarErr.message)
+        setDeleting(false)
+        return
+      }
+      const { error: delProdErr } = await supabase.from('products').delete().eq('id', product.id)
+      if (delProdErr) {
+        setActionError('Error al eliminar producto: ' + delProdErr.message)
+        setDeleting(false)
+        return
+      }
+      flashSuccess(`"${product.name}" fue eliminado`)
+    } else {
+      const { error: delErr } = await supabase.from('product_variants').delete().eq('id', confirmDelete.variantId)
+      if (delErr) {
+        setActionError('Error al eliminar: ' + delErr.message)
+        setDeleting(false)
+        return
+      }
+      flashSuccess('Variante eliminada')
     }
+
+    setDeleting(false)
+    setConfirmDelete(null)
     loadProducts()
   }
 
@@ -247,9 +273,10 @@ export default function Products({ onBack }) {
 
   const handleAddVariant = async () => {
     if (!newVariantStock || isNaN(parseInt(newVariantStock))) {
-      alert('Ingresá el stock de la nueva variante')
+      setActionError('Ingresá el stock de la nueva variante')
       return
     }
+    setActionError('')
     const { error: insErr } = await supabase.from('product_variants').insert({
       product_id: addingVariantTo.id,
       size: newVariantAttr.trim() || null,
@@ -258,10 +285,11 @@ export default function Products({ onBack }) {
       stock: parseInt(newVariantStock) || 0,
     })
     if (insErr) {
-      alert('Error al agregar variante: ' + insErr.message)
+      setActionError('Error al agregar variante: ' + insErr.message)
       return
     }
     setAddingVariantTo(null)
+    flashSuccess('Variante agregada')
     loadProducts()
   }
 
@@ -287,6 +315,9 @@ export default function Products({ onBack }) {
           {showForm ? 'Cancelar' : '+ Nuevo producto'}
         </button>
       </div>
+
+      {actionSuccess && <div style={styles.successBanner}>✅ {actionSuccess}</div>}
+      {actionError && <div style={styles.errorBanner}>⚠️ {actionError}</div>}
 
       {showForm && (
         <div style={styles.form}>
@@ -464,7 +495,7 @@ export default function Products({ onBack }) {
                           </span>
                           <span style={v.stock > 0 ? styles.stockOk : styles.stockLow}>Stock: {v.stock}</span>
                           <span style={styles.variantPrice}>${Number(v.price).toFixed(2)}</span>
-                          <button style={styles.deleteVariantBtn} onClick={() => handleDeleteVariant(v.id, p.name)}>Eliminar</button>
+                          <button style={styles.deleteVariantBtn} onClick={() => askDeleteVariant(p, v.id)}>Eliminar</button>
                         </div>
                       ))}
                     </div>
@@ -485,7 +516,7 @@ export default function Products({ onBack }) {
                         <button style={styles.smallActionBtn} onClick={() => openAddVariant(p)}>
                           + Agregar {preset2.attrLabel.toLowerCase()}
                         </button>
-                        <button style={styles.deleteProductBtn} onClick={() => handleDeleteProduct(p)}>
+                        <button style={styles.deleteProductBtn} onClick={() => askDeleteProduct(p)}>
                           🗑️ Eliminar producto
                         </button>
                       </div>
@@ -495,6 +526,29 @@ export default function Products({ onBack }) {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {confirmDelete && (
+        <div style={styles.confirmOverlay} onClick={() => !deleting && setConfirmDelete(null)}>
+          <div style={styles.confirmBox} onClick={(e) => e.stopPropagation()}>
+            <p style={styles.confirmTitle}>
+              {confirmDelete.type === 'product' ? '¿Eliminar este producto?' : '¿Eliminar esta variante?'}
+            </p>
+            <p style={styles.confirmText}>
+              {confirmDelete.type === 'product'
+                ? `Se eliminará "${confirmDelete.product.name}" y sus ${confirmDelete.product.variants.length} variante(s). Esta acción no se puede deshacer.`
+                : `Se eliminará esta variante de "${confirmDelete.product.name}". Esta acción no se puede deshacer.`}
+            </p>
+            <div style={styles.confirmActions}>
+              <button style={styles.cancelBtnSmall} onClick={() => setConfirmDelete(null)} disabled={deleting}>
+                Cancelar
+              </button>
+              <button style={styles.confirmDeleteBtn} onClick={confirmDeleteAction} disabled={deleting}>
+                {deleting ? 'Eliminando...' : 'Sí, eliminar'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -507,6 +561,21 @@ const styles = {
   backBtn: { background: 'transparent', color: '#999', border: '1px solid #333', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' },
   title: { color: '#d4af37', margin: 0, fontSize: 20 },
   addBtn: { background: '#d4af37', color: '#0f0f0f', border: 'none', borderRadius: 8, padding: '10px 16px', fontWeight: 'bold', cursor: 'pointer' },
+
+  successBanner: { background: '#1e3a24', color: '#7fd88f', border: '1px solid #2d5636', borderRadius: 10, padding: '10px 16px', marginBottom: 16, fontSize: 13.5 },
+  errorBanner: { background: '#3a1e1e', color: '#ff9b9b', border: '1px solid #5a2323', borderRadius: 10, padding: '10px 16px', marginBottom: 16, fontSize: 13.5 },
+
+  confirmOverlay: {
+    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 20,
+  },
+  confirmBox: {
+    background: '#1a1a1a', border: '1px solid #333', borderRadius: 14, padding: 24, maxWidth: 380, width: '100%',
+  },
+  confirmTitle: { fontSize: 17, fontWeight: 'bold', margin: '0 0 10px', color: '#f5f5f5' },
+  confirmText: { fontSize: 13.5, color: '#999', margin: '0 0 20px', lineHeight: 1.5 },
+  confirmActions: { display: 'flex', gap: 10, justifyContent: 'flex-end' },
+  confirmDeleteBtn: { background: '#c94b4b', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 18px', fontWeight: 'bold', cursor: 'pointer', fontSize: 13.5 },
 
   form: { background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: 20, marginBottom: 24 },
   formRow: { display: 'flex', gap: 12, marginBottom: 14, flexWrap: 'wrap' },
