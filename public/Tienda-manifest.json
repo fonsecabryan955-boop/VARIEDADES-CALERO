@@ -5,8 +5,8 @@
   "start_url": "/tienda",
   "scope": "/tienda",
   "display": "standalone",
-  "background_color": "#0e0d0c",
-  "theme_color": "#0e0d0c",
+  "background_color": "#faf8f5",
+  "theme_color": "#faf8f5",
   "orientation": "portrait-primary",
   "icons": [
     {
