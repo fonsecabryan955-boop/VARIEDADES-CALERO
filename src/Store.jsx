@@ -420,7 +420,7 @@ function GlobalStyle() {
         grid-template-columns: 1fr 1fr;
       }
       .vc-modal.open { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
-      .vc-modal-imgwrap { background: var(--vc-panel-raised); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
+      .vc-modal-imgwrap { background: var(--vc-panel-raised); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
       .vc-modal-imgwrap img { width: 100%; height: 100%; object-fit: contain; }
       .vc-modal-imgwrap .vc-noimg { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 48px; color: var(--vc-border); }
       .vc-modal-body { padding: 30px 30px 24px; position: relative; display: flex; flex-direction: column; }
@@ -675,7 +675,8 @@ function GlobalStyle() {
         border: none;
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
+        gap: 10px;
         padding: 14px 0;
         font-size: 12.5px;
         font-weight: 600;
@@ -683,8 +684,10 @@ function GlobalStyle() {
         cursor: pointer;
         text-transform: uppercase;
         letter-spacing: 0.4px;
+        text-align: left;
       }
-      .vc-accordion-chevron { transition: transform .2s ease; color: var(--vc-ink-soft); font-size: 15px; }
+      .vc-accordion-head-title { flex: 1; min-width: 0; overflow-wrap: break-word; }
+      .vc-accordion-chevron { transition: transform .2s ease; color: var(--vc-ink-soft); font-size: 15px; flex: none; }
       .vc-accordion-chevron.open { transform: rotate(180deg); }
       .vc-accordion-body { padding: 0 0 16px; color: var(--vc-ink-soft); font-size: 13px; line-height: 1.6; }
 
@@ -1483,7 +1486,7 @@ export default function Store() {
                     className="vc-accordion-head"
                     onClick={() => setOpenSection(openSection === s.key ? null : s.key)}
                   >
-                    {s.title}
+                    <span className="vc-accordion-head-title">{s.title}</span>
                     <span className={`vc-accordion-chevron ${openSection === s.key ? 'open' : ''}`}>⌄</span>
                   </button>
                   {openSection === s.key && <div className="vc-accordion-body">{s.body}</div>}
