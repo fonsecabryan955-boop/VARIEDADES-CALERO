@@ -85,6 +85,8 @@ function GlobalStyle() {
         border-radius: 8px; padding: 7px 12px; cursor: pointer; font-size: 12.5px;
       }
       .em-icon-btn:hover { border-color: #d4af37; }
+      .em-delete-btn { color: #ff6b6b; border-color: #5a2323; }
+      .em-delete-btn:hover { border-color: #ff6b6b; }
 
       .em-period-bar {
         display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
@@ -294,6 +296,19 @@ export default function Employees({ onBack }) {
     loadEmployees()
   }
 
+  const handleDeleteEmployee = async (emp) => {
+    const ok = window.confirm(
+      `¿Eliminar a "${emp.name}" definitivamente? Esto también borra su historial de pagos de nómina. Esta acción no se puede deshacer.`
+    )
+    if (!ok) return
+    const { error: delErr } = await supabase.from('employees').delete().eq('id', emp.id)
+    if (delErr) {
+      alert('Error al eliminar: ' + delErr.message)
+      return
+    }
+    loadEmployees()
+  }
+
   const activeEmployees = useMemo(() => employees.filter((e) => e.active), [employees])
 
   const getDraft = (empId) => payrollDraft[empId] || { bonuses: '0', deductions: '0' }
@@ -482,6 +497,9 @@ export default function Employees({ onBack }) {
                     <button className="em-icon-btn" onClick={() => openEdit(emp)}>Editar</button>
                     <button className="em-icon-btn" onClick={() => toggleActive(emp)}>
                       {emp.active ? 'Desactivar' : 'Activar'}
+                    </button>
+                    <button className="em-icon-btn em-delete-btn" onClick={() => handleDeleteEmployee(emp)}>
+                      🗑️ Eliminar
                     </button>
                   </div>
                 </div>
