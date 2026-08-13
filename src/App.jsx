@@ -8,6 +8,7 @@ import Cash from './Cash.jsx'
 import Reports from './Reports.jsx'
 import Receivables from './Receivables.jsx'
 import Clients from './Clients.jsx'
+import Employees from './Employees.jsx'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -76,6 +77,10 @@ export default function App() {
 
   if (view === 'clients') {
     return <Clients onBack={() => setView('home')} />
+  }
+
+  if (view === 'employees') {
+    return <Employees onBack={() => setView('home')} />
   }
 
   return (
@@ -148,6 +153,9 @@ export default function App() {
             </button>
             <button onClick={() => setView('clients')} style={cardBtnStyle}>
               👥 Clientes
+            </button>
+            <button onClick={() => setView('employees')} style={cardBtnStyle}>
+              🧑‍💼 Empleados y Nómina
             </button>
           </>
         )}
