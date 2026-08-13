@@ -26,6 +26,17 @@ const IconCheck = (p) => (
   <svg viewBox="0 0 24 24" width={p.size || 34} height={p.size || 34} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
 )
 
+// ---------- category-aware care copy for the product accordion ----------
+const CARE_TEXT = {
+  'Ropa': 'Lavar a mano o en ciclo delicado con agua fría. Secar a la sombra, evitar la secadora para conservar la tela.',
+  'Calzado': 'Limpiar con un paño húmedo. Guardar en un lugar seco y evitar la exposición directa al sol.',
+  'Perfumería': 'Conservar en un lugar fresco, lejos de la luz directa. Cerrar bien después de cada uso.',
+  'Maquillaje': 'Conservar a temperatura ambiente. Evitar la exposición directa al sol y revisar la fecha de vencimiento.',
+  'Accesorios': 'Guardar en un lugar seco. Evitar el contacto con perfumes o productos químicos.',
+  'Artículos para el cabello': 'Seguir las instrucciones de uso del empaque. Conservar en un lugar seco.',
+  default: 'Conservar en un lugar fresco y seco. Ante cualquier duda, escribinos por WhatsApp.',
+}
+
 // ---------- Global styles for this page only ----------
 function GlobalStyle() {
   return (
@@ -608,6 +619,113 @@ function GlobalStyle() {
       .vc-trust-row span { display: flex; align-items: center; gap: 6px; }
       .vc-trust-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--vc-ink); }
 
+      /* toolbar: chips + sort */
+      .vc-toolbar {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 20px 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .vc-toolbar .vc-chips { padding: 10px 0 6px; margin: 0; flex: 1; }
+      .vc-sort-wrap { display: flex; align-items: center; gap: 8px; padding: 10px 0; flex: none; }
+      .vc-sort-wrap label { font-size: 11px; color: var(--vc-ink-soft); text-transform: uppercase; letter-spacing: 0.5px; }
+      .vc-sort-select {
+        background: transparent;
+        border: 1px solid var(--vc-border);
+        color: var(--vc-ink);
+        border-radius: 3px;
+        padding: 7px 10px;
+        font-size: 12.5px;
+        cursor: pointer;
+      }
+      .vc-sort-select:focus { border-color: var(--vc-ink); outline: none; }
+
+      /* color swatches */
+      .vc-attr-value { color: var(--vc-ink-soft); font-weight: 400; text-transform: none; letter-spacing: 0; }
+      .vc-swatch-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+      .vc-swatch {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 1px solid var(--vc-border);
+        cursor: pointer;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--vc-ink-soft);
+        background: var(--vc-panel-raised);
+        padding: 0;
+      }
+      .vc-swatch.active { outline: 2px solid var(--vc-ink); outline-offset: 2px; }
+      .vc-swatch.disabled { opacity: 0.3; cursor: not-allowed; }
+
+      /* accordion */
+      .vc-accordion { border-top: 1px solid var(--vc-border); margin-top: 24px; }
+      .vc-accordion-item { border-bottom: 1px solid var(--vc-border); }
+      .vc-accordion-head {
+        width: 100%;
+        background: none;
+        border: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 0;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--vc-ink);
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .vc-accordion-chevron { transition: transform .2s ease; color: var(--vc-ink-soft); font-size: 15px; }
+      .vc-accordion-chevron.open { transform: rotate(180deg); }
+      .vc-accordion-body { padding: 0 0 16px; color: var(--vc-ink-soft); font-size: 13px; line-height: 1.6; }
+
+      /* toast */
+      .vc-toast {
+        position: fixed;
+        left: 50%;
+        bottom: 26px;
+        transform: translateX(-50%);
+        background: var(--vc-ink);
+        color: #fff;
+        padding: 12px 22px;
+        border-radius: 999px;
+        font-size: 12.5px;
+        z-index: 60;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+        animation: vc-toast-in .25s ease;
+      }
+      @keyframes vc-toast-in {
+        from { opacity: 0; transform: translate(-50%, 8px); }
+        to { opacity: 1; transform: translate(-50%, 0); }
+      }
+
+      /* shopping bag full page */
+      .vc-bag-back {
+        background: transparent; border: 1px solid var(--vc-border); color: var(--vc-ink);
+        border-radius: 999px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+      }
+      .vc-bag-back:hover { border-color: var(--vc-ink); }
+      .vc-bag-page { max-width: 640px; margin: 0 auto; padding: 10px 20px 130px; }
+      .vc-bag-list { display: flex; flex-direction: column; }
+      .vc-bag-checkout-bar {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        background: var(--vc-panel);
+        border-top: 1px solid var(--vc-border);
+        padding: 16px 20px;
+        z-index: 30;
+      }
+
+
       @media (prefers-reduced-motion: reduce) {
         .vc-store *, .vc-store *::before, .vc-store *::after {
           animation-duration: 0.001ms !important;
@@ -636,15 +754,18 @@ export default function Store() {
   const [rawVariants, setRawVariants] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState('Todos')
+  const [sortBy, setSortBy] = useState('recent') // recent | price_asc | price_desc
 
   const [selectedProduct, setSelectedProduct] = useState(null)
-  const [modalVariantId, setModalVariantId] = useState(null)
+  const [modalColor, setModalColor] = useState(null)
+  const [modalSize, setModalSize] = useState(null)
   const [modalQty, setModalQty] = useState(1)
+  const [openSection, setOpenSection] = useState(null)
 
   const [cart, setCart] = useState([])
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [toast, setToast] = useState('')
 
-  const [step, setStep] = useState('catalog') // catalog | checkout | confirmed
+  const [step, setStep] = useState('catalog') // catalog | bag | checkout | confirmed
   const [accounts, setAccounts] = useState([])
 
   const [clientName, setClientName] = useState('')
@@ -735,9 +856,12 @@ export default function Store() {
   }, [products])
 
   const filteredProducts = useMemo(() => {
-    if (activeCategory === 'Todos') return products
-    return products.filter((p) => p.category === activeCategory)
-  }, [products, activeCategory])
+    let list = activeCategory === 'Todos' ? products : products.filter((p) => p.category === activeCategory)
+    const minPrice = (p) => Math.min(...p.variants.map((v) => v.price))
+    if (sortBy === 'price_asc') list = [...list].sort((a, b) => minPrice(a) - minPrice(b))
+    if (sortBy === 'price_desc') list = [...list].sort((a, b) => minPrice(b) - minPrice(a))
+    return list
+  }, [products, activeCategory, sortBy])
 
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0)
   const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0)
@@ -754,16 +878,70 @@ export default function Store() {
 
   const totalStock = (product) => product.variants.reduce((s, v) => s + v.stock, 0)
 
+  // named colors get a real swatch dot; anything unrecognized falls back to
+  // a small labeled chip so we never guess wrong.
+  const COLOR_HEX = {
+    rojo: '#b23b32', azul: '#2f5fa8', 'azul marino': '#1f3358', celeste: '#8fc1e0',
+    negro: '#1a1a1a', blanco: '#f5f5f0', beige: '#d8c9ae', crema: '#efe6d5',
+    rosa: '#e8a0bf', rosado: '#e8a0bf', verde: '#4c7a52', 'verde olivo': '#6b7a4f',
+    amarillo: '#e4c13b', cafe: '#6b4a34', café: '#6b4a34', marron: '#6b4a34', marrón: '#6b4a34',
+    gris: '#9b968c', dorado: '#c9a34e', plateado: '#b9b9b9', morado: '#7b5ea7',
+    purpura: '#7b5ea7', púrpura: '#7b5ea7', lila: '#b9a3d1', naranja: '#d97b3f',
+    turquesa: '#2fa6a6', vino: '#6e2b3a', mostaza: '#c9a13b', coral: '#e18b73',
+    fucsia: '#c23b8f', khaki: '#a89a6b', caqui: '#a89a6b',
+  }
+  const colorHex = (name) => (name ? COLOR_HEX[name.trim().toLowerCase()] : null)
+
+  const uniqueColors = (product) => {
+    const seen = new Set()
+    return product.variants.map((v) => v.color).filter((c) => c && !seen.has(c) && seen.add(c))
+  }
+  const uniqueSizes = (product) => {
+    const seen = new Set()
+    return product.variants.map((v) => v.size).filter((s) => s && !seen.has(s) && seen.add(s))
+  }
+
   // ---------- modal ----------
   const openProduct = (product) => {
     setSelectedProduct(product)
     const firstAvailable = product.variants.find((v) => v.stock > 0) || product.variants[0]
-    setModalVariantId(firstAvailable?.id ?? null)
+    setModalColor(firstAvailable?.color ?? null)
+    setModalSize(firstAvailable?.size ?? null)
     setModalQty(1)
+    setOpenSection(null)
   }
   const closeProduct = () => setSelectedProduct(null)
 
-  const activeModalVariant = selectedProduct?.variants.find((v) => v.id === modalVariantId)
+  const activeModalVariant = selectedProduct?.variants.find(
+    (v) => (v.color || null) === (modalColor || null) && (v.size || null) === (modalSize || null)
+  )
+
+  const selectColor = (color) => {
+    setModalColor(color)
+    setModalQty(1)
+    // if current size isn't available for this color, jump to one that is
+    const stillValid = selectedProduct.variants.some((v) => (v.color || null) === (color || null) && (v.size || null) === (modalSize || null))
+    if (!stillValid) {
+      const fallback = selectedProduct.variants.find((v) => (v.color || null) === (color || null) && v.stock > 0)
+        || selectedProduct.variants.find((v) => (v.color || null) === (color || null))
+      setModalSize(fallback?.size ?? null)
+    }
+  }
+  const selectSize = (size) => {
+    setModalSize(size)
+    setModalQty(1)
+    const stillValid = selectedProduct.variants.some((v) => (v.size || null) === (size || null) && (v.color || null) === (modalColor || null))
+    if (!stillValid) {
+      const fallback = selectedProduct.variants.find((v) => (v.size || null) === (size || null) && v.stock > 0)
+        || selectedProduct.variants.find((v) => (v.size || null) === (size || null))
+      setModalColor(fallback?.color ?? null)
+    }
+  }
+
+  const showToast = (msg) => {
+    setToast(msg)
+    setTimeout(() => setToast(''), 2200)
+  }
 
   const addToCart = (product, variant, qty) => {
     setCart((prev) => {
@@ -786,7 +964,7 @@ export default function Store() {
         },
       ]
     })
-    setDrawerOpen(true)
+    showToast(`Agregado: ${product.name}`)
   }
 
   const quickAdd = (product) => {
@@ -807,7 +985,6 @@ export default function Store() {
   const goToCheckout = async () => {
     const { data } = await supabase.from('payment_accounts').select('*').eq('active', true)
     setAccounts(data || [])
-    setDrawerOpen(false)
     setStep('checkout')
   }
 
@@ -973,6 +1150,64 @@ export default function Store() {
     )
   }
 
+  if (step === 'bag') {
+    return (
+      <div className="vc-store">
+        <GlobalStyle />
+        <header className="vc-header">
+          <div className="vc-header-left">
+            <button className="vc-bag-back" onClick={() => setStep('catalog')} aria-label="Volver">
+              <IconChevronLeft size={18} />
+            </button>
+            <p className="vc-logo" style={{ fontSize: 18 }}>Bolsa de compras</p>
+          </div>
+        </header>
+
+        <div className="vc-bag-page">
+          {cart.length === 0 ? (
+            <div className="vc-drawer-empty" style={{ padding: '80px 20px' }}>
+              Tu bolsa está vacía.<br />Volvé al catálogo para agregar productos.
+              <div style={{ marginTop: 20 }}>
+                <button className="vc-btn-ghost" style={{ width: 'auto', padding: '10px 22px' }} onClick={() => setStep('catalog')}>
+                  Ir al catálogo
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="vc-bag-list">
+              {cart.map((i) => (
+                <div key={i.id} className="vc-drawer-item">
+                  {i.image ? <img src={i.image} alt={i.name} /> : <div className="vc-noimg">📦</div>}
+                  <div className="vc-drawer-item-info">
+                    <div className="vc-drawer-item-name">{i.name}</div>
+                    <div className="vc-drawer-item-variant">{i.variantLabel}</div>
+                    <div className="vc-drawer-item-row">
+                      <div className="vc-stepper">
+                        <button onClick={() => changeQty(i.id, -1)}><IconMinus size={12} /></button>
+                        <span>{i.qty}</span>
+                        <button onClick={() => changeQty(i.id, 1)} disabled={i.qty >= i.stock}><IconPlus size={12} /></button>
+                      </div>
+                      <span style={{ color: 'var(--vc-ink)', fontWeight: 700, fontSize: 13.5 }}>${(i.price * i.qty).toFixed(2)}</span>
+                    </div>
+                    <button className="vc-drawer-item-remove" onClick={() => removeItem(i.id)}>Quitar</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {cart.length > 0 && (
+          <div className="vc-bag-checkout-bar">
+            <button className="vc-btn-primary" style={{ maxWidth: 1180, margin: '0 auto' }} onClick={goToCheckout}>
+              Ir a pagar · ${total.toFixed(2)}
+            </button>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   if (step === 'checkout') {
     return (
       <div className="vc-store">
@@ -1016,8 +1251,8 @@ export default function Store() {
               <button className="vc-btn-primary" onClick={handleSubmitOrder} disabled={submitting}>
                 {submitting ? 'Enviando...' : 'Confirmar pedido'}
               </button>
-              <button className="vc-btn-ghost" onClick={() => setStep('catalog')}>
-                <IconChevronLeft size={14} /> Volver al catálogo
+              <button className="vc-btn-ghost" onClick={() => setStep('bag')}>
+                <IconChevronLeft size={14} /> Volver a la bolsa
               </button>
             </div>
           </div>
@@ -1038,7 +1273,7 @@ export default function Store() {
             <p className="vc-logo-sub">Tienda online</p>
           </div>
         </div>
-        <button className="vc-cart-btn" onClick={() => setDrawerOpen(true)} aria-label="Ver carrito">
+        <button className="vc-cart-btn" onClick={() => setStep('bag')} aria-label="Ver bolsa de compras">
           <IconBag />
           {cartCount > 0 && <span className="vc-cart-badge">{cartCount}</span>}
         </button>
@@ -1067,15 +1302,25 @@ export default function Store() {
         {!loading && <span className="vc-section-count">{filteredProducts.length} artículo{filteredProducts.length !== 1 ? 's' : ''}</span>}
       </div>
 
-      {categories.length > 1 && (
-        <div className="vc-chips">
-          {categories.map((c) => (
-            <button key={c} className={`vc-chip ${activeCategory === c ? 'active' : ''}`} onClick={() => setActiveCategory(c)}>
-              {c}
-            </button>
-          ))}
+      <div className="vc-toolbar">
+        {categories.length > 1 && (
+          <div className="vc-chips" style={{ padding: '10px 20px 6px' }}>
+            {categories.map((c) => (
+              <button key={c} className={`vc-chip ${activeCategory === c ? 'active' : ''}`} onClick={() => setActiveCategory(c)}>
+                {c}
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="vc-sort-wrap">
+          <label htmlFor="vc-sort">Ordenar</label>
+          <select id="vc-sort" className="vc-sort-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <option value="recent">Más recientes</option>
+            <option value="price_asc">Precio: menor a mayor</option>
+            <option value="price_desc">Precio: mayor a menor</option>
+          </select>
         </div>
-      )}
+      </div>
 
       <main className="vc-main">
         {loading ? (
@@ -1144,28 +1389,61 @@ export default function Store() {
               {activeModalVariant ? `$${activeModalVariant.price.toFixed(2)}` : priceDisplay(selectedProduct)}
             </div>
 
-            {selectedProduct.variants.length > 1 && (
+            {uniqueColors(selectedProduct).length > 0 && (
               <>
-                <div className="vc-attr-label">Elegí una opción</div>
-                <div className="vc-chip-row">
-                  {selectedProduct.variants.map((v) => (
-                    <button
-                      key={v.id}
-                      className={`vc-variant-chip ${modalVariantId === v.id ? 'active' : ''} ${v.stock === 0 ? 'disabled' : ''}`}
-                      onClick={() => v.stock > 0 && (setModalVariantId(v.id), setModalQty(1))}
-                      disabled={v.stock === 0}
-                    >
-                      {variantLabel(v)}
-                    </button>
-                  ))}
+                <div className="vc-attr-label">
+                  Color{modalColor ? <span className="vc-attr-value">: {modalColor}</span> : ''}
+                </div>
+                <div className="vc-swatch-row">
+                  {uniqueColors(selectedProduct).map((c) => {
+                    const hex = colorHex(c)
+                    const anyStock = selectedProduct.variants.some((v) => v.color === c && v.stock > 0)
+                    return (
+                      <button
+                        key={c}
+                        type="button"
+                        className={`vc-swatch ${modalColor === c ? 'active' : ''} ${!anyStock ? 'disabled' : ''}`}
+                        style={hex ? { background: hex } : undefined}
+                        onClick={() => anyStock && selectColor(c)}
+                        disabled={!anyStock}
+                        title={c}
+                      >
+                        {!hex && c.slice(0, 1).toUpperCase()}
+                      </button>
+                    )
+                  })}
                 </div>
               </>
             )}
 
-            {activeModalVariant && (
+            {uniqueSizes(selectedProduct).length > 0 && (
+              <>
+                <div className="vc-attr-label">Talla</div>
+                <div className="vc-chip-row">
+                  {uniqueSizes(selectedProduct).map((s) => {
+                    const anyStock = selectedProduct.variants.some((v) => v.size === s && v.stock > 0)
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        className={`vc-variant-chip ${modalSize === s ? 'active' : ''} ${!anyStock ? 'disabled' : ''}`}
+                        onClick={() => anyStock && selectSize(s)}
+                        disabled={!anyStock}
+                      >
+                        {s}
+                      </button>
+                    )
+                  })}
+                </div>
+              </>
+            )}
+
+            {activeModalVariant ? (
               <p className={`vc-stock-note ${activeModalVariant.stock <= 5 ? 'low' : 'ok'}`}>
                 {activeModalVariant.stock <= 5 ? `Solo quedan ${activeModalVariant.stock} disponibles` : 'Disponible'}
               </p>
+            ) : (
+              <p className="vc-stock-note low">Esa combinación no está disponible</p>
             )}
 
             <div className="vc-qty-row">
@@ -1190,53 +1468,33 @@ export default function Store() {
                 closeProduct()
               }}
             >
-              Agregar al carrito
+              Agregar a la bolsa
             </button>
+
+            <div className="vc-accordion">
+              {[
+                { key: 'details', title: 'Detalles del producto', body: `${selectedProduct.name} — categoría ${selectedProduct.category}. Pieza seleccionada por Variedades Calero.` },
+                { key: 'care', title: 'Cuidados', body: CARE_TEXT[selectedProduct.category] || CARE_TEXT.default },
+                { key: 'shipping', title: 'Envío y devoluciones', body: 'Coordinamos la entrega directo con vos por WhatsApp después de confirmar tu pedido. Si algo no calza, escribinos dentro de las 48 horas siguientes a la entrega.' },
+              ].map((s) => (
+                <div key={s.key} className="vc-accordion-item">
+                  <button
+                    type="button"
+                    className="vc-accordion-head"
+                    onClick={() => setOpenSection(openSection === s.key ? null : s.key)}
+                  >
+                    {s.title}
+                    <span className={`vc-accordion-chevron ${openSection === s.key ? 'open' : ''}`}>⌄</span>
+                  </button>
+                  {openSection === s.key && <div className="vc-accordion-body">{s.body}</div>}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {/* cart drawer */}
-      <div className={`vc-overlay ${drawerOpen ? 'open' : ''}`} onClick={() => setDrawerOpen(false)} />
-      <div className={`vc-drawer ${drawerOpen ? 'open' : ''}`}>
-        <div className="vc-drawer-head">
-          <h3>Tu carrito</h3>
-          <button className="vc-modal-close" onClick={() => setDrawerOpen(false)} aria-label="Cerrar carrito"><IconClose /></button>
-        </div>
-        <div className="vc-drawer-items">
-          {cart.length === 0 ? (
-            <div className="vc-drawer-empty">Tu carrito está vacío.<br />Agregá productos del catálogo.</div>
-          ) : (
-            cart.map((i) => (
-              <div key={i.id} className="vc-drawer-item">
-                {i.image ? <img src={i.image} alt={i.name} /> : <div className="vc-noimg">📦</div>}
-                <div className="vc-drawer-item-info">
-                  <div className="vc-drawer-item-name">{i.name}</div>
-                  <div className="vc-drawer-item-variant">{i.variantLabel}</div>
-                  <div className="vc-drawer-item-row">
-                    <div className="vc-stepper">
-                      <button onClick={() => changeQty(i.id, -1)}><IconMinus size={12} /></button>
-                      <span>{i.qty}</span>
-                      <button onClick={() => changeQty(i.id, 1)} disabled={i.qty >= i.stock}><IconPlus size={12} /></button>
-                    </div>
-                    <span style={{ color: 'var(--vc-ink)', fontWeight: 700, fontSize: 13.5 }}>${(i.price * i.qty).toFixed(2)}</span>
-                  </div>
-                  <button className="vc-drawer-item-remove" onClick={() => removeItem(i.id)}>Quitar</button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-        {cart.length > 0 && (
-          <div className="vc-drawer-foot">
-            <div className="vc-drawer-total">
-              <span>Total</span>
-              <b>${total.toFixed(2)}</b>
-            </div>
-            <button className="vc-btn-primary" onClick={goToCheckout}>Continuar pedido</button>
-          </div>
-        )}
-      </div>
+      {toast && <div className="vc-toast">{toast}</div>}
     </div>
   )
 }
