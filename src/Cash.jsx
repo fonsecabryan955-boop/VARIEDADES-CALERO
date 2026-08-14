@@ -18,6 +18,8 @@ export default function Cash({ user, onBack }) {
   const [closingAmount, setClosingAmount] = useState('')
   const [closing, setClosing] = useState(false)
   const [error, setError] = useState('')
+  const [deleting, setDeleting] = useState(null)
+  const [deletingSession, setDeletingSession] = useState(false)
 
   const loadSession = async () => {
     setLoading(true)
@@ -103,6 +105,52 @@ export default function Cash({ user, onBack }) {
     loadSession()
   }
 
+  const handleDeleteExpense = async (expenseId) => {
+    if (!window.confirm('¿Eliminar este gasto? Esta acción no se puede deshacer.')) return
+    setDeleting(expenseId)
+    setError('')
+    const { error: err } = await supabase.from('expenses').delete().eq('id', expenseId)
+    if (err) {
+      setError('Error al eliminar gasto: ' + err.message)
+      setDeleting(null)
+      return
+    }
+    setDeleting(null)
+    loadSession()
+  }
+
+  const handleDeleteSession = async () => {
+    if (
+      !window.confirm(
+        '¿Eliminar esta sesión de caja por completo (incluyendo todos sus gastos registrados)? Esta acción no se puede deshacer.'
+      )
+    )
+      return
+    setDeletingSession(true)
+    setError('')
+
+    // Primero borramos los gastos ligados a esta sesión para evitar conflicto de llave foránea
+    const { error: expErr } = await supabase
+      .from('expenses')
+      .delete()
+      .eq('cash_session_id', session.id)
+    if (expErr) {
+      setError('Error al eliminar gastos de la sesión: ' + expErr.message)
+      setDeletingSession(false)
+      return
+    }
+
+    const { error: sessErr } = await supabase.from('cash_sessions').delete().eq('id', session.id)
+    if (sessErr) {
+      setError('Error al eliminar sesión de caja: ' + sessErr.message)
+      setDeletingSession(false)
+      return
+    }
+
+    setDeletingSession(false)
+    loadSession()
+  }
+
   const totalExpenses = expenses.reduce((s, e) => s + Number(e.amount), 0)
   const expected = session ? Number(session.opening_amount) + cashSales - totalExpenses : 0
 
@@ -171,7 +219,17 @@ export default function Cash({ user, onBack }) {
       ) : (
         <>
           <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Turno abierto</h3>
+            <div style={styles.cardHeaderRow}>
+              <h3 style={styles.cardTitle}>Turno abierto</h3>
+              <button
+                style={styles.deleteSessionBtn}
+                onClick={handleDeleteSession}
+                disabled={deletingSession}
+                title="Eliminar esta sesión de caja por completo"
+              >
+                {deletingSession ? 'Eliminando...' : '🗑 Eliminar caja'}
+              </button>
+            </div>
             <div style={styles.summaryGrid}>
               <div style={styles.summaryItem}>
                 <div style={styles.muted}>Abierta por</div>
@@ -229,7 +287,17 @@ export default function Cash({ user, onBack }) {
                 {expenses.map((e) => (
                   <div key={e.id} style={styles.expenseRow}>
                     <span>{e.description} {e.category ? `(${e.category})` : ''}</span>
-                    <span style={{ color: '#ff9b9b' }}>-${Number(e.amount).toFixed(2)}</span>
+                    <div style={styles.expenseRight}>
+                      <span style={{ color: '#ff9b9b' }}>-${Number(e.amount).toFixed(2)}</span>
+                      <button
+                        style={styles.deleteExpenseBtn}
+                        onClick={() => handleDeleteExpense(e.id)}
+                        disabled={deleting === e.id}
+                        title="Eliminar este gasto"
+                      >
+                        {deleting === e.id ? '...' : '🗑'}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -265,6 +333,17 @@ const styles = {
   muted: { color: '#999', fontSize: 13 },
   card: { background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: 20, marginBottom: 18, maxWidth: 480 },
   cardTitle: { marginTop: 0, color: '#d4af37', fontSize: 16 },
+  cardHeaderRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  deleteSessionBtn: {
+    background: 'transparent',
+    color: '#ff6b6b',
+    border: '1px solid #ff6b6b',
+    borderRadius: 8,
+    padding: '6px 12px',
+    fontSize: 12,
+    fontWeight: 'bold',
+    cursor: 'pointer',
+  },
   input: {
     width: '100%',
     background: '#242424',
@@ -318,8 +397,19 @@ const styles = {
   expenseRow: {
     display: 'flex',
     justifyContent: 'space-between',
+    alignItems: 'center',
     fontSize: 13,
     borderBottom: '1px solid #2a2a2a',
     paddingBottom: 6,
+  },
+  expenseRight: { display: 'flex', alignItems: 'center', gap: 8 },
+  deleteExpenseBtn: {
+    background: 'transparent',
+    color: '#ff6b6b',
+    border: '1px solid #ff6b6b',
+    borderRadius: 6,
+    padding: '3px 8px',
+    fontSize: 11,
+    cursor: 'pointer',
   },
 }
