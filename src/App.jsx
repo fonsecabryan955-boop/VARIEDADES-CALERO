@@ -9,6 +9,7 @@ import Reports from './Reports.jsx'
 import Receivables from './Receivables.jsx'
 import Clients from './Clients.jsx'
 import Employees from './Employees.jsx'
+import PushNotificationSetup from './PushNotificationSetup.jsx'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -121,6 +122,8 @@ export default function App() {
           Salir
         </button>
       </div>
+
+      {user.role === 'admin' && <PushNotificationSetup />}
 
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
         <button
