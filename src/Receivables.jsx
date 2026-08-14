@@ -8,6 +8,7 @@ export default function Receivables({ onBack }) {
   const [payAmount, setPayAmount] = useState({})
   const [paying, setPaying] = useState(null)
   const [error, setError] = useState('')
+  const [deleting, setDeleting] = useState(null)
 
   const loadData = async () => {
     setLoading(true)
@@ -71,6 +72,39 @@ export default function Receivables({ onBack }) {
     loadData()
   }
 
+  const handleDeleteOrder = async (orderId) => {
+    if (!window.confirm('¿Eliminar esta orden por cobrar? Esta acción no se puede deshacer.')) return
+    setDeleting(orderId)
+    setError('')
+    const { error: err } = await supabase.from('orders').delete().eq('id', orderId)
+    if (err) {
+      setError('Error al eliminar orden: ' + err.message)
+      setDeleting(null)
+      return
+    }
+    setDeleting(null)
+    loadData()
+  }
+
+  const handleDeleteClient = async (clientId, orderIds) => {
+    if (
+      !window.confirm(
+        `¿Eliminar TODAS las cuentas pendientes de este cliente (${orderIds.length} orden${orderIds.length === 1 ? '' : 'es'})? Esta acción no se puede deshacer.`
+      )
+    )
+      return
+    setDeleting(clientId)
+    setError('')
+    const { error: err } = await supabase.from('orders').delete().in('id', orderIds)
+    if (err) {
+      setError('Error al eliminar cuenta del cliente: ' + err.message)
+      setDeleting(null)
+      return
+    }
+    setDeleting(null)
+    loadData()
+  }
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
@@ -100,7 +134,23 @@ export default function Receivables({ onBack }) {
                     <div style={styles.clientName}>{c.name}</div>
                     <div style={styles.muted}>{c.phone}</div>
                   </div>
-                  <div style={styles.clientTotal}>${c.total.toFixed(2)}</div>
+                  <div style={styles.headerRight}>
+                    <div style={styles.clientTotal}>${c.total.toFixed(2)}</div>
+                    <button
+                      style={styles.deleteClientBtn}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDeleteClient(
+                          clientId,
+                          c.orders.map((o) => o.id)
+                        )
+                      }}
+                      disabled={deleting === clientId}
+                      title="Eliminar toda la cuenta de este cliente"
+                    >
+                      {deleting === clientId ? '...' : '🗑'}
+                    </button>
+                  </div>
                 </div>
 
                 {expanded === clientId && (
@@ -135,6 +185,14 @@ export default function Receivables({ onBack }) {
                             disabled={paying === o.id}
                           >
                             {paying === o.id ? '...' : 'Abonar'}
+                          </button>
+                          <button
+                            style={styles.deleteOrderBtn}
+                            onClick={() => handleDeleteOrder(o.id)}
+                            disabled={deleting === o.id}
+                            title="Eliminar esta orden"
+                          >
+                            {deleting === o.id ? '...' : '🗑'}
                           </button>
                         </div>
                       </div>
@@ -176,7 +234,17 @@ const styles = {
     cursor: 'pointer',
   },
   clientName: { fontWeight: 'bold' },
+  headerRight: { display: 'flex', alignItems: 'center', gap: 10 },
   clientTotal: { color: '#ff9b9b', fontWeight: 'bold', fontSize: 16 },
+  deleteClientBtn: {
+    background: 'transparent',
+    color: '#ff6b6b',
+    border: '1px solid #ff6b6b',
+    borderRadius: 6,
+    padding: '6px 10px',
+    fontSize: 13,
+    cursor: 'pointer',
+  },
   ordersList: {
     borderTop: '1px solid #2a2a2a',
     padding: 16,
@@ -213,6 +281,15 @@ const styles = {
     padding: '6px 12px',
     fontSize: 12,
     fontWeight: 'bold',
+    cursor: 'pointer',
+  },
+  deleteOrderBtn: {
+    background: 'transparent',
+    color: '#ff6b6b',
+    border: '1px solid #ff6b6b',
+    borderRadius: 6,
+    padding: '6px 10px',
+    fontSize: 12,
     cursor: 'pointer',
   },
 }
