@@ -34,10 +34,17 @@ export default function Products({ onBack }) {
   const [categoryName, setCategoryName] = useState('Ropa')
   const [customCategory, setCustomCategory] = useState('')
   const [basePrice, setBasePrice] = useState('')
+  const [cost, setCost] = useState('')
+  const [description, setDescription] = useState('')
+  const [supplier, setSupplier] = useState('')
   const [sharedColor, setSharedColor] = useState('')
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
   const [uploadingImage, setUploadingImage] = useState(false)
+
+  // when editing an existing product's basic info (name/price/cost/etc,
+  // not its variants — those still use the add/delete variant flow below)
+  const [editingProductId, setEditingProductId] = useState(null)
 
   // variant rows being built for the new product
   const [rows, setRows] = useState([])
@@ -48,6 +55,7 @@ export default function Products({ onBack }) {
   const [newVariantColor, setNewVariantColor] = useState('')
   const [newVariantStock, setNewVariantStock] = useState('')
   const [newVariantPrice, setNewVariantPrice] = useState('')
+  const [newVariantSku, setNewVariantSku] = useState('')
 
   const [existingCategoryNames, setExistingCategoryNames] = useState([])
 
@@ -55,7 +63,7 @@ export default function Products({ onBack }) {
     setLoading(true)
     const { data } = await supabase
       .from('product_variants')
-      .select('id, size, color, stock, price, product_id, products(id, name, base_price, image_url, category_id, categories(id, name))')
+      .select('id, size, color, stock, price, sku, product_id, products(id, name, base_price, image_url, category_id, description, cost, supplier, categories(id, name))')
       .order('created_at', { ascending: false })
     setRawVariants(data || [])
     setLoading(false)
@@ -82,7 +90,11 @@ export default function Products({ onBack }) {
           name: v.products?.name || 'Producto',
           image: v.products?.image_url || null,
           category: v.products?.categories?.name || 'Sin categoría',
+          categoryId: v.products?.category_id || null,
           basePrice: v.products?.base_price,
+          description: v.products?.description || '',
+          cost: v.products?.cost ?? 0,
+          supplier: v.products?.supplier || '',
           variants: [],
         })
       }
@@ -92,6 +104,7 @@ export default function Products({ onBack }) {
         color: v.color,
         stock: v.stock,
         price: v.price,
+        sku: v.sku,
       })
     })
     return Array.from(map.values())
@@ -101,7 +114,7 @@ export default function Products({ onBack }) {
 
   // ---------- variant row builder (new product form) ----------
   const addRow = (attr = '', color = sharedColor) => {
-    setRows((prev) => [...prev, { key: newRowId(), attr, color, stock: '', price: basePrice }])
+    setRows((prev) => [...prev, { key: newRowId(), attr, color, stock: '', price: basePrice, sku: '' }])
   }
   const removeRow = (key) => setRows((prev) => prev.filter((r) => r.key !== key))
   const updateRow = (key, field, value) => {
@@ -121,11 +134,15 @@ export default function Products({ onBack }) {
     setCategoryName('Ropa')
     setCustomCategory('')
     setBasePrice('')
+    setCost('')
+    setDescription('')
+    setSupplier('')
     setSharedColor('')
     setImageFile(null)
     setImagePreview(null)
     setRows([])
     setError('')
+    setEditingProductId(null)
   }
 
   const handleImageChange = (e) => {
@@ -149,7 +166,7 @@ export default function Products({ onBack }) {
       setError('Nombre, categoría y precio son obligatorios')
       return
     }
-    if (rows.length === 0) {
+    if (!editingProductId && rows.length === 0) {
       setError(`Agregá al menos una variante (${preset.attrLabel.toLowerCase()})`)
       return
     }
@@ -178,23 +195,41 @@ export default function Products({ onBack }) {
         setUploadingImage(false)
       }
 
-      const { data: newProduct, error: prodErr } = await supabase
-        .from('products')
-        .insert({ name: name.trim(), category_id: categoryId, base_price: parseFloat(basePrice), image_url: imageUrl })
-        .select('id')
-        .single()
-      if (prodErr) throw new Error('Error al crear producto: ' + prodErr.message)
+      const productPayload = {
+        name: name.trim(),
+        category_id: categoryId,
+        base_price: parseFloat(basePrice),
+        cost: cost ? parseFloat(cost) : 0,
+        description: description.trim() || null,
+        supplier: supplier.trim() || null,
+      }
+      if (imageUrl) productPayload.image_url = imageUrl
 
-      const variantRows = rows.map((r) => ({
-        product_id: newProduct.id,
-        size: r.attr.trim() || null,
-        color: r.color.trim() || null,
-        price: r.price ? parseFloat(r.price) : parseFloat(basePrice),
-        stock: parseInt(r.stock) || 0,
-      }))
+      if (editingProductId) {
+        const { error: updErr } = await supabase.from('products').update(productPayload).eq('id', editingProductId)
+        if (updErr) throw new Error('Error al actualizar producto: ' + updErr.message)
+        flashSuccess(`"${name.trim()}" fue actualizado`)
+      } else {
+        const { data: newProduct, error: prodErr } = await supabase
+          .from('products')
+          .insert(productPayload)
+          .select('id')
+          .single()
+        if (prodErr) throw new Error('Error al crear producto: ' + prodErr.message)
 
-      const { error: varErr } = await supabase.from('product_variants').insert(variantRows)
-      if (varErr) throw new Error('Error al crear variantes: ' + varErr.message)
+        const variantRows = rows.map((r) => ({
+          product_id: newProduct.id,
+          size: r.attr.trim() || null,
+          color: r.color.trim() || null,
+          sku: r.sku?.trim() || null,
+          price: r.price ? parseFloat(r.price) : parseFloat(basePrice),
+          stock: parseInt(r.stock) || 0,
+        }))
+
+        const { error: varErr } = await supabase.from('product_variants').insert(variantRows)
+        if (varErr) throw new Error('Error al crear variantes: ' + varErr.message)
+        flashSuccess(`"${name.trim()}" fue creado`)
+      }
 
       setSaving(false)
       setShowForm(false)
@@ -206,6 +241,22 @@ export default function Products({ onBack }) {
       setSaving(false)
       setUploadingImage(false)
     }
+  }
+
+  const openEditProduct = (product) => {
+    setEditingProductId(product.id)
+    setName(product.name)
+    setCategoryName(CATEGORY_PRESETS.some((c) => c.name === product.category) ? product.category : '__custom__')
+    setCustomCategory(CATEGORY_PRESETS.some((c) => c.name === product.category) ? '' : product.category)
+    setBasePrice(String(product.basePrice ?? ''))
+    setCost(String(product.cost ?? ''))
+    setDescription(product.description || '')
+    setSupplier(product.supplier || '')
+    setImageFile(null)
+    setImagePreview(product.image)
+    setRows([])
+    setError('')
+    setShowForm(true)
   }
 
   // ---------- delete product / variant ----------
@@ -302,6 +353,7 @@ export default function Products({ onBack }) {
     setNewVariantColor('')
     setNewVariantStock('')
     setNewVariantPrice(String(product.basePrice ?? ''))
+    setNewVariantSku('')
   }
 
   const handleAddVariant = async () => {
@@ -314,6 +366,7 @@ export default function Products({ onBack }) {
       product_id: addingVariantTo.id,
       size: newVariantAttr.trim() || null,
       color: newVariantColor.trim() || null,
+      sku: newVariantSku.trim() || null,
       price: newVariantPrice ? parseFloat(newVariantPrice) : addingVariantTo.basePrice,
       stock: parseInt(newVariantStock) || 0,
     })
@@ -354,6 +407,7 @@ export default function Products({ onBack }) {
 
       {showForm && (
         <div style={styles.form}>
+          <p style={styles.formTitle}>{editingProductId ? 'Editar producto' : 'Nuevo producto'}</p>
           <div style={styles.formRow}>
             <div style={styles.fieldCol}>
               <label style={styles.fieldLabel}>Nombre del producto *</label>
@@ -361,7 +415,7 @@ export default function Products({ onBack }) {
             </div>
             <div style={styles.fieldCol}>
               <label style={styles.fieldLabel}>Categoría *</label>
-              <select style={styles.input} value={categoryName} onChange={(e) => setCategoryName(e.target.value)}>
+              <select style={styles.input} value={categoryName} onChange={(e) => setCategoryName(e.target.value)} disabled={!!editingProductId}>
                 {allCategoryOptions.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
@@ -378,10 +432,42 @@ export default function Products({ onBack }) {
 
           <div style={styles.formRow}>
             <div style={styles.fieldCol}>
-              <label style={styles.fieldLabel}>Precio base *</label>
+              <label style={styles.fieldLabel}>Precio de venta *</label>
               <input style={styles.input} type="number" step="0.01" placeholder="0.00" value={basePrice} onChange={(e) => setBasePrice(e.target.value)} />
             </div>
-            {preset.hasColor && (
+            <div style={styles.fieldCol}>
+              <label style={styles.fieldLabel}>Costo de compra</label>
+              <input style={styles.input} type="number" step="0.01" placeholder="0.00" value={cost} onChange={(e) => setCost(e.target.value)} />
+            </div>
+            <div style={styles.fieldCol}>
+              <label style={styles.fieldLabel}>Proveedor</label>
+              <input style={styles.input} placeholder="Ej. Distribuidora XYZ" value={supplier} onChange={(e) => setSupplier(e.target.value)} />
+            </div>
+          </div>
+
+          {basePrice && cost && (
+            <p style={styles.marginPreview}>
+              {(() => {
+                const p = parseFloat(basePrice) || 0
+                const c = parseFloat(cost) || 0
+                const gain = p - c
+                const pct = p > 0 ? (gain / p) * 100 : 0
+                return `Ganancia estimada: $${gain.toFixed(2)} por unidad (${pct.toFixed(0)}% de margen)`
+              })()}
+            </p>
+          )}
+
+          <div style={styles.formRow}>
+            <div style={{ ...styles.fieldCol, flex: 2 }}>
+              <label style={styles.fieldLabel}>Descripción</label>
+              <textarea
+                style={{ ...styles.input, minHeight: 70, resize: 'vertical' }}
+                placeholder="Detalles del producto: material, uso, características..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+            {preset.hasColor && !editingProductId && (
               <div style={styles.fieldCol}>
                 <label style={styles.fieldLabel}>Color (aplica a las variantes que agregues)</label>
                 <input style={styles.input} placeholder="Ej. Rojo" value={sharedColor} onChange={(e) => setSharedColor(e.target.value)} />
@@ -399,7 +485,9 @@ export default function Products({ onBack }) {
             </div>
           </div>
 
-          {/* variant builder, adapted to the category */}
+          {/* variant builder, adapted to the category — only for new products;
+              editing an existing product's variants happens on its card below */}
+          {!editingProductId && (
           <div style={styles.variantBuilder}>
             <p style={styles.variantBuilderTitle}>
               {preset.attrLabel}{preset.hasColor ? ' y color' : ''} — agregá cada variante que vas a tener en stock
@@ -434,6 +522,7 @@ export default function Products({ onBack }) {
                 <div style={styles.rowsHeader}>
                   <span style={{ flex: 1.2 }}>{preset.attrLabel}</span>
                   {preset.hasColor && <span style={{ flex: 1 }}>Color</span>}
+                  <span style={{ flex: 1 }}>SKU</span>
                   <span style={{ width: 90 }}>Stock</span>
                   <span style={{ width: 100 }}>Precio</span>
                   <span style={{ width: 30 }} />
@@ -454,6 +543,12 @@ export default function Products({ onBack }) {
                         onChange={(e) => updateRow(r.key, 'color', e.target.value)}
                       />
                     )}
+                    <input
+                      style={{ ...styles.rowInput, flex: 1 }}
+                      placeholder="Código (opcional)"
+                      value={r.sku}
+                      onChange={(e) => updateRow(r.key, 'sku', e.target.value)}
+                    />
                     <input
                       style={{ ...styles.rowInput, width: 90 }}
                       type="number"
@@ -479,10 +574,11 @@ export default function Products({ onBack }) {
               + Agregar {preset.attrLabel.toLowerCase()} manual
             </button>
           </div>
+          )}
 
           {error && <p style={styles.error}>{error}</p>}
           <button style={styles.saveBtn} onClick={handleSaveProduct} disabled={saving}>
-            {saving ? (uploadingImage ? 'Subiendo foto...' : 'Guardando...') : 'Guardar producto'}
+            {saving ? (uploadingImage ? 'Subiendo foto...' : 'Guardando...') : editingProductId ? 'Guardar cambios' : 'Guardar producto'}
           </button>
         </div>
       )}
@@ -517,6 +613,35 @@ export default function Products({ onBack }) {
 
                 {isOpen && (
                   <div style={styles.cardExpand}>
+                    {(p.cost > 0 || p.supplier || p.description) && (
+                      <div style={styles.detailBox}>
+                        {p.cost > 0 && (
+                          <div style={styles.detailRow}>
+                            <span style={styles.detailLabel}>Costo de compra</span>
+                            <span>${Number(p.cost).toFixed(2)}</span>
+                          </div>
+                        )}
+                        {p.cost > 0 && (
+                          <div style={styles.detailRow}>
+                            <span style={styles.detailLabel}>Ganancia por unidad</span>
+                            <span style={styles.gainValue}>
+                              ${(Number(p.basePrice) - Number(p.cost)).toFixed(2)}
+                              {' '}({Number(p.basePrice) > 0 ? (((Number(p.basePrice) - Number(p.cost)) / Number(p.basePrice)) * 100).toFixed(0) : 0}%)
+                            </span>
+                          </div>
+                        )}
+                        {p.supplier && (
+                          <div style={styles.detailRow}>
+                            <span style={styles.detailLabel}>Proveedor</span>
+                            <span>{p.supplier}</span>
+                          </div>
+                        )}
+                        {p.description && (
+                          <div style={styles.detailDescription}>{p.description}</div>
+                        )}
+                      </div>
+                    )}
+
                     <div style={styles.variantTable}>
                       {p.variants.map((v) => (
                         <div key={v.id} style={styles.variantRow}>
@@ -524,6 +649,7 @@ export default function Products({ onBack }) {
                             {[
                               v.size ? `${preset2.attrLabel}: ${v.size}` : null,
                               v.color ? `Color: ${v.color}` : null,
+                              v.sku ? `SKU: ${v.sku}` : null,
                             ].filter(Boolean).join(' · ') || 'Único'}
                           </span>
                           <span style={v.stock > 0 ? styles.stockOk : styles.stockLow}>Stock: {v.stock}</span>
@@ -539,6 +665,7 @@ export default function Products({ onBack }) {
                         {preset2.hasColor && (
                           <input style={styles.rowInput} placeholder="Color" value={newVariantColor} onChange={(e) => setNewVariantColor(e.target.value)} />
                         )}
+                        <input style={styles.rowInput} placeholder="Código (opcional)" value={newVariantSku} onChange={(e) => setNewVariantSku(e.target.value)} />
                         <input style={{ ...styles.rowInput, width: 90 }} type="number" placeholder="Stock" value={newVariantStock} onChange={(e) => setNewVariantStock(e.target.value)} />
                         <input style={{ ...styles.rowInput, width: 100 }} type="number" step="0.01" placeholder="Precio" value={newVariantPrice} onChange={(e) => setNewVariantPrice(e.target.value)} />
                         <button style={styles.saveBtnSmall} onClick={handleAddVariant}>Guardar</button>
@@ -548,6 +675,9 @@ export default function Products({ onBack }) {
                       <div style={styles.cardActions}>
                         <button style={styles.smallActionBtn} onClick={() => openAddVariant(p)}>
                           + Agregar {preset2.attrLabel.toLowerCase()}
+                        </button>
+                        <button style={styles.smallActionBtn} onClick={() => openEditProduct(p)}>
+                          ✏️ Editar info
                         </button>
                         <button style={styles.deleteProductBtn} onClick={() => askDeleteProduct(p)}>
                           🗑️ Eliminar producto
@@ -611,6 +741,8 @@ const styles = {
   confirmDeleteBtn: { background: '#c94b4b', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 18px', fontWeight: 'bold', cursor: 'pointer', fontSize: 13.5 },
 
   form: { background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: 20, marginBottom: 24 },
+  formTitle: { margin: '0 0 16px', fontSize: 15, fontWeight: 'bold', color: '#d4af37' },
+  marginPreview: { color: '#7fd88f', fontSize: 12.5, margin: '-6px 0 14px', fontStyle: 'italic' },
   formRow: { display: 'flex', gap: 12, marginBottom: 14, flexWrap: 'wrap' },
   fieldCol: { flex: 1, minWidth: 160 },
   fieldLabel: { display: 'block', fontSize: 11.5, color: '#999', marginBottom: 5, textTransform: 'uppercase', letterSpacing: 0.4 },
@@ -646,6 +778,11 @@ const styles = {
   expandIcon: { color: '#777', fontSize: 11 },
 
   cardExpand: { padding: '4px 18px 16px', borderTop: '1px solid #2a2a2a' },
+  detailBox: { background: '#151515', border: '1px solid #262626', borderRadius: 10, padding: '12px 14px', margin: '12px 0 4px' },
+  detailRow: { display: 'flex', justifyContent: 'space-between', fontSize: 12.5, marginBottom: 6, color: '#ccc' },
+  detailLabel: { color: '#999' },
+  gainValue: { color: '#7fd88f', fontWeight: 600 },
+  detailDescription: { fontSize: 12.5, color: '#aaa', lineHeight: 1.5, marginTop: 6, borderTop: '1px solid #262626', paddingTop: 8 },
   variantTable: { marginTop: 10, marginBottom: 12 },
   variantRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #232323', fontSize: 13 },
   stockOk: { color: '#7fd88f', width: 90 },
