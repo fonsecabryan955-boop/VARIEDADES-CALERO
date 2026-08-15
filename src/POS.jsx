@@ -1,8 +1,37 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { supabase } from './supabaseClient'
 
+// ---------- Icons (inline SVG, no extra deps) ----------
+const IconChevronLeft = (p) => (
+  <svg viewBox="0 0 24 24" width={p.size || 16} height={p.size || 16} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+)
+const IconSearch = (p) => (
+  <svg viewBox="0 0 24 24" width={p.size || 15} height={p.size || 15} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+)
+const IconMinus = (p) => (
+  <svg viewBox="0 0 24 24" width={p.size || 13} height={p.size || 13} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M5 12h14" /></svg>
+)
+const IconPlus = (p) => (
+  <svg viewBox="0 0 24 24" width={p.size || 13} height={p.size || 13} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+)
+const IconClose = (p) => (
+  <svg viewBox="0 0 24 24" width={p.size || 13} height={p.size || 13} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+)
+const IconPrinter = (p) => (
+  <svg viewBox="0 0 24 24" width={p.size || 16} height={p.size || 16} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 9V3h12v6" /><rect x="4" y="9" width="16" height="8" rx="1" /><path d="M6 17v4h12v-4" />
+  </svg>
+)
+const IconBox = (p) => (
+  <svg viewBox="0 0 24 24" width={p.size || 22} height={p.size || 22} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 8 12 3 3 8l9 5 9-5Z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" />
+  </svg>
+)
+const IconCheckCircle = (p) => (
+  <svg viewBox="0 0 24 24" width={p.size || 34} height={p.size || 34} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+)
+
 const paymentLabelsMap = { cash: 'Efectivo', card: 'Tarjeta', transfer: 'Transferencia' }
-const paymentIconMap = { cash: '💵', card: '💳', transfer: '🏦' }
 
 // A variant can have its own price, otherwise falls back to the product's
 // base price. If the product is marked as "en liquidación", the discount
@@ -223,97 +252,91 @@ export default function POS({ user, onBack }) {
     )
     const itemCount = receipt.items.reduce((s, i) => s + i.qty, 0)
     return (
-      <div className="vc-root">
-        <style>{VC_STYLES}</style>
-        <div className="vc-topbar" />
-        <div className="vc-receipt-wrap">
-          <div className="vc-receipt-box" id="receipt-print">
-            <div className="vc-receipt-hole" />
+      <div className="pos-root">
+        <style>{POS_STYLES}</style>
+        <div className="pos-receipt-wrap">
+          <div className="pos-receipt-box" id="receipt-print">
+            <div className="pos-receipt-monogram">VC</div>
+            <h2 className="pos-brand">Variedades Calero</h2>
+            <p className="pos-receipt-tagline">Boutique · Masatepe, Nicaragua</p>
+            <p className="pos-receipt-ref">N.º {receipt.orderRef}</p>
 
-            <div className="vc-receipt-crest">
-              <span className="vc-crest-text">VC</span>
-            </div>
-            <h2 className="vc-brand">Variedades Calero</h2>
-            <p className="vc-receipt-tagline">Boutique · Masatepe, Nicaragua</p>
-            <div className="vc-brand-rule" />
-            <p className="vc-receipt-ref">N.º {receipt.orderRef}</p>
-
-            <div className="vc-receipt-meta">
-              <div className="vc-receipt-meta-row"><span>Fecha</span><span>{receipt.date.toLocaleDateString()} · {receipt.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></div>
-              <div className="vc-receipt-meta-row"><span>Atendido por</span><span>{receipt.soldBy}</span></div>
-              {receipt.clientName && <div className="vc-receipt-meta-row"><span>Cliente</span><span>{receipt.clientName}</span></div>}
+            <div className="pos-receipt-meta">
+              <div className="pos-receipt-meta-row"><span>Fecha</span><span>{receipt.date.toLocaleDateString()} · {receipt.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></div>
+              <div className="pos-receipt-meta-row"><span>Atendido por</span><span>{receipt.soldBy}</span></div>
+              {receipt.clientName && <div className="pos-receipt-meta-row"><span>Cliente</span><span>{receipt.clientName}</span></div>}
             </div>
 
-            <div className="vc-receipt-divider" />
+            <div className="pos-receipt-divider" />
 
-            <div className="vc-receipt-cols-head">
+            <div className="pos-receipt-cols-head">
               <span>Artículo</span>
               <span>Importe</span>
             </div>
             {receipt.items.map((i) => (
-              <div key={i.id} className="vc-receipt-item">
-                <div className="vc-receipt-item-top">
-                  <span className="vc-receipt-item-name">
+              <div key={i.id} className="pos-receipt-item">
+                <div className="pos-receipt-item-top">
+                  <span className="pos-receipt-item-name">
                     {i.products?.name}
-                    {isOnSale(i) && <span className="vc-receipt-sale-tag">liquidación</span>}
+                    {isOnSale(i) && <span className="pos-receipt-sale-tag">liquidación</span>}
                   </span>
-                  <span className="vc-num">${(getEffectivePrice(i) * i.qty).toFixed(2)}</span>
+                  <span className="pos-num">${(getEffectivePrice(i) * i.qty).toFixed(2)}</span>
                 </div>
-                <div className="vc-receipt-item-sub">
+                <div className="pos-receipt-item-sub">
                   {i.qty} × ${getEffectivePrice(i).toFixed(2)}
-                  {isOnSale(i) && <span className="vc-receipt-item-strike vc-num">${getBasePrice(i).toFixed(2)}</span>}
+                  {isOnSale(i) && <span className="pos-receipt-item-strike pos-num">${getBasePrice(i).toFixed(2)}</span>}
                 </div>
               </div>
             ))}
 
-            <div className="vc-receipt-divider" />
+            <div className="pos-receipt-divider" />
 
-            <div className="vc-receipt-line">
+            <div className="pos-receipt-line">
               <span>Artículos</span>
-              <span className="vc-num">{itemCount}</span>
+              <span className="pos-num">{itemCount}</span>
             </div>
             {savings > 0 && (
-              <div className="vc-receipt-line vc-success">
+              <div className="pos-receipt-line pos-success">
                 <span>Ahorro por liquidación</span>
-                <span className="vc-num">-${savings.toFixed(2)}</span>
+                <span className="pos-num">-${savings.toFixed(2)}</span>
               </div>
             )}
-            <div className="vc-receipt-line vc-receipt-total">
+            <div className="pos-receipt-line pos-receipt-total">
               <span>Total</span>
-              <span className="vc-num">${receipt.total.toFixed(2)}</span>
+              <span className="pos-num">${receipt.total.toFixed(2)}</span>
             </div>
-            <div className="vc-receipt-line">
+            <div className="pos-receipt-line">
               <span>Abonado ({paymentLabelsMap[receipt.paymentMethod]})</span>
-              <span className="vc-num">${receipt.paid.toFixed(2)}</span>
+              <span className="pos-num">${receipt.paid.toFixed(2)}</span>
             </div>
-            <div className={`vc-receipt-line vc-receipt-bold ${receipt.remaining > 0 ? 'vc-danger' : 'vc-success'}`}>
+            <div className={`pos-receipt-line pos-receipt-bold ${receipt.remaining > 0 ? 'pos-danger' : 'pos-success'}`}>
               <span>{receipt.remaining > 0 ? 'Resta de esta compra' : 'Pagado completo'}</span>
-              <span className="vc-num">${receipt.remaining.toFixed(2)}</span>
+              <span className="pos-num">${receipt.remaining.toFixed(2)}</span>
             </div>
 
             {receipt.clientName && receipt.clientBalance > 0 && (
               <>
-                <div className="vc-receipt-divider" />
-                <div className="vc-receipt-line vc-receipt-bold vc-danger">
+                <div className="pos-receipt-divider" />
+                <div className="pos-receipt-line pos-receipt-bold pos-danger">
                   <span>Total pendiente del cliente</span>
-                  <span className="vc-num">${receipt.clientBalance.toFixed(2)}</span>
+                  <span className="pos-num">${receipt.clientBalance.toFixed(2)}</span>
                 </div>
               </>
             )}
 
-            <div className="vc-receipt-divider" />
-            <p className="vc-receipt-thanks">¡Gracias por tu compra!</p>
-            <p className="vc-receipt-footer-tag">Conservá este recibo para cualquier cambio o garantía.</p>
+            <div className="pos-receipt-divider" />
+            <p className="pos-receipt-thanks">Gracias por tu compra</p>
+            <p className="pos-receipt-footer-tag">Conservá este recibo para cualquier cambio o garantía.</p>
           </div>
 
-          <div className="vc-receipt-actions">
-            <button className="vc-btn-primary" onClick={() => window.print()}>
-              🖨️ Imprimir recibo
+          <div className="pos-receipt-actions">
+            <button className="pos-btn-primary" onClick={() => window.print()}>
+              <IconPrinter size={15} /> Imprimir recibo
             </button>
-            <button className="vc-btn-ghost" onClick={() => setReceipt(null)}>
+            <button className="pos-btn-ghost" onClick={() => setReceipt(null)}>
               Nueva venta
             </button>
-            <button className="vc-btn-ghost" onClick={onBack}>
+            <button className="pos-btn-ghost" onClick={onBack}>
               Volver al menú
             </button>
           </div>
@@ -323,38 +346,35 @@ export default function POS({ user, onBack }) {
   }
 
   return (
-    <div className="vc-root">
-      <style>{VC_STYLES}</style>
-      <div className="vc-topbar" />
+    <div className="pos-root">
+      <style>{POS_STYLES}</style>
 
-      <div className="vc-header">
-        <div className="vc-brand-block">
-          <div className="vc-crest">
-            <span className="vc-crest-text">VC</span>
-          </div>
-          <div className="vc-headtext">
-            <div className="vc-wordmark">Variedades Calero</div>
-            <div className="vc-subtitle">Punto de venta</div>
+      <div className="pos-header">
+        <div className="pos-brand-block">
+          <div className="pos-monogram">VC</div>
+          <div>
+            <div className="pos-wordmark">Variedades Calero</div>
+            <div className="pos-subtitle">Punto de venta</div>
           </div>
         </div>
-        <button onClick={onBack} className="vc-back">← Volver</button>
+        <button onClick={onBack} className="pos-back"><IconChevronLeft size={15} /> Volver</button>
       </div>
 
-      <div className="vc-toolbar">
-        <div className="vc-search-wrap">
-          <span className="vc-search-icon">🔍</span>
+      <div className="pos-toolbar">
+        <div className="pos-search-wrap">
+          <span className="pos-search-icon"><IconSearch /></span>
           <input
-            className="vc-search"
+            className="pos-search"
             placeholder="Buscar producto..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="vc-chips">
+        <div className="pos-chips">
           {categories.map((c) => (
             <button
               key={c}
-              className={`vc-chip ${activeCategory === c ? 'vc-chip-active' : ''}`}
+              className={`pos-chip ${activeCategory === c ? 'pos-chip-active' : ''}`}
               onClick={() => setActiveCategory(c)}
             >
               {c}
@@ -363,50 +383,54 @@ export default function POS({ user, onBack }) {
         </div>
       </div>
 
-      <div className="vc-layout">
-        <div className="vc-products">
+      <div className="pos-layout">
+        <div className="pos-products">
           {loading ? (
-            <div className="vc-grid">
+            <div className="pos-grid">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="vc-skeleton" />
+                <div key={i} className="pos-skeleton" />
               ))}
             </div>
           ) : filteredVariants.length === 0 ? (
-            <div className="vc-empty">
-              <div className="vc-empty-icon">🏷️</div>
-              <p className="vc-muted">
+            <div className="pos-empty">
+              <div className="pos-empty-icon"><IconBox size={26} /></div>
+              <p className="pos-muted">
                 {variants.length === 0
                   ? 'No hay productos con stock disponible.'
                   : 'Ningún producto coincide con la búsqueda.'}
               </p>
             </div>
           ) : (
-            <div className="vc-grid">
+            <div className="pos-grid">
               {filteredVariants.map((v) => (
-                <button key={v.id} className="vc-card" onClick={() => addToCart(v)}>
-                  <span className="vc-card-hole" />
+                <button key={v.id} className="pos-card" onClick={() => addToCart(v)}>
                   {isOnSale(v) && (
-                    <span className="vc-sale-ribbon">-{v.products.discount_percent}%</span>
+                    <span className="pos-sale-badge">-{v.products.discount_percent}%</span>
                   )}
-                  {v.products?.image_url ? (
-                    <img src={v.products.image_url} alt="" className="vc-card-img" />
-                  ) : (
-                    <div className="vc-card-img-placeholder">📦</div>
-                  )}
-                  <div className="vc-card-name">{v.products?.name}</div>
-                  <div className="vc-card-meta">
-                    {v.size ? `Talla ${v.size}` : ''} {v.color || ''}
-                  </div>
-                  <div className="vc-card-footer">
-                    {isOnSale(v) ? (
-                      <span className="vc-card-price-wrap">
-                        <span className="vc-card-price-strike vc-num">${getBasePrice(v).toFixed(2)}</span>
-                        <span className="vc-card-price vc-num">${getEffectivePrice(v).toFixed(2)}</span>
-                      </span>
+                  {v.stock <= 3 && <span className="pos-lowstock-badge">Stock {v.stock}</span>}
+                  <div className="pos-card-imgwrap">
+                    {v.products?.image_url ? (
+                      <img src={v.products.image_url} alt="" className="pos-card-img" />
                     ) : (
-                      <span className="vc-card-price vc-num">${getBasePrice(v).toFixed(2)}</span>
+                      <div className="pos-card-img-placeholder"><IconBox size={20} /></div>
                     )}
-                    <span className="vc-card-stock">Stock {v.stock}</span>
+                  </div>
+                  <div className="pos-card-body">
+                    <div className="pos-card-name">{v.products?.name}</div>
+                    <div className="pos-card-meta">
+                      {v.size ? `Talla ${v.size}` : ''} {v.color || ''}
+                    </div>
+                    <div className="pos-card-footer">
+                      {isOnSale(v) ? (
+                        <span className="pos-card-price-wrap">
+                          <span className="pos-card-price-strike pos-num">${getBasePrice(v).toFixed(2)}</span>
+                          <span className="pos-card-price pos-num">${getEffectivePrice(v).toFixed(2)}</span>
+                        </span>
+                      ) : (
+                        <span className="pos-card-price pos-num">${getBasePrice(v).toFixed(2)}</span>
+                      )}
+                      {v.stock > 3 && <span className="pos-card-stock">Stock {v.stock}</span>}
+                    </div>
                   </div>
                 </button>
               ))}
@@ -414,91 +438,91 @@ export default function POS({ user, onBack }) {
           )}
         </div>
 
-        <div className="vc-cart">
-          <div className="vc-cart-head">
-            <h3 className="vc-cart-title">Carrito</h3>
-            <span className="vc-cart-count">{cart.length} {cart.length === 1 ? 'artículo' : 'artículos'}</span>
+        <div className="pos-cart">
+          <div className="pos-cart-head">
+            <h3 className="pos-cart-title">Carrito</h3>
+            <span className="pos-cart-count">{cart.length} {cart.length === 1 ? 'artículo' : 'artículos'}</span>
           </div>
           {cart.length === 0 ? (
-            <p className="vc-muted vc-cart-empty">Vacío. Tocá un producto para agregarlo.</p>
+            <p className="pos-muted pos-cart-empty">Vacío. Tocá un producto para agregarlo.</p>
           ) : (
-            <div className="vc-cart-list">
+            <div className="pos-cart-list">
               {cart.map((i) => (
-                <div key={i.id} className="vc-cart-item">
-                  <div className="vc-cart-item-info">
-                    <div className="vc-cart-item-name">
+                <div key={i.id} className="pos-cart-item">
+                  <div className="pos-cart-item-info">
+                    <div className="pos-cart-item-name">
                       {i.products?.name}
-                      {isOnSale(i) && <span className="vc-cart-sale-tag">🏷️ liquidación</span>}
+                      {isOnSale(i) && <span className="pos-cart-sale-tag">Liquidación</span>}
                     </div>
-                    <div className="vc-cart-item-meta">
+                    <div className="pos-cart-item-meta">
                       {i.size ? `Talla ${i.size}` : ''} {i.color || ''}
                     </div>
                   </div>
-                  <div className="vc-qty">
-                    <button className="vc-qty-btn" onClick={() => changeQty(i.id, -1)}>−</button>
-                    <span className="vc-qty-value vc-num">{i.qty}</span>
+                  <div className="pos-qty">
+                    <button className="pos-qty-btn" onClick={() => changeQty(i.id, -1)}><IconMinus /></button>
+                    <span className="pos-qty-value pos-num">{i.qty}</span>
                     <button
-                      className="vc-qty-btn"
+                      className="pos-qty-btn"
                       onClick={() => changeQty(i.id, 1)}
                       disabled={i.qty >= i.stock}
                     >
-                      +
+                      <IconPlus />
                     </button>
                   </div>
-                  <div className="vc-cart-item-price vc-num">
+                  <div className="pos-cart-item-price pos-num">
                     ${(getEffectivePrice(i) * i.qty).toFixed(2)}
                   </div>
-                  <button className="vc-remove" onClick={() => removeItem(i.id)}>×</button>
+                  <button className="pos-remove" onClick={() => removeItem(i.id)}><IconClose /></button>
                 </div>
               ))}
             </div>
           )}
 
-          <div className="vc-total-row">
-            <span className="vc-total-label">Total a pagar</span>
-            <span className={`vc-total-value ${bump ? 'vc-bump' : ''}`}>${total.toFixed(2)}</span>
+          <div className="pos-total-row">
+            <span className="pos-total-label">Total a pagar</span>
+            <span className={`pos-total-value ${bump ? 'pos-bump' : ''}`}>${total.toFixed(2)}</span>
           </div>
 
-          <div className="vc-pay-methods">
+          <div className="pos-pay-methods">
             {Object.keys(paymentLabelsMap).map((key) => (
               <button
                 key={key}
-                className={`vc-pay-chip ${paymentMethod === key ? 'vc-pay-chip-active' : ''}`}
+                className={`pos-pay-chip ${paymentMethod === key ? 'pos-pay-chip-active' : ''}`}
                 onClick={() => setPaymentMethod(key)}
               >
-                {paymentIconMap[key]} {paymentLabelsMap[key]}
+                {paymentLabelsMap[key]}
               </button>
             ))}
           </div>
 
-          <div className="vc-credit">
-            <p className="vc-credit-label">Cliente (opcional, para ventas al crédito)</p>
+          <div className="pos-credit">
+            <p className="pos-credit-label">Cliente (opcional, para ventas al crédito)</p>
             <input
-              className="vc-input"
+              className="pos-input"
               placeholder="Nombre del cliente"
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
             />
             <input
-              className="vc-input"
+              className="pos-input"
               placeholder="Teléfono"
               value={clientPhone}
               onChange={(e) => setClientPhone(e.target.value)}
             />
             <input
-              className="vc-input"
+              className="pos-input"
               type="number"
               step="0.01"
-              placeholder={`Monto abonado (dejar vacío = paga todo $${total.toFixed(2)})`}
+              placeholder={`Monto abonado (vacío = paga todo $${total.toFixed(2)})`}
               value={amountPaid}
               onChange={(e) => setAmountPaid(e.target.value)}
             />
           </div>
 
-          {message && <p className="vc-message">{message}</p>}
+          {message && <p className="pos-message">{message}</p>}
 
           <button
-            className="vc-checkout-btn"
+            className="pos-checkout-btn"
             onClick={handleCheckout}
             disabled={cart.length === 0 || checkingOut}
           >
@@ -510,22 +534,20 @@ export default function POS({ user, onBack }) {
   )
 }
 
-const VC_STYLES = `
-  .vc-root {
-    --bg: #F2EBDB;
-    --surface: #FBF8F0;
-    --surface-2: #EAE0C7;
-    --border: #DACC9E;
-    --border-soft: #C7B689;
-    --stitch: rgba(59, 46, 31, 0.18);
-    --accent: #3B2E1F;
-    --accent-soft: #55432C;
-    --accent-contrast: #F5EFDF;
-    --ink: #2E2618;
-    --muted: #8A7A56;
-    --success: #5F7D53;
-    --danger: #9C5340;
-    --display: 'Fraunces', Georgia, serif;
+const POS_STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;1,6..96,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  .pos-root {
+    --bg: #f5f4f1;
+    --panel: #ffffff;
+    --panel-raised: #f2f0ec;
+    --border: #e2ded5;
+    --ink: #0b0b0a;
+    --ink-soft: #726d63;
+    --ink-faint: #a39d8f;
+    --success: #3f6b4a;
+    --danger: #9c3b2e;
+    --display: 'Bodoni Moda', serif;
     --body: 'Inter', system-ui, -apple-system, sans-serif;
     --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
 
@@ -534,620 +556,567 @@ const VC_STYLES = `
     background: var(--bg);
     color: var(--ink);
     font-family: var(--body);
-    padding: 24px;
+    padding: 22px 26px 40px;
     box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
   }
-  .vc-root * { box-sizing: border-box; }
-  .vc-num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
-  .vc-muted { color: var(--muted); }
-  .vc-center { text-align: center; }
-  .vc-danger { color: var(--danger) !important; }
-  .vc-success { color: var(--success) !important; }
-
-  .vc-topbar {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--accent);
+  .pos-root * { box-sizing: border-box; }
+  .pos-root button { font: inherit; }
+  .pos-root button:focus-visible,
+  .pos-root input:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
   }
+  .pos-num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .pos-muted { color: var(--ink-soft); }
+  .pos-danger { color: var(--danger) !important; }
+  .pos-success { color: var(--success) !important; }
 
-  .vc-header {
+  /* ---------- header ---------- */
+  .pos-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 6px 0 24px;
+    margin: 0 0 22px;
     gap: 12px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
   }
-  .vc-brand-block { display: flex; align-items: center; gap: 13px; }
-  .vc-crest {
+  .pos-brand-block { display: flex; align-items: center; gap: 13px; }
+  .pos-monogram {
     flex-shrink: 0;
-    width: 42px;
-    height: 42px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
-    border: 1px solid var(--border-soft);
+    border: 1px solid var(--ink);
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    background: var(--surface);
-  }
-  .vc-crest::before {
-    content: '';
-    position: absolute;
-    inset: 4px;
-    border: 1px solid var(--border);
-    border-radius: 50%;
-  }
-  .vc-crest-text {
     font-family: var(--display);
-    font-style: italic;
     font-weight: 600;
-    font-size: 14px;
-    color: var(--accent);
-    letter-spacing: 0.5px;
+    font-size: 13px;
+    color: var(--ink);
   }
-  .vc-headtext { text-align: left; }
-  .vc-wordmark {
+  .pos-wordmark {
     font-family: var(--display);
-    font-style: italic;
-    font-weight: 600;
-    font-size: 21px;
+    font-weight: 500;
+    font-size: 19px;
     color: var(--ink);
     letter-spacing: 0.2px;
     line-height: 1.15;
   }
-  .vc-subtitle {
-    font-family: var(--mono);
+  .pos-subtitle {
+    font-family: var(--body);
     font-size: 9.5px;
     text-transform: uppercase;
-    letter-spacing: 2.5px;
-    color: var(--muted);
-    margin-top: 2px;
+    letter-spacing: 2.2px;
+    color: var(--ink-soft);
+    font-weight: 600;
+    margin-top: 3px;
   }
-  .vc-back {
-    background: var(--surface);
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 9px 15px;
-    font-family: var(--body);
-    font-size: 13px;
+  .pos-back {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--ink);
+    border-radius: 0;
+    padding: 10px 16px;
+    font-size: 12px;
+    letter-spacing: 0.3px;
     cursor: pointer;
-    transition: border-color .2s, color .2s;
+    transition: background .15s, color .15s;
     flex-shrink: 0;
   }
-  .vc-back:hover { border-color: var(--accent); color: var(--accent); }
+  .pos-back:hover { background: var(--ink); color: #fff; }
 
-  .vc-toolbar {
+  /* ---------- toolbar ---------- */
+  .pos-toolbar {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
     margin-bottom: 22px;
   }
-  .vc-search-wrap {
+  .pos-search-wrap {
     position: relative;
     max-width: 360px;
   }
-  .vc-search-icon {
+  .pos-search-icon {
     position: absolute;
-    left: 13px;
+    left: 2px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 13px;
-    opacity: 0.5;
+    color: var(--ink-faint);
+    display: flex;
   }
-  .vc-search {
+  .pos-search {
     width: 100%;
-    background: var(--surface);
+    background: transparent;
     color: var(--ink);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 11px 12px 11px 36px;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    padding: 9px 6px 9px 24px;
     font-family: var(--body);
-    font-size: 13px;
+    font-size: 13.5px;
     outline: none;
     transition: border-color .2s;
   }
-  .vc-search::placeholder { color: var(--muted); }
-  .vc-search:focus { border-color: var(--accent); }
-  .vc-chips {
+  .pos-search::placeholder { color: var(--ink-faint); }
+  .pos-search:focus { border-bottom-color: var(--ink); }
+  .pos-chips {
     display: flex;
-    gap: 6px;
+    gap: 20px;
     overflow-x: auto;
-    padding-bottom: 4px;
+    padding-bottom: 2px;
     scrollbar-width: none;
+    border-bottom: 1px solid var(--border);
   }
-  .vc-chips::-webkit-scrollbar { display: none; }
-  .vc-chip {
+  .pos-chips::-webkit-scrollbar { display: none; }
+  .pos-chip {
     flex-shrink: 0;
-    background: var(--surface);
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 3px 0 0 3px;
-    padding: 7px 20px 7px 14px;
-    font-size: 12px;
-    font-family: var(--body);
+    background: transparent;
+    color: var(--ink-soft);
+    border: none;
+    border-bottom: 1.5px solid transparent;
+    padding: 4px 0 9px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
     cursor: pointer;
     white-space: nowrap;
-    transition: color .2s, border-color .2s, background .2s;
-    clip-path: polygon(0 0, 88% 0, 100% 50%, 88% 100%, 0 100%);
+    transition: color .15s, border-color .15s;
   }
-  .vc-chip:hover { color: var(--accent); border-color: var(--accent); }
-  .vc-chip-active {
-    background: var(--accent);
-    color: var(--accent-contrast);
-    border-color: var(--accent);
-    font-weight: 600;
-  }
+  .pos-chip:hover { color: var(--ink); }
+  .pos-chip-active { color: var(--ink); border-bottom-color: var(--ink); }
 
-  .vc-layout { display: flex; gap: 22px; flex-wrap: wrap; align-items: flex-start; }
-  .vc-products { flex: 2; min-width: 280px; }
+  /* ---------- layout ---------- */
+  .pos-layout { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+  .pos-products { flex: 2; min-width: 300px; }
 
-  .vc-grid {
+  .pos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
     gap: 16px;
   }
 
-  .vc-card {
+  .pos-card {
     position: relative;
-    background: var(--surface);
+    background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 4px 18px 4px 4px;
-    padding: 18px 13px 13px;
+    border-radius: 0;
+    padding: 0;
     text-align: left;
     cursor: pointer;
     color: var(--ink);
     font-family: var(--body);
-    box-shadow: 0 1px 2px rgba(59, 46, 31, 0.05);
-    transition: border-color .2s, transform .18s, box-shadow .2s;
+    overflow: hidden;
+    transition: border-color .15s, transform .12s;
   }
-  .vc-card::after {
-    content: '';
-    position: absolute;
-    inset: 6px;
-    border: 1px dashed var(--stitch);
-    border-radius: 3px 15px 3px 3px;
-    pointer-events: none;
-  }
-  .vc-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 14px rgba(59, 46, 31, 0.09);
-  }
-  .vc-card:active { transform: translateY(0); }
-  .vc-card-hole {
-    position: absolute;
-    top: 9px;
-    left: 11px;
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    z-index: 1;
-  }
-  .vc-card-img {
+  .pos-card:hover { border-color: var(--ink); transform: translateY(-2px); }
+  .pos-card:active { transform: translateY(0); }
+  .pos-card-imgwrap {
     width: 100%;
-    height: 86px;
-    object-fit: cover;
-    border-radius: 7px;
-    margin-bottom: 9px;
-    position: relative;
+    aspect-ratio: 1;
+    background: var(--panel-raised);
+    overflow: hidden;
   }
-  .vc-card-img-placeholder {
-    width: 100%;
-    height: 86px;
-    background: var(--surface-2);
-    border-radius: 7px;
-    margin-bottom: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    opacity: 0.55;
+  .pos-card-img { width: 100%; height: 100%; object-fit: cover; }
+  .pos-card-img-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-faint);
   }
-  .vc-card-name { font-weight: 600; font-size: 13.5px; line-height: 1.3; position: relative; }
-  .vc-card-meta { color: var(--muted); font-size: 11px; margin-top: 3px; position: relative; }
-  .vc-card-footer {
+  .pos-card-body { padding: 11px 12px 12px; }
+  .pos-card-name { font-weight: 600; font-size: 13px; line-height: 1.3; font-family: var(--display); }
+  .pos-card-meta { color: var(--ink-soft); font-size: 10.5px; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .pos-card-footer {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    margin-top: 11px;
+    margin-top: 10px;
     padding-top: 9px;
-    border-top: 1px dashed var(--border);
-    position: relative;
+    border-top: 1px solid var(--border);
   }
-  .vc-card-price { color: var(--accent); font-weight: 700; font-size: 13.5px; }
-  .vc-card-price-wrap { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
-  .vc-card-price-strike { color: var(--muted); font-size: 10.5px; text-decoration: line-through; }
-  .vc-sale-ribbon {
-    position: absolute;
-    top: 10px;
-    right: -1px;
-    background: var(--danger);
-    color: #FBF8F0;
-    font-family: var(--mono);
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 8px 2px 10px;
-    border-radius: 4px 0 0 4px;
-    z-index: 1;
+  .pos-card-price { color: var(--ink); font-weight: 700; font-size: 13px; }
+  .pos-card-price-wrap { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+  .pos-card-price-strike { color: var(--ink-faint); font-size: 10px; text-decoration: line-through; }
+  .pos-sale-badge {
+    position: absolute; top: 0; left: 0; z-index: 1;
+    background: var(--danger); color: #fff;
+    font-family: var(--body); font-size: 9.5px; font-weight: 700; letter-spacing: 0.4px;
+    padding: 4px 9px;
   }
-  .vc-cart-sale-tag {
+  .pos-lowstock-badge {
+    position: absolute; top: 0; right: 0; z-index: 1;
+    background: var(--ink); color: #fff;
+    font-family: var(--mono); font-size: 9.5px; font-weight: 600;
+    padding: 4px 9px;
+  }
+  .pos-cart-sale-tag {
     display: inline-block;
     margin-left: 6px;
-    font-size: 9.5px;
+    font-size: 9px;
     color: var(--danger);
-    font-family: var(--mono);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    border: 1px solid var(--danger);
+    padding: 1px 5px;
   }
-  .vc-card-stock { color: var(--success); font-size: 10px; font-family: var(--mono); }
+  .pos-card-stock { color: var(--ink-faint); font-size: 10px; font-family: var(--mono); }
 
-  .vc-skeleton {
-    height: 180px;
-    border-radius: 4px 18px 4px 4px;
-    background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%);
+  .pos-skeleton {
+    aspect-ratio: 0.78;
+    background: linear-gradient(90deg, var(--panel) 25%, var(--panel-raised) 50%, var(--panel) 75%);
     background-size: 200% 100%;
-    animation: vc-pulse 1.4s ease-in-out infinite;
+    animation: pos-pulse 1.4s ease-in-out infinite;
     border: 1px solid var(--border);
   }
-  @keyframes vc-pulse {
+  @keyframes pos-pulse {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
 
-  .vc-empty {
+  .pos-empty {
     text-align: center;
-    padding: 64px 20px;
+    padding: 70px 20px;
     border: 1px dashed var(--border);
-    border-radius: 14px;
   }
-  .vc-empty-icon { font-size: 30px; margin-bottom: 10px; opacity: 0.5; }
+  .pos-empty-icon { color: var(--ink-faint); margin-bottom: 12px; display: flex; justify-content: center; }
 
-  .vc-cart {
+  /* ---------- cart ---------- */
+  .pos-cart {
     flex: 1;
-    min-width: 270px;
-    background: var(--surface);
+    min-width: 300px;
+    background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px;
+    border-radius: 0;
+    padding: 22px;
     position: sticky;
     top: 16px;
-    box-shadow: 0 1px 2px rgba(59, 46, 31, 0.05);
   }
-  .vc-cart-head {
+  .pos-cart-head {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    margin-bottom: 14px;
-    padding-bottom: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
     border-bottom: 1px solid var(--border);
   }
-  .vc-cart-title {
+  .pos-cart-title {
     margin: 0;
     color: var(--ink);
     font-family: var(--display);
-    font-style: italic;
-    font-size: 19px;
+    font-weight: 500;
+    font-size: 20px;
   }
-  .vc-cart-count {
+  .pos-cart-count {
     font-family: var(--mono);
     font-size: 10px;
-    color: var(--muted);
+    color: var(--ink-soft);
     text-transform: uppercase;
     letter-spacing: 1px;
   }
-  .vc-cart-empty { padding: 24px 0; text-align: center; font-size: 13px; }
-  .vc-cart-list { display: flex; flex-direction: column; gap: 11px; margin-bottom: 16px; }
-  .vc-cart-item {
+  .pos-cart-empty { padding: 26px 0; text-align: center; font-size: 13px; }
+  .pos-cart-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; max-height: 320px; overflow-y: auto; }
+  .pos-cart-item {
     display: flex;
     align-items: center;
     gap: 8px;
-    border-bottom: 1px dashed var(--border);
-    padding-bottom: 11px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
   }
-  .vc-cart-item-info { flex: 1; min-width: 0; }
-  .vc-cart-item-name { font-size: 13px; font-weight: 600; }
-  .vc-cart-item-meta { font-size: 11px; color: var(--muted); }
-  .vc-qty { display: flex; align-items: center; gap: 6px; }
-  .vc-qty-btn {
-    background: var(--surface-2);
+  .pos-cart-item-info { flex: 1; min-width: 0; }
+  .pos-cart-item-name { font-size: 13px; font-weight: 600; font-family: var(--display); }
+  .pos-cart-item-meta { font-size: 10.5px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 2px; }
+  .pos-qty { display: flex; align-items: center; border: 1px solid var(--border); }
+  .pos-qty-btn {
+    background: transparent;
     color: var(--ink);
-    border: 1px solid var(--border);
-    border-radius: 6px;
+    border: none;
     width: 24px;
     height: 24px;
+    display: flex; align-items: center; justify-content: center;
     cursor: pointer;
-    font-size: 13px;
-    line-height: 1;
-    transition: border-color .2s;
   }
-  .vc-qty-btn:hover:not(:disabled) { border-color: var(--accent); }
-  .vc-qty-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .vc-qty-value { min-width: 16px; text-align: center; font-size: 13px; }
-  .vc-cart-item-price { font-size: 13px; min-width: 54px; text-align: right; }
-  .vc-remove {
+  .pos-qty-btn:hover:not(:disabled) { background: var(--panel-raised); }
+  .pos-qty-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .pos-qty-value { min-width: 20px; text-align: center; font-size: 12.5px; }
+  .pos-cart-item-price { font-size: 13px; min-width: 58px; text-align: right; }
+  .pos-remove {
     background: transparent;
-    color: var(--danger);
+    color: var(--ink-soft);
     border: none;
-    font-size: 17px;
     cursor: pointer;
-    line-height: 1;
-    padding: 0 2px;
+    display: flex;
+    padding: 2px;
   }
+  .pos-remove:hover { color: var(--danger); }
 
-  .vc-total-row {
+  .pos-total-row {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
     border-top: 1px solid var(--border);
-    padding-top: 14px;
-    margin-bottom: 14px;
+    padding-top: 16px;
+    margin-bottom: 16px;
   }
-  .vc-total-label {
-    font-size: 11px;
+  .pos-total-label {
+    font-size: 10.5px;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--muted);
-  }
-  .vc-total-value {
-    font-family: var(--display);
-    font-style: italic;
+    letter-spacing: 1.4px;
+    color: var(--ink-soft);
     font-weight: 600;
-    color: var(--accent);
-    font-size: 27px;
+  }
+  .pos-total-value {
+    font-family: var(--display);
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 28px;
     display: inline-block;
     transition: transform .18s ease;
   }
-  .vc-total-value.vc-bump { transform: scale(1.08); }
+  .pos-total-value.pos-bump { transform: scale(1.07); }
 
-  .vc-pay-methods { display: flex; gap: 7px; margin-bottom: 16px; }
-  .vc-pay-chip {
+  .pos-pay-methods { display: flex; border: 1px solid var(--border); margin-bottom: 18px; }
+  .pos-pay-chip {
     flex: 1;
-    background: var(--surface-2);
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 10px 4px;
-    font-size: 11px;
+    background: transparent;
+    color: var(--ink-soft);
+    border: none;
+    border-right: 1px solid var(--border);
+    padding: 11px 4px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
     font-family: var(--body);
     cursor: pointer;
-    transition: all .2s;
+    transition: all .15s;
   }
-  .vc-pay-chip:hover { color: var(--ink); }
-  .vc-pay-chip-active {
-    background: var(--accent);
-    color: var(--accent-contrast);
-    border-color: var(--accent);
-    font-weight: 600;
+  .pos-pay-chip:last-child { border-right: none; }
+  .pos-pay-chip:hover { color: var(--ink); }
+  .pos-pay-chip-active {
+    background: var(--ink);
+    color: #fff;
   }
 
-  .vc-credit {
+  .pos-credit {
     border-top: 1px solid var(--border);
-    padding-top: 14px;
-    margin-bottom: 14px;
+    padding-top: 16px;
+    margin-bottom: 16px;
   }
-  .vc-credit-label {
-    font-size: 10.5px;
+  .pos-credit-label {
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--muted);
-    margin: 0 0 9px;
+    letter-spacing: 1.2px;
+    color: var(--ink-faint);
+    font-weight: 700;
+    margin: 0 0 12px;
   }
-  .vc-input {
+  .pos-input {
     width: 100%;
-    background: var(--surface-2);
+    background: transparent;
     color: var(--ink);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 10px 11px;
-    margin-bottom: 9px;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    padding: 9px 1px;
+    margin-bottom: 12px;
     font-size: 13px;
     font-family: var(--body);
     outline: none;
     transition: border-color .2s;
   }
-  .vc-input::placeholder { color: var(--muted); }
-  .vc-input:focus { border-color: var(--accent); }
+  .pos-input::placeholder { color: var(--ink-faint); }
+  .pos-input:focus { border-bottom-color: var(--ink); }
 
-  .vc-message { font-size: 13px; margin-bottom: 10px; color: var(--danger); }
+  .pos-message { font-size: 12.5px; margin-bottom: 12px; color: var(--danger); }
 
-  .vc-checkout-btn {
+  .pos-checkout-btn {
     width: 100%;
-    background: var(--accent);
-    color: var(--accent-contrast);
-    border: none;
-    border-radius: 9px;
-    padding: 14px 0;
+    background: var(--ink);
+    color: #fff;
+    border: 1px solid var(--ink);
+    border-radius: 0;
+    padding: 15px 0;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 12px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
     font-family: var(--body);
     cursor: pointer;
-    transition: background .2s;
+    transition: opacity .15s;
   }
-  .vc-checkout-btn:hover:not(:disabled) { background: var(--accent-soft); }
-  .vc-checkout-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .pos-checkout-btn:hover:not(:disabled) { opacity: 0.85; }
+  .pos-checkout-btn:disabled { opacity: 0.32; cursor: not-allowed; }
 
-  .vc-receipt-wrap { max-width: 380px; margin: 0 auto; }
-  .vc-receipt-crest {
-    width: 40px;
-    height: 40px;
-    margin: 0 auto 10px;
+  /* ---------- receipt (perforated ticket) ---------- */
+  .pos-receipt-wrap { max-width: 380px; margin: 0 auto; }
+  .pos-receipt-monogram {
+    width: 38px;
+    height: 38px;
+    margin: 0 auto 12px;
     border-radius: 50%;
-    border: 1px solid var(--border-soft);
+    border: 1px solid var(--ink);
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-  }
-  .vc-receipt-crest::before {
-    content: '';
-    position: absolute;
-    inset: 4px;
-    border: 1px solid var(--border);
-    border-radius: 50%;
-  }
-  .vc-brand {
     font-family: var(--display);
-    font-style: italic;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .pos-brand {
+    font-family: var(--display);
+    font-weight: 500;
     color: var(--ink);
     text-align: center;
     margin: 0;
     font-size: 21px;
   }
-  .vc-receipt-tagline {
+  .pos-receipt-tagline {
     text-align: center;
-    font-family: var(--mono);
-    font-size: 9px;
+    font-size: 9.5px;
     text-transform: uppercase;
     letter-spacing: 2px;
-    color: var(--muted);
-    margin: 4px 0 0;
+    color: var(--ink-soft);
+    margin: 5px 0 0;
+    font-weight: 600;
   }
-  .vc-brand-rule {
-    width: 52px;
-    height: 1px;
-    margin: 11px auto 8px;
-    background: var(--border-soft);
-  }
-  .vc-receipt-ref {
+  .pos-receipt-ref {
     text-align: center;
     font-family: var(--mono);
     font-size: 11px;
     letter-spacing: 1.5px;
-    color: var(--accent);
-    margin: 0 0 14px;
+    color: var(--ink);
+    margin: 14px 0 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
   }
-  .vc-receipt-meta { margin-bottom: 4px; }
-  .vc-receipt-meta-row {
+  .pos-receipt-meta { margin-bottom: 4px; }
+  .pos-receipt-meta-row {
     display: flex;
     justify-content: space-between;
     font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 4px;
+    color: var(--ink-soft);
+    margin-bottom: 5px;
   }
-  .vc-receipt-meta-row span:last-child { color: var(--ink); font-weight: 500; }
-  .vc-receipt-box {
+  .pos-receipt-meta-row span:last-child { color: var(--ink); font-weight: 500; }
+  .pos-receipt-box {
     position: relative;
-    background: var(--surface);
+    background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 26px 22px 22px;
-    box-shadow: 0 2px 8px rgba(59, 46, 31, 0.06);
+    border-radius: 0;
+    padding: 30px 24px 24px;
+    margin: 10px 0;
   }
-  .vc-receipt-hole {
+  .pos-receipt-box::before, .pos-receipt-box::after {
+    content: '';
     position: absolute;
-    top: -6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 13px;
-    height: 13px;
-    border-radius: 50%;
-    background: var(--bg);
-    border: 1px solid var(--border);
+    left: 0; right: 0;
+    height: 9px;
+    background-image: radial-gradient(circle at 9px 4.5px, var(--bg) 5.5px, transparent 6px);
+    background-size: 18px 9px;
+    background-repeat: repeat-x;
   }
-  .vc-receipt-divider { position: relative; border-top: 1px dashed var(--border); margin: 12px 0; }
-  .vc-receipt-divider::after {
-    content: '❖';
-    position: absolute;
-    top: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--surface);
-    color: var(--accent);
-    font-size: 11px;
-    padding: 0 8px;
-  }
-  .vc-receipt-cols-head {
+  .pos-receipt-box::before { top: -4.5px; }
+  .pos-receipt-box::after { bottom: -4.5px; transform: scaleY(-1); }
+  .pos-receipt-divider { border-top: 1px dashed var(--border); margin: 14px 0; }
+  .pos-receipt-cols-head {
     display: flex;
     justify-content: space-between;
     font-family: var(--mono);
     font-size: 9.5px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: var(--muted);
-    margin-bottom: 8px;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
   }
-  .vc-receipt-item { margin-bottom: 9px; }
-  .vc-receipt-item-top { display: flex; justify-content: space-between; font-size: 13.5px; font-weight: 500; }
-  .vc-receipt-item-name { padding-right: 10px; }
-  .vc-receipt-sale-tag {
+  .pos-receipt-item { margin-bottom: 10px; }
+  .pos-receipt-item-top { display: flex; justify-content: space-between; font-size: 13.5px; font-weight: 500; }
+  .pos-receipt-item-name { padding-right: 10px; }
+  .pos-receipt-sale-tag {
     display: inline-block;
     margin-left: 6px;
-    font-family: var(--mono);
     font-size: 8.5px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--danger);
     border: 1px solid var(--danger);
-    border-radius: 4px;
     padding: 1px 5px;
     vertical-align: middle;
   }
-  .vc-receipt-item-sub {
+  .pos-receipt-item-sub {
     font-family: var(--mono);
     font-size: 11px;
-    color: var(--muted);
-    margin-top: 1px;
+    color: var(--ink-soft);
+    margin-top: 2px;
   }
-  .vc-receipt-item-strike {
+  .pos-receipt-item-strike {
     text-decoration: line-through;
     margin-left: 7px;
     opacity: 0.7;
   }
-  .vc-receipt-line { display: flex; justify-content: space-between; font-size: 13.5px; margin-bottom: 6px; }
-  .vc-receipt-total { font-weight: 700; font-size: 15px; }
-  .vc-receipt-bold { font-weight: 700; }
-  .vc-receipt-thanks {
+  .pos-receipt-line { display: flex; justify-content: space-between; font-size: 13.5px; margin-bottom: 7px; }
+  .pos-receipt-total { font-weight: 700; font-size: 15px; }
+  .pos-receipt-bold { font-weight: 700; }
+  .pos-receipt-thanks {
     text-align: center;
     font-family: var(--display);
-    font-style: italic;
     font-size: 16px;
-    color: var(--accent);
-    margin: 4px 0 4px;
+    color: var(--ink);
+    margin: 6px 0 4px;
   }
-  .vc-receipt-footer-tag {
+  .pos-receipt-footer-tag {
     text-align: center;
     font-size: 10.5px;
-    color: var(--muted);
+    color: var(--ink-soft);
     margin: 0;
   }
-  .vc-receipt-actions { margin-top: 18px; display: flex; flex-direction: column; gap: 9px; }
-  .vc-btn-primary {
-    background: var(--accent);
-    color: var(--accent-contrast);
-    border: none;
-    border-radius: 9px;
-    padding: 13px 0;
+  .pos-receipt-actions { margin-top: 18px; display: flex; flex-direction: column; gap: 9px; }
+  .pos-btn-primary {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--ink);
+    color: #fff;
+    border: 1px solid var(--ink);
+    border-radius: 0;
+    padding: 14px 0;
     font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
     font-family: var(--body);
     cursor: pointer;
-    transition: background .2s;
+    transition: opacity .15s;
   }
-  .vc-btn-primary:hover { background: var(--accent-soft); }
-  .vc-btn-ghost {
+  .pos-btn-primary:hover { opacity: 0.85; }
+  .pos-btn-ghost {
     background: transparent;
-    color: var(--muted);
+    color: var(--ink-soft);
     border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 11px 0;
+    border-radius: 0;
+    padding: 12px 0;
+    font-size: 12px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
     font-family: var(--body);
     cursor: pointer;
     transition: border-color .2s, color .2s;
   }
-  .vc-btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .pos-btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
 
   @media print {
-    .vc-root { background: white; color: black; padding: 0; }
-    .vc-topbar { display: none; }
-    .vc-receipt-actions { display: none; }
-    .vc-receipt-box { border: none; box-shadow: none; }
+    .pos-root { background: white; color: black; padding: 0; }
+    .pos-receipt-actions { display: none; }
+    .pos-receipt-box { border: none; }
+    .pos-receipt-box::before, .pos-receipt-box::after { display: none; }
   }
 
   @media (max-width: 640px) {
-    .vc-header { flex-wrap: wrap; }
-    .vc-cart { position: static; }
+    .pos-root { padding: 16px 16px 32px; }
+    .pos-header { flex-wrap: wrap; }
+    .pos-cart { position: static; }
   }
 `
