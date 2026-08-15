@@ -128,21 +128,42 @@ function GlobalStyle() {
 
       /* ---- receipt (58mm print) ---- */
       .em-receipt-wrap { display: flex; flex-direction: column; align-items: center; }
+      .em-ticket-frame {
+        background: #FBF8F0;
+        border: 1px solid #DACC9E;
+        border-radius: 14px;
+        padding: 22px 18px;
+        box-shadow: 0 10px 28px -14px rgba(59,46,31,0.35);
+      }
       .em-receipt {
         width: 58mm;
         background: #fff;
         color: #111;
-        padding: 8px 6px;
+        padding: 10px 8px;
         font-family: 'Courier New', monospace;
         font-size: 11px;
-        line-height: 1.5;
+        line-height: 1.55;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.12);
       }
-      .em-receipt hr { border: none; border-top: 1px dashed #111; margin: 6px 0; }
+      .em-receipt hr { border: none; border-top: 1px dashed #111; margin: 7px 0; }
       .em-receipt .center { text-align: center; }
       .em-receipt .bold { font-weight: 700; }
       .em-receipt .row { display: flex; justify-content: space-between; }
-      .em-receipt .brand { font-size: 14px; font-weight: 700; letter-spacing: 0.5px; }
+      .em-receipt .brand { font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 2px; }
+      .em-receipt .tagline { font-size: 8px; text-transform: uppercase; letter-spacing: 1px; color: #444; margin: 2px 0 4px; }
+      .em-receipt .subtitle { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+      .em-receipt .folio { font-size: 9.5px; letter-spacing: 1px; margin-top: 2px; }
+      .em-receipt .section-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 3px; }
+      .em-receipt .muted-line { color: #444; }
+      .em-receipt .small { font-size: 9.5px; }
+      .em-receipt .thanks { font-size: 10.5px; font-style: italic; }
       .em-receipt .total-row { font-size: 13px; margin-top: 4px; }
+      .em-r-crest {
+        width: 26px; height: 26px; margin: 0 auto 4px;
+        border: 1px solid #111; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+      }
 
       .em-receipt-actions { display: flex; gap: 10px; margin-top: 20px; }
       .em-print-btn {
@@ -156,6 +177,7 @@ function GlobalStyle() {
         .em-print-area {
           position: absolute; top: 0; left: 0; margin: 0; padding: 0;
         }
+        .em-receipt { box-shadow: none; }
         @page { size: 58mm auto; margin: 0; }
       }
     `}</style>
@@ -380,29 +402,35 @@ export default function Employees({ onBack }) {
         </div>
 
         <div className="em-receipt-wrap" style={{ marginTop: 24 }}>
-          <div className="em-print-area">
-            <div className="em-receipt">
-              <div className="center brand">VARIEDADES CALERO</div>
-              <div className="center">Recibo de sueldo</div>
-              <hr />
-              <div className="row"><span>Empleado:</span></div>
-              <div className="bold">{receipt.employee_name}</div>
-              {receipt.employee_position && <div>{receipt.employee_position}</div>}
-              <hr />
-              <div className="row"><span>Período:</span></div>
-              <div>{fmtDate(receipt.period_start)} — {fmtDate(receipt.period_end)}</div>
-              <div className="row"><span>Fecha de pago:</span></div>
-              <div>{fmtDate(String(receipt.paid_at).slice(0, 10))}</div>
-              <hr />
-              <div className="row"><span>Salario base</span><span>${Number(receipt.base_amount).toFixed(2)}</span></div>
-              <div className="row"><span>Bonificaciones</span><span>+${Number(receipt.bonuses).toFixed(2)}</span></div>
-              <div className="row"><span>Descuentos</span><span>-${Number(receipt.deductions).toFixed(2)}</span></div>
-              <hr />
-              <div className="row bold total-row"><span>NETO A PAGAR</span><span>${Number(receipt.net_amount).toFixed(2)}</span></div>
-              <hr />
-              <div className="center" style={{ marginTop: 14 }}>_____________________</div>
-              <div className="center">Firma del empleado</div>
-              <div className="center" style={{ marginTop: 10, fontSize: 9 }}>Gracias por tu trabajo</div>
+          <div className="em-ticket-frame">
+            <div className="em-print-area">
+              <div className="em-receipt">
+                <div className="em-r-crest">VC</div>
+                <div className="center brand">VARIEDADES CALERO</div>
+                <div className="center tagline">Boutique · Masatepe, Nicaragua</div>
+                <div className="center subtitle">Recibo de pago de nómina</div>
+                <div className="center folio">N.º {String(receipt.id || '').slice(-6).padStart(6, '0') || '000000'}</div>
+                <hr />
+                <div className="section-label">Empleado</div>
+                <div className="bold">{receipt.employee_name}</div>
+                {receipt.employee_position && <div className="muted-line">{receipt.employee_position}</div>}
+                <hr />
+                <div className="section-label">Período</div>
+                <div className="row"><span>Del</span><span>{fmtDate(receipt.period_start)}</span></div>
+                <div className="row"><span>Al</span><span>{fmtDate(receipt.period_end)}</span></div>
+                <div className="row"><span>Fecha de pago</span><span>{fmtDate(String(receipt.paid_at).slice(0, 10))}</span></div>
+                <hr />
+                <div className="section-label">Detalle</div>
+                <div className="row"><span>Salario base</span><span>${Number(receipt.base_amount).toFixed(2)}</span></div>
+                <div className="row"><span>Bonificaciones</span><span>+${Number(receipt.bonuses).toFixed(2)}</span></div>
+                <div className="row"><span>Descuentos</span><span>-${Number(receipt.deductions).toFixed(2)}</span></div>
+                <hr />
+                <div className="row bold total-row"><span>NETO A PAGAR</span><span>${Number(receipt.net_amount).toFixed(2)}</span></div>
+                <hr />
+                <div className="center" style={{ marginTop: 20 }}>_____________________</div>
+                <div className="center small">Firma del empleado</div>
+                <div className="center thanks" style={{ marginTop: 14 }}>Gracias por tu trabajo</div>
+              </div>
             </div>
           </div>
 
