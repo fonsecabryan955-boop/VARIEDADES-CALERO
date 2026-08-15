@@ -451,19 +451,19 @@ export default function POS({ user, onBack }) {
 
 const VC_STYLES = `
   .vc-root {
-    --bg: #1C1A17;
-    --surface: #232019;
-    --surface-2: #2A261D;
-    --border: #3A362B;
-    --border-soft: #4A4536;
-    --stitch: rgba(166, 138, 91, 0.22);
-    --accent: #A68A5B;
-    --accent-soft: #8C7449;
-    --accent-text: #1C1A17;
-    --ivory: #ECE6D8;
-    --muted: #928972;
-    --success: #7C9B7F;
-    --danger: #B97A63;
+    --bg: #F2EBDB;
+    --surface: #FBF8F0;
+    --surface-2: #EAE0C7;
+    --border: #DACC9E;
+    --border-soft: #C7B689;
+    --stitch: rgba(59, 46, 31, 0.18);
+    --accent: #3B2E1F;
+    --accent-soft: #55432C;
+    --accent-contrast: #F5EFDF;
+    --ink: #2E2618;
+    --muted: #8A7A56;
+    --success: #5F7D53;
+    --danger: #9C5340;
     --display: 'Fraunces', Georgia, serif;
     --body: 'Inter', system-ui, -apple-system, sans-serif;
     --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
@@ -471,7 +471,7 @@ const VC_STYLES = `
     position: relative;
     min-height: 100vh;
     background: var(--bg);
-    color: var(--ivory);
+    color: var(--ink);
     font-family: var(--body);
     padding: 24px;
     box-sizing: border-box;
@@ -508,6 +508,7 @@ const VC_STYLES = `
     align-items: center;
     justify-content: center;
     position: relative;
+    background: var(--surface);
   }
   .vc-crest::before {
     content: '';
@@ -530,7 +531,7 @@ const VC_STYLES = `
     font-style: italic;
     font-weight: 600;
     font-size: 21px;
-    color: var(--ivory);
+    color: var(--ink);
     letter-spacing: 0.2px;
     line-height: 1.15;
   }
@@ -554,7 +555,7 @@ const VC_STYLES = `
     transition: border-color .2s, color .2s;
     flex-shrink: 0;
   }
-  .vc-back:hover { border-color: var(--accent); color: var(--ivory); }
+  .vc-back:hover { border-color: var(--accent); color: var(--accent); }
 
   .vc-toolbar {
     display: flex;
@@ -577,7 +578,7 @@ const VC_STYLES = `
   .vc-search {
     width: 100%;
     background: var(--surface);
-    color: var(--ivory);
+    color: var(--ink);
     border: 1px solid var(--border);
     border-radius: 9px;
     padding: 11px 12px 11px 36px;
@@ -586,6 +587,7 @@ const VC_STYLES = `
     outline: none;
     transition: border-color .2s;
   }
+  .vc-search::placeholder { color: var(--muted); }
   .vc-search:focus { border-color: var(--accent); }
   .vc-chips {
     display: flex;
@@ -609,10 +611,10 @@ const VC_STYLES = `
     transition: color .2s, border-color .2s, background .2s;
     clip-path: polygon(0 0, 88% 0, 100% 50%, 88% 100%, 0 100%);
   }
-  .vc-chip:hover { color: var(--ivory); border-color: var(--accent); }
+  .vc-chip:hover { color: var(--accent); border-color: var(--accent); }
   .vc-chip-active {
     background: var(--accent);
-    color: var(--accent-text);
+    color: var(--accent-contrast);
     border-color: var(--accent);
     font-weight: 600;
   }
@@ -634,9 +636,10 @@ const VC_STYLES = `
     padding: 18px 13px 13px;
     text-align: left;
     cursor: pointer;
-    color: var(--ivory);
+    color: var(--ink);
     font-family: var(--body);
-    transition: border-color .2s, transform .18s;
+    box-shadow: 0 1px 2px rgba(59, 46, 31, 0.05);
+    transition: border-color .2s, transform .18s, box-shadow .2s;
   }
   .vc-card::after {
     content: '';
@@ -649,6 +652,7 @@ const VC_STYLES = `
   .vc-card:hover {
     border-color: var(--accent);
     transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(59, 46, 31, 0.09);
   }
   .vc-card:active { transform: translateY(0); }
   .vc-card-hole {
@@ -680,7 +684,7 @@ const VC_STYLES = `
     align-items: center;
     justify-content: center;
     font-size: 22px;
-    opacity: 0.6;
+    opacity: 0.55;
   }
   .vc-card-name { font-weight: 600; font-size: 13.5px; line-height: 1.3; position: relative; }
   .vc-card-meta { color: var(--muted); font-size: 11px; margin-top: 3px; position: relative; }
@@ -693,7 +697,7 @@ const VC_STYLES = `
     border-top: 1px dashed var(--border);
     position: relative;
   }
-  .vc-card-price { color: var(--accent); font-weight: 600; font-size: 13.5px; }
+  .vc-card-price { color: var(--accent); font-weight: 700; font-size: 13.5px; }
   .vc-card-stock { color: var(--success); font-size: 10px; font-family: var(--mono); }
 
   .vc-skeleton {
@@ -726,6 +730,7 @@ const VC_STYLES = `
     padding: 20px;
     position: sticky;
     top: 16px;
+    box-shadow: 0 1px 2px rgba(59, 46, 31, 0.05);
   }
   .vc-cart-head {
     display: flex;
@@ -737,7 +742,7 @@ const VC_STYLES = `
   }
   .vc-cart-title {
     margin: 0;
-    color: var(--ivory);
+    color: var(--ink);
     font-family: var(--display);
     font-style: italic;
     font-size: 19px;
@@ -764,7 +769,7 @@ const VC_STYLES = `
   .vc-qty { display: flex; align-items: center; gap: 6px; }
   .vc-qty-btn {
     background: var(--surface-2);
-    color: var(--ivory);
+    color: var(--ink);
     border: 1px solid var(--border);
     border-radius: 6px;
     width: 24px;
@@ -826,10 +831,10 @@ const VC_STYLES = `
     cursor: pointer;
     transition: all .2s;
   }
-  .vc-pay-chip:hover { color: var(--ivory); }
+  .vc-pay-chip:hover { color: var(--ink); }
   .vc-pay-chip-active {
     background: var(--accent);
-    color: var(--accent-text);
+    color: var(--accent-contrast);
     border-color: var(--accent);
     font-weight: 600;
   }
@@ -849,7 +854,7 @@ const VC_STYLES = `
   .vc-input {
     width: 100%;
     background: var(--surface-2);
-    color: var(--ivory);
+    color: var(--ink);
     border: 1px solid var(--border);
     border-radius: 9px;
     padding: 10px 11px;
@@ -859,6 +864,7 @@ const VC_STYLES = `
     outline: none;
     transition: border-color .2s;
   }
+  .vc-input::placeholder { color: var(--muted); }
   .vc-input:focus { border-color: var(--accent); }
 
   .vc-message { font-size: 13px; margin-bottom: 10px; color: var(--danger); }
@@ -866,7 +872,7 @@ const VC_STYLES = `
   .vc-checkout-btn {
     width: 100%;
     background: var(--accent);
-    color: var(--accent-text);
+    color: var(--accent-contrast);
     border: none;
     border-radius: 9px;
     padding: 14px 0;
@@ -883,7 +889,7 @@ const VC_STYLES = `
   .vc-brand {
     font-family: var(--display);
     font-style: italic;
-    color: var(--ivory);
+    color: var(--ink);
     text-align: center;
     margin: 0;
     font-size: 21px;
@@ -908,6 +914,7 @@ const VC_STYLES = `
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 26px 22px 22px;
+    box-shadow: 0 2px 8px rgba(59, 46, 31, 0.06);
   }
   .vc-receipt-hole {
     position: absolute;
@@ -938,7 +945,7 @@ const VC_STYLES = `
   .vc-receipt-actions { margin-top: 18px; display: flex; flex-direction: column; gap: 9px; }
   .vc-btn-primary {
     background: var(--accent);
-    color: var(--accent-text);
+    color: var(--accent-contrast);
     border: none;
     border-radius: 9px;
     padding: 13px 0;
@@ -958,13 +965,13 @@ const VC_STYLES = `
     cursor: pointer;
     transition: border-color .2s, color .2s;
   }
-  .vc-btn-ghost:hover { border-color: var(--accent); color: var(--ivory); }
+  .vc-btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 
   @media print {
     .vc-root { background: white; color: black; padding: 0; }
     .vc-topbar { display: none; }
     .vc-receipt-actions { display: none; }
-    .vc-receipt-box { border: none; }
+    .vc-receipt-box { border: none; box-shadow: none; }
   }
 
   @media (max-width: 640px) {
