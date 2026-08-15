@@ -4,6 +4,19 @@ import { supabase } from './supabaseClient'
 const paymentLabelsMap = { cash: 'Efectivo', card: 'Tarjeta', transfer: 'Transferencia' }
 const paymentIconMap = { cash: '💵', card: '💳', transfer: '🏦' }
 
+// A variant can have its own price, otherwise falls back to the product's
+// base price. If the product is marked as "en liquidación", the discount
+// applies on top of whichever of those two prices was in effect.
+const getBasePrice = (v) => v.price ?? v.products?.base_price ?? 0
+const isOnSale = (v) => !!v.products?.on_sale && Number(v.products?.discount_percent) > 0
+const getEffectivePrice = (v) => {
+  const base = getBasePrice(v)
+  if (isOnSale(v)) {
+    return +(base * (1 - Number(v.products.discount_percent) / 100)).toFixed(2)
+  }
+  return base
+}
+
 export default function POS({ user, onBack }) {
   const [variants, setVariants] = useState([])
   const [loading, setLoading] = useState(true)
@@ -23,7 +36,7 @@ export default function POS({ user, onBack }) {
     setLoading(true)
     const { data } = await supabase
       .from('product_variants')
-      .select('id, size, color, stock, price, products(name, base_price, image_url, categories(id, name))')
+      .select('id, size, color, stock, price, products(name, base_price, image_url, on_sale, discount_percent, categories(id, name))')
       .gt('stock', 0)
       .order('created_at', { ascending: false })
     setVariants(data || [])
@@ -76,10 +89,7 @@ export default function POS({ user, onBack }) {
     setCart((prev) => prev.filter((i) => i.id !== id))
   }
 
-  const total = cart.reduce((sum, i) => {
-    const price = i.price ?? i.products?.base_price ?? 0
-    return sum + price * i.qty
-  }, 0)
+  const total = cart.reduce((sum, i) => sum + getEffectivePrice(i) * i.qty, 0)
 
   const prevTotalRef = useRef(total)
   useEffect(() => {
@@ -159,8 +169,8 @@ export default function POS({ user, onBack }) {
       order_id: order.id,
       variant_id: i.id,
       quantity: i.qty,
-      unit_price: i.price ?? i.products?.base_price ?? 0,
-      subtotal: (i.price ?? i.products?.base_price ?? 0) * i.qty,
+      unit_price: getEffectivePrice(i),
+      subtotal: getEffectivePrice(i) * i.qty,
     }))
 
     const { error: itemsErr } = await supabase.from('order_items').insert(items)
@@ -226,7 +236,7 @@ export default function POS({ user, onBack }) {
             {receipt.items.map((i) => (
               <div key={i.id} className="vc-receipt-line">
                 <span>{i.products?.name} ×{i.qty}</span>
-                <span className="vc-num">${((i.price ?? i.products?.base_price ?? 0) * i.qty).toFixed(2)}</span>
+                <span className="vc-num">${(getEffectivePrice(i) * i.qty).toFixed(2)}</span>
               </div>
             ))}
 
@@ -335,6 +345,9 @@ export default function POS({ user, onBack }) {
               {filteredVariants.map((v) => (
                 <button key={v.id} className="vc-card" onClick={() => addToCart(v)}>
                   <span className="vc-card-hole" />
+                  {isOnSale(v) && (
+                    <span className="vc-sale-ribbon">-{v.products.discount_percent}%</span>
+                  )}
                   {v.products?.image_url ? (
                     <img src={v.products.image_url} alt="" className="vc-card-img" />
                   ) : (
@@ -345,9 +358,14 @@ export default function POS({ user, onBack }) {
                     {v.size ? `Talla ${v.size}` : ''} {v.color || ''}
                   </div>
                   <div className="vc-card-footer">
-                    <span className="vc-card-price vc-num">
-                      ${Number(v.price ?? v.products?.base_price).toFixed(2)}
-                    </span>
+                    {isOnSale(v) ? (
+                      <span className="vc-card-price-wrap">
+                        <span className="vc-card-price-strike vc-num">${getBasePrice(v).toFixed(2)}</span>
+                        <span className="vc-card-price vc-num">${getEffectivePrice(v).toFixed(2)}</span>
+                      </span>
+                    ) : (
+                      <span className="vc-card-price vc-num">${getBasePrice(v).toFixed(2)}</span>
+                    )}
                     <span className="vc-card-stock">Stock {v.stock}</span>
                   </div>
                 </button>
@@ -368,7 +386,10 @@ export default function POS({ user, onBack }) {
               {cart.map((i) => (
                 <div key={i.id} className="vc-cart-item">
                   <div className="vc-cart-item-info">
-                    <div className="vc-cart-item-name">{i.products?.name}</div>
+                    <div className="vc-cart-item-name">
+                      {i.products?.name}
+                      {isOnSale(i) && <span className="vc-cart-sale-tag">🏷️ liquidación</span>}
+                    </div>
                     <div className="vc-cart-item-meta">
                       {i.size ? `Talla ${i.size}` : ''} {i.color || ''}
                     </div>
@@ -385,7 +406,7 @@ export default function POS({ user, onBack }) {
                     </button>
                   </div>
                   <div className="vc-cart-item-price vc-num">
-                    ${((i.price ?? i.products?.base_price ?? 0) * i.qty).toFixed(2)}
+                    ${(getEffectivePrice(i) * i.qty).toFixed(2)}
                   </div>
                   <button className="vc-remove" onClick={() => removeItem(i.id)}>×</button>
                 </div>
@@ -698,6 +719,30 @@ const VC_STYLES = `
     position: relative;
   }
   .vc-card-price { color: var(--accent); font-weight: 700; font-size: 13.5px; }
+  .vc-card-price-wrap { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+  .vc-card-price-strike { color: var(--muted); font-size: 10.5px; text-decoration: line-through; }
+  .vc-sale-ribbon {
+    position: absolute;
+    top: 10px;
+    right: -1px;
+    background: var(--danger);
+    color: #FBF8F0;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px 2px 10px;
+    border-radius: 4px 0 0 4px;
+    z-index: 1;
+  }
+  .vc-cart-sale-tag {
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 9.5px;
+    color: var(--danger);
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
   .vc-card-stock { color: var(--success); font-size: 10px; font-family: var(--mono); }
 
   .vc-skeleton {
