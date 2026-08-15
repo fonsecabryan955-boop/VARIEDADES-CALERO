@@ -9,7 +9,7 @@ import Reports from './Reports.jsx'
 import Receivables from './Receivables.jsx'
 import Clients from './Clients.jsx'
 import Employees from './Employees.jsx'
-import PushNotificationSetup from './PushNotificationSetup.jsx'
+import PushNotificationSetup from '../PushNotificationSetup.jsx'
 
 export default function App() {
   const [user, setUser] = useState(null)
