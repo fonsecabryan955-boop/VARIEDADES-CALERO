@@ -366,6 +366,48 @@ function GlobalStyle() {
         text-transform: uppercase;
         border: 1px solid var(--vc-border);
       }
+      .vc-card-sale-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: var(--vc-red);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        text-transform: uppercase;
+      }
+      .vc-card-price-strike {
+        color: var(--vc-ink-soft);
+        text-decoration: line-through;
+        font-size: 12.5px;
+        margin-right: 7px;
+        font-weight: 400;
+      }
+      .vc-card-price-sale { color: var(--vc-red); }
+      .vc-modal-sale-badge {
+        display: inline-block;
+        margin-left: 8px;
+        background: var(--vc-red);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        padding: 3px 9px;
+        border-radius: 999px;
+        text-transform: uppercase;
+        vertical-align: middle;
+      }
+      .vc-modal-price-strike {
+        color: var(--vc-ink-soft);
+        text-decoration: line-through;
+        font-size: 15px;
+        margin-right: 8px;
+        font-weight: 400;
+      }
+      .vc-modal-price-sale { color: var(--vc-red); }
       .vc-card-quick {
         position: absolute;
         right: 10px;
@@ -883,7 +925,7 @@ export default function Store() {
       setLoading(true)
       const { data } = await supabase
         .from('product_variants')
-        .select('id, size, color, stock, price, product_id, products(name, base_price, image_url, categories(name))')
+        .select('id, size, color, stock, price, product_id, products(name, base_price, image_url, on_sale, discount_percent, categories(name))')
         .gt('stock', 0)
         .order('created_at', { ascending: false })
       setRawVariants(data || [])
@@ -934,15 +976,24 @@ export default function Store() {
           image: v.products?.image_url || null,
           category: v.products?.categories?.name || 'Otros',
           basePrice: v.products?.base_price,
+          onSale: !!v.products?.on_sale && Number(v.products?.discount_percent) > 0,
+          discountPercent: Number(v.products?.discount_percent) || 0,
           variants: [],
         })
       }
+      const product = map.get(pid)
+      const rawPrice = v.price ?? v.products?.base_price ?? 0
+      const finalPrice = product.onSale
+        ? +(rawPrice * (1 - product.discountPercent / 100)).toFixed(2)
+        : rawPrice
       map.get(pid).variants.push({
         id: v.id,
         size: v.size,
         color: v.color,
         stock: v.stock,
-        price: v.price ?? v.products?.base_price ?? 0,
+        price: finalPrice,
+        originalPrice: rawPrice,
+        onSale: product.onSale,
       })
     })
     return Array.from(map.values())
@@ -972,6 +1023,12 @@ export default function Store() {
     const max = Math.max(...prices)
     if (min === max) return `$${min.toFixed(2)}`
     return `Desde $${min.toFixed(2)}`
+  }
+
+  const originalPriceDisplay = (product) => {
+    const prices = product.variants.map((v) => v.originalPrice)
+    const min = Math.min(...prices)
+    return `$${min.toFixed(2)}`
   }
 
   const totalStock = (product) => product.variants.reduce((s, v) => s + v.stock, 0)
@@ -1451,7 +1508,8 @@ export default function Store() {
               <div key={p.id} className="vc-card" onClick={() => openProduct(p)}>
                 <div className="vc-card-imgwrap">
                   {p.image ? <img src={p.image} alt={p.name} /> : <div className="vc-noimg">📦</div>}
-                  {totalStock(p) <= 5 && <span className="vc-card-badge">Últimas unidades</span>}
+                  {p.onSale && <span className="vc-card-sale-badge">-{p.discountPercent}% Liquidación</span>}
+                  {!p.onSale && totalStock(p) <= 5 && <span className="vc-card-badge">Últimas unidades</span>}
                   <div className="vc-card-quick">
                     <button
                       className="vc-quick-btn"
@@ -1467,7 +1525,10 @@ export default function Store() {
                 <div className="vc-card-body">
                   <div className="vc-card-cat">{p.category}</div>
                   <p className="vc-card-name">{p.name}</p>
-                  <div className="vc-card-price">{priceDisplay(p)}</div>
+                  <div className="vc-card-price">
+                    {p.onSale && <span className="vc-card-price-strike">{originalPriceDisplay(p)}</span>}
+                    <span className={p.onSale ? 'vc-card-price-sale' : ''}>{priceDisplay(p)}</span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -1495,10 +1556,22 @@ export default function Store() {
           </div>
           <div className="vc-modal-body">
             <button className="vc-modal-close" onClick={closeProduct} aria-label="Cerrar"><IconClose /></button>
-            <div className="vc-modal-cat">{selectedProduct.category}</div>
+            <div className="vc-modal-cat">
+              {selectedProduct.category}
+              {selectedProduct.onSale && (
+                <span className="vc-modal-sale-badge">-{selectedProduct.discountPercent}% Liquidación</span>
+              )}
+            </div>
             <h2 className="vc-modal-name">{selectedProduct.name}</h2>
             <div className="vc-modal-price">
-              {activeModalVariant ? `$${activeModalVariant.price.toFixed(2)}` : priceDisplay(selectedProduct)}
+              {selectedProduct.onSale && (
+                <span className="vc-modal-price-strike">
+                  {activeModalVariant ? `$${activeModalVariant.originalPrice.toFixed(2)}` : originalPriceDisplay(selectedProduct)}
+                </span>
+              )}
+              <span className={selectedProduct.onSale ? 'vc-modal-price-sale' : ''}>
+                {activeModalVariant ? `$${activeModalVariant.price.toFixed(2)}` : priceDisplay(selectedProduct)}
+              </span>
             </div>
 
             {uniqueColors(selectedProduct).length > 0 && (
