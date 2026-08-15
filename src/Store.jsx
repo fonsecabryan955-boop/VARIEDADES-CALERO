@@ -3,27 +3,30 @@ import { supabase } from './supabaseClient'
 
 // ---------- Icons (inline SVG, no extra deps) ----------
 const IconBag = (p) => (
-  <svg viewBox="0 0 24 24" width={p.size || 20} height={p.size || 20} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg viewBox="0 0 24 24" width={p.size || 20} height={p.size || 20} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <path d="M6 8h12l-1 12H7L6 8Z" />
     <path d="M9 8V6a3 3 0 0 1 6 0v2" />
   </svg>
 )
 const IconClose = (p) => (
-  <svg viewBox="0 0 24 24" width={p.size || 18} height={p.size || 18} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg viewBox="0 0 24 24" width={p.size || 18} height={p.size || 18} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <path d="M18 6 6 18M6 6l12 12" />
   </svg>
 )
 const IconMinus = (p) => (
-  <svg viewBox="0 0 24 24" width={p.size || 14} height={p.size || 14} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M5 12h14" /></svg>
+  <svg viewBox="0 0 24 24" width={p.size || 14} height={p.size || 14} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M5 12h14" /></svg>
 )
 const IconPlus = (p) => (
-  <svg viewBox="0 0 24 24" width={p.size || 14} height={p.size || 14} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+  <svg viewBox="0 0 24 24" width={p.size || 14} height={p.size || 14} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
 )
 const IconChevronLeft = (p) => (
-  <svg viewBox="0 0 24 24" width={p.size || 16} height={p.size || 16} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+  <svg viewBox="0 0 24 24" width={p.size || 16} height={p.size || 16} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+)
+const IconArrow = (p) => (
+  <svg viewBox="0 0 24 24" width={p.size || 15} height={p.size || 15} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
 )
 const IconCheck = (p) => (
-  <svg viewBox="0 0 24 24" width={p.size || 34} height={p.size || 34} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+  <svg viewBox="0 0 24 24" width={p.size || 30} height={p.size || 30} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
 )
 const IconWhatsapp = (p) => (
   <svg viewBox="0 0 24 24" width={p.size || 22} height={p.size || 22} fill="currentColor">
@@ -50,9 +53,8 @@ const CARE_TEXT = {
   default: 'Conservar en un lugar fresco y seco. Ante cualquier duda, escribinos por WhatsApp.',
 }
 
-// Floating contact button, visible while browsing. Minimalist: ink circle,
-// no green bubble, matches the boutique palette instead of the generic
-// WhatsApp branding.
+// Floating contact button, visible while browsing. Minimalist ink circle —
+// matches the boutique palette instead of generic WhatsApp green branding.
 function FloatingWhatsapp() {
   const message = 'Hola, tengo una consulta sobre Variedades Calero 🙂'
   return (
@@ -63,8 +65,34 @@ function FloatingWhatsapp() {
       rel="noopener noreferrer"
       aria-label="Escribinos por WhatsApp"
     >
-      <IconWhatsapp size={22} />
+      <IconWhatsapp size={21} />
     </a>
+  )
+}
+
+// Running assurance strip — the page's signature element. A slow, seamless
+// marquee in inverted ink, standing in for the trust badges a boutique
+// would print on a garment tag: what you're buying, how it moves, how it's
+// paid for. Real operational facts, not decoration.
+function MarqueeBar() {
+  const items = [
+    'PIEZAS SELECCIONADAS CON CRITERIO',
+    'PAGO POR TRANSFERENCIA BANCARIA',
+    'ENTREGA COORDINADA POR WHATSAPP',
+    'MASATEPE, NICARAGUA',
+  ]
+  const track = [...items, ...items]
+  return (
+    <div className="vc-marquee" aria-hidden="true">
+      <div className="vc-marquee-track">
+        {track.map((t, i) => (
+          <span key={i} className="vc-marquee-item">
+            {t}
+            <span className="vc-marquee-dot">✦</span>
+          </span>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -72,41 +100,77 @@ function FloatingWhatsapp() {
 function GlobalStyle() {
   return (
     <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;1,6..96,500;1,6..96,600&family=Inter:wght@400;500;600;700&display=swap');
 
       .vc-store {
-        --vc-bg: #faf8f5;
+        --vc-bg: #ffffff;
+        --vc-bg-soft: #f5f4f1;
         --vc-panel: #ffffff;
-        --vc-panel-raised: #f2efe8;
-        --vc-border: #e7e2d8;
-        --vc-ink: #17150f;
-        --vc-ink-soft: #6f6a5e;
-        --vc-accent: #17150f;
-        --vc-accent-soft: #3a362c;
-        --vc-tag: #17150f;
-        --vc-green: #4c7a52;
-        --vc-red: #b3453f;
+        --vc-panel-raised: #f2f0ec;
+        --vc-border: #e2ded5;
+        --vc-line: #0b0b0a;
+        --vc-ink: #0b0b0a;
+        --vc-ink-soft: #726d63;
+        --vc-ink-faint: #a39d8f;
+        --vc-accent: #0b0b0a;
+        --vc-green: #3f6b4a;
+        --vc-red: #9c3b2e;
         min-height: 100vh;
         background: var(--vc-bg);
         color: var(--vc-ink);
         font-family: 'Inter', system-ui, sans-serif;
         position: relative;
+        -webkit-font-smoothing: antialiased;
       }
       .vc-store * { box-sizing: border-box; }
-      .vc-serif { font-family: 'Fraunces', serif; }
+      .vc-serif { font-family: 'Bodoni Moda', serif; }
 
-      .vc-store a, .vc-store button, .vc-store input, .vc-store textarea {
+      .vc-store a, .vc-store button, .vc-store input, .vc-store textarea, .vc-store select {
         font-family: inherit;
       }
       .vc-store button:focus-visible,
       .vc-store input:focus-visible,
       .vc-store textarea:focus-visible,
+      .vc-store select:focus-visible,
       .vc-store [tabindex]:focus-visible {
         outline: 2px solid var(--vc-ink);
         outline-offset: 2px;
       }
+      .vc-store button { font: inherit; }
 
-      /* header */
+      /* ---------- marquee (signature) ---------- */
+      .vc-marquee {
+        background: var(--vc-ink);
+        color: #fdfcf9;
+        overflow: hidden;
+        white-space: nowrap;
+        border-bottom: 1px solid var(--vc-ink);
+      }
+      .vc-marquee-track {
+        display: inline-flex;
+        align-items: center;
+        animation: vc-marquee-scroll 26s linear infinite;
+        will-change: transform;
+      }
+      .vc-marquee-item {
+        display: inline-flex;
+        align-items: center;
+        font-size: 10.5px;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        padding: 10px 0;
+      }
+      .vc-marquee-dot { margin: 0 26px; font-size: 9px; opacity: 0.55; }
+      @keyframes vc-marquee-scroll {
+        from { transform: translateX(0); }
+        to { transform: translateX(-50%); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .vc-marquee-track { animation: none; }
+      }
+
+      /* ---------- header ---------- */
       .vc-header {
         position: sticky;
         top: 0;
@@ -114,64 +178,63 @@ function GlobalStyle() {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 18px 22px;
-        background: rgba(250,248,245,0.9);
+        padding: 20px 24px;
+        background: rgba(255,255,255,0.92);
         backdrop-filter: blur(10px);
         border-bottom: 1px solid var(--vc-border);
       }
-      .vc-header-left { display: flex; align-items: center; gap: 12px; }
+      .vc-header-left { display: flex; align-items: center; gap: 13px; }
       .vc-monogram {
-        width: 36px;
-        height: 36px;
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
         border: 1px solid var(--vc-ink);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-family: 'Fraunces', serif;
-        font-style: italic;
+        font-family: 'Bodoni Moda', serif;
         font-weight: 600;
-        font-size: 13px;
+        font-size: 12.5px;
         color: var(--vc-ink);
         flex: none;
       }
       .vc-logo {
-        font-family: 'Fraunces', serif;
+        font-family: 'Bodoni Moda', serif;
         font-weight: 500;
-        font-size: 20px;
+        font-size: 19px;
+        letter-spacing: 0.3px;
         color: var(--vc-ink);
-        letter-spacing: 0.2px;
         margin: 0;
       }
       .vc-logo-sub {
         color: var(--vc-ink-soft);
-        font-size: 10.5px;
-        letter-spacing: 1.6px;
+        font-size: 9.5px;
+        letter-spacing: 2.2px;
         text-transform: uppercase;
         margin-top: 2px;
       }
       .vc-cart-btn {
         position: relative;
         background: transparent;
-        border: 1px solid var(--vc-border);
+        border: 1px solid var(--vc-ink);
         color: var(--vc-ink);
-        border-radius: 999px;
+        border-radius: 0;
         width: 42px;
         height: 42px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: border-color .2s, background .2s;
+        transition: background .2s, color .2s;
       }
-      .vc-cart-btn:hover { border-color: var(--vc-ink); background: var(--vc-panel-raised); }
+      .vc-cart-btn:hover { background: var(--vc-ink); color: #fff; }
       .vc-cart-badge {
         position: absolute;
-        top: -4px;
-        right: -4px;
+        top: -7px;
+        right: -7px;
         background: var(--vc-ink);
         color: #fff;
-        font-size: 10.5px;
+        font-size: 10px;
         font-weight: 700;
         min-width: 17px;
         height: 17px;
@@ -180,135 +243,200 @@ function GlobalStyle() {
         align-items: center;
         justify-content: center;
         padding: 0 4px;
+        border: 1.5px solid #fff;
       }
 
-      /* hero */
+      /* ---------- hero (asymmetric editorial split) ---------- */
       .vc-hero {
         position: relative;
-        padding: 60px 20px 52px;
-        text-align: center;
         border-bottom: 1px solid var(--vc-border);
+        background: var(--vc-bg-soft);
       }
-      .vc-hero-inner { max-width: 620px; margin: 0 auto; }
+      .vc-hero-grid {
+        max-width: 1180px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1.5fr 1px 1fr;
+        gap: 0;
+        align-items: stretch;
+      }
+      .vc-hero-rule { background: var(--vc-border); }
+      .vc-hero-main {
+        padding: 76px 40px 76px 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
       .vc-eyebrow {
         display: inline-flex;
         align-items: center;
-        gap: 9px;
+        gap: 10px;
         font-size: 10.5px;
-        letter-spacing: 2.4px;
+        letter-spacing: 2.6px;
         text-transform: uppercase;
         color: var(--vc-ink-soft);
         font-weight: 600;
-        margin-bottom: 18px;
+        margin-bottom: 20px;
       }
-      .vc-eyebrow::before, .vc-eyebrow::after {
+      .vc-eyebrow::before {
         content: '';
-        width: 20px;
+        width: 26px;
         height: 1px;
         background: var(--vc-ink-soft);
-        opacity: 0.55;
+        opacity: 0.6;
       }
-      .vc-hero h1 {
-        font-family: 'Fraunces', serif;
+      .vc-hero-main h1 {
+        font-family: 'Bodoni Moda', serif;
         font-weight: 400;
-        font-size: clamp(32px, 6vw, 52px);
-        line-height: 1.1;
-        margin: 0 0 18px;
+        font-size: clamp(38px, 6vw, 64px);
+        line-height: 1.03;
+        letter-spacing: -0.5px;
+        margin: 0 0 22px;
         color: var(--vc-ink);
       }
-      .vc-hero p {
+      .vc-hero-main h1 em { font-style: italic; font-weight: 500; }
+      .vc-hero-main p {
         color: var(--vc-ink-soft);
         font-size: 15px;
-        line-height: 1.65;
-        max-width: 420px;
-        margin: 0 auto 30px;
+        line-height: 1.7;
+        max-width: 400px;
+        margin: 0 0 32px;
       }
       .vc-hero-cta {
-        background: var(--vc-ink);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: transparent;
         border: 1px solid var(--vc-ink);
-        color: #fff;
-        padding: 13px 30px;
-        border-radius: 999px;
-        font-size: 12.5px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
+        color: var(--vc-ink);
+        padding: 15px 26px;
+        border-radius: 0;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: 1.2px;
         text-transform: uppercase;
         cursor: pointer;
-        transition: opacity .2s, transform .15s;
+        transition: background .2s, color .2s;
+        width: fit-content;
       }
-      .vc-hero-cta:hover { opacity: 0.8; transform: translateY(-1px); }
+      .vc-hero-cta:hover { background: var(--vc-ink); color: #fff; }
+      .vc-hero-cta svg { transition: transform .2s; }
+      .vc-hero-cta:hover svg { transform: translateX(3px); }
 
-      .vc-stitch {
-        width: 100%;
-        height: 0;
-        border-top: 1px solid var(--vc-border);
+      .vc-hero-meta {
+        padding: 76px 24px 76px 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 30px;
+      }
+      .vc-meta-item { }
+      .vc-meta-label {
+        font-size: 10px;
+        letter-spacing: 1.6px;
+        text-transform: uppercase;
+        color: var(--vc-ink-faint);
+        font-weight: 700;
+        margin-bottom: 7px;
+      }
+      .vc-meta-value {
+        font-size: 13.5px;
+        line-height: 1.55;
+        color: var(--vc-ink);
+        max-width: 260px;
       }
 
-      /* catalog section head */
+      /* ---------- catalog section head ---------- */
       .vc-section-head {
         max-width: 1180px;
         margin: 0 auto;
-        padding: 44px 20px 4px;
+        padding: 56px 24px 6px;
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
         flex-wrap: wrap;
         gap: 10px;
       }
-      .vc-section-head .vc-eyebrow { margin-bottom: 8px; }
+      .vc-section-head .vc-eyebrow { margin-bottom: 10px; }
       .vc-section-head h2 {
-        font-family: 'Fraunces', serif;
+        font-family: 'Bodoni Moda', serif;
         font-weight: 500;
-        font-size: clamp(19px, 3vw, 25px);
+        font-size: clamp(21px, 3vw, 28px);
         margin: 0;
         color: var(--vc-ink);
       }
-      .vc-section-count { color: var(--vc-ink-soft); font-size: 12.5px; }
+      .vc-section-count { color: var(--vc-ink-soft); font-size: 12px; letter-spacing: 0.3px; }
 
-      /* category chips */
-      .vc-chips {
-        display: flex;
-        gap: 8px;
-        padding: 20px 20px 6px;
+      /* ---------- toolbar: category tabs + sort ---------- */
+      .vc-toolbar {
         max-width: 1180px;
         margin: 0 auto;
+        padding: 20px 24px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+        border-bottom: 1px solid var(--vc-border);
+      }
+      .vc-chips {
+        display: flex;
+        gap: 22px;
         overflow-x: auto;
         scrollbar-width: none;
+        flex: 1;
       }
       .vc-chips::-webkit-scrollbar { display: none; }
       .vc-chip {
         flex: none;
         background: transparent;
-        border: 1px solid var(--vc-border);
+        border: none;
+        border-bottom: 1.5px solid transparent;
         color: var(--vc-ink-soft);
-        padding: 8px 16px;
-        border-radius: 999px;
-        font-size: 12.5px;
+        padding: 4px 0 8px;
+        font-size: 11.5px;
+        font-weight: 600;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
         cursor: pointer;
-        transition: all .15s;
+        transition: color .15s, border-color .15s;
         white-space: nowrap;
       }
-      .vc-chip:hover { border-color: var(--vc-ink); color: var(--vc-ink); }
-      .vc-chip.active {
-        background: var(--vc-ink);
-        border-color: var(--vc-ink);
-        color: #fff;
-        font-weight: 600;
-      }
+      .vc-chip:hover { color: var(--vc-ink); }
+      .vc-chip.active { color: var(--vc-ink); border-bottom-color: var(--vc-ink); }
 
-      /* grid */
-      .vc-main { max-width: 1180px; margin: 0 auto; padding: 8px 20px 90px; }
+      .vc-sort-wrap { display: flex; align-items: center; gap: 9px; flex: none; }
+      .vc-sort-wrap label { font-size: 10.5px; color: var(--vc-ink-faint); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+      .vc-sort-select {
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid var(--vc-border);
+        color: var(--vc-ink);
+        border-radius: 0;
+        padding: 5px 18px 5px 0;
+        font-size: 12px;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b0b0a' stroke-width='1.6'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right center;
+        background-size: 13px;
+      }
+      .vc-sort-select:focus { border-bottom-color: var(--vc-ink); outline: none; }
+
+      /* ---------- grid ---------- */
+      .vc-main { max-width: 1180px; margin: 0 auto; padding: 12px 24px 96px; }
       .vc-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 26px 20px;
+        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+        gap: 40px 22px;
       }
       .vc-grid .vc-card {
         opacity: 0;
-        animation: vc-card-in .5s ease forwards;
+        animation: vc-card-in .55s ease forwards;
       }
       @keyframes vc-card-in {
-        from { opacity: 0; transform: translateY(12px); }
+        from { opacity: 0; transform: translateY(14px); }
         to { opacity: 1; transform: translateY(0); }
       }
       .vc-grid .vc-card:nth-child(1) { animation-delay: .02s; }
@@ -333,56 +461,55 @@ function GlobalStyle() {
       .vc-card-imgwrap {
         position: relative;
         width: 100%;
-        aspect-ratio: 3 / 4;
+        aspect-ratio: 4 / 5;
         overflow: hidden;
         background: var(--vc-panel-raised);
-        border-radius: 3px;
       }
       .vc-card-imgwrap img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform .6s ease;
+        transition: transform .7s ease;
       }
       @media (hover: hover) {
-        .vc-card:hover .vc-card-imgwrap img { transform: scale(1.035); }
+        .vc-card:hover .vc-card-imgwrap img { transform: scale(1.04); }
       }
       .vc-card-imgwrap .vc-noimg {
         width: 100%; height: 100%;
         display: flex; align-items: center; justify-content: center;
-        font-size: 32px; color: var(--vc-border);
+        font-size: 30px; color: var(--vc-border);
       }
       .vc-card-badge {
         position: absolute;
-        top: 12px;
-        left: 12px;
-        background: var(--vc-panel);
+        top: 0;
+        left: 0;
+        background: var(--vc-bg);
         color: var(--vc-ink);
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        padding: 4px 10px;
-        border-radius: 999px;
+        font-size: 9.5px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        padding: 6px 11px;
+        border-radius: 0;
         text-transform: uppercase;
         border: 1px solid var(--vc-border);
       }
       .vc-card-sale-badge {
         position: absolute;
-        top: 12px;
-        left: 12px;
+        top: 0;
+        left: 0;
         background: var(--vc-red);
         color: #fff;
-        font-size: 10px;
+        font-size: 9.5px;
         font-weight: 700;
-        letter-spacing: 0.4px;
-        padding: 4px 10px;
-        border-radius: 999px;
+        letter-spacing: 0.6px;
+        padding: 6px 11px;
+        border-radius: 0;
         text-transform: uppercase;
       }
       .vc-card-price-strike {
-        color: var(--vc-ink-soft);
+        color: var(--vc-ink-faint);
         text-decoration: line-through;
-        font-size: 12.5px;
+        font-size: 12px;
         margin-right: 7px;
         font-weight: 400;
       }
@@ -396,77 +523,80 @@ function GlobalStyle() {
         font-weight: 700;
         letter-spacing: 0.4px;
         padding: 3px 9px;
-        border-radius: 999px;
+        border-radius: 0;
         text-transform: uppercase;
         vertical-align: middle;
       }
       .vc-modal-price-strike {
-        color: var(--vc-ink-soft);
+        color: var(--vc-ink-faint);
         text-decoration: line-through;
         font-size: 15px;
         margin-right: 8px;
         font-weight: 400;
       }
       .vc-modal-price-sale { color: var(--vc-red); }
-      .vc-card-quick {
+
+      /* slide-up add bar (desktop hover / always-on touch) */
+      .vc-card-addbar {
         position: absolute;
-        right: 10px;
-        bottom: 10px;
-        opacity: 0;
-        transform: translateY(6px);
-        transition: opacity .2s ease, transform .2s ease;
+        left: 0; right: 0; bottom: 0;
+        background: var(--vc-ink);
+        color: #fdfcf9;
+        text-align: center;
+        padding: 13px 8px;
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: 1.1px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transform: translateY(100%);
+        transition: transform .3s cubic-bezier(.4,0,.2,1);
       }
       @media (hover: hover) {
-        .vc-card:hover .vc-card-quick { opacity: 1; transform: translateY(0); }
+        .vc-card:hover .vc-card-addbar { transform: translateY(0); }
       }
-      .vc-quick-btn {
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        background: var(--vc-panel);
-        border: 1px solid var(--vc-ink);
-        color: var(--vc-ink);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 17px;
-        line-height: 1;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      @media (hover: none) {
+        .vc-card-addbar {
+          position: static;
+          transform: none;
+          margin-top: 10px;
+          background: transparent;
+          color: var(--vc-ink);
+          border: 1px solid var(--vc-ink);
+          padding: 10px 8px;
+        }
       }
-      .vc-quick-btn:hover { background: var(--vc-ink); color: #fff; }
 
-      .vc-card-body { padding: 14px 2px 0; }
-      .vc-card-cat { color: var(--vc-ink-soft); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+      .vc-card-body { padding: 16px 1px 0; }
+      .vc-card-cat { color: var(--vc-ink-faint); font-size: 9.5px; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 5px; font-weight: 600; }
       .vc-card-name {
-        font-family: 'Fraunces', serif;
-        font-size: 15px;
+        font-family: 'Bodoni Moda', serif;
+        font-size: 16px;
         font-weight: 500;
-        margin: 0 0 6px;
-        line-height: 1.3;
+        margin: 0 0 7px;
+        line-height: 1.28;
         color: var(--vc-ink);
       }
-      .vc-card-price { color: var(--vc-ink); font-weight: 600; font-size: 13.5px; letter-spacing: 0.2px; }
+      .vc-card-price { color: var(--vc-ink); font-weight: 600; font-size: 13px; letter-spacing: 0.2px; }
 
       .vc-skeleton {
         background: var(--vc-panel-raised);
-        border-radius: 3px;
         overflow: hidden;
       }
       .vc-skeleton-img {
-        width: 100%; aspect-ratio: 3/4;
-        background: linear-gradient(90deg, var(--vc-panel-raised) 25%, #e9e4d8 37%, var(--vc-panel-raised) 63%);
+        width: 100%; aspect-ratio: 4/5;
+        background: linear-gradient(90deg, var(--vc-panel-raised) 25%, #e9e5da 37%, var(--vc-panel-raised) 63%);
         background-size: 400% 100%;
         animation: vc-shimmer 1.4s ease infinite;
       }
       @keyframes vc-shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 
-      .vc-empty { text-align: center; padding: 60px 20px; color: var(--vc-ink-soft); }
+      .vc-empty { text-align: center; padding: 70px 20px; color: var(--vc-ink-soft); font-size: 13.5px; }
 
-      /* overlay shared */
+      /* ---------- overlay shared ---------- */
       .vc-overlay {
         position: fixed; inset: 0;
-        background: rgba(23,21,15,0.4);
+        background: rgba(11,11,10,0.45);
         z-index: 40;
         opacity: 0;
         pointer-events: none;
@@ -474,47 +604,47 @@ function GlobalStyle() {
       }
       .vc-overlay.open { opacity: 1; pointer-events: auto; }
 
-      /* product modal */
+      /* ---------- product modal ---------- */
       .vc-modal {
         position: fixed;
         top: 50%; left: 50%;
-        transform: translate(-50%, -46%) scale(0.97);
-        width: min(760px, 92vw);
-        max-height: 88vh;
+        transform: translate(-50%, -46%) scale(0.98);
+        width: min(820px, 94vw);
+        max-height: 90vh;
         overflow: auto;
         background: var(--vc-panel);
         border: 1px solid var(--vc-border);
-        border-radius: 4px;
+        border-radius: 0;
         z-index: 41;
         opacity: 0;
         pointer-events: none;
         transition: opacity .25s ease, transform .25s ease;
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1.1fr 1fr;
       }
       .vc-modal.open { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
-      .vc-modal-imgwrap { background: var(--vc-panel-raised); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-      .vc-modal-imgwrap img { width: 100%; height: 100%; object-fit: contain; }
-      .vc-modal-imgwrap .vc-noimg { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 48px; color: var(--vc-border); }
-      .vc-modal-body { padding: 30px 30px 24px; position: relative; display: flex; flex-direction: column; }
+      .vc-modal-imgwrap { background: var(--vc-panel-raised); aspect-ratio: 4/5; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+      .vc-modal-imgwrap img { width: 100%; height: 100%; object-fit: cover; }
+      .vc-modal-imgwrap .vc-noimg { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 44px; color: var(--vc-border); }
+      .vc-modal-body { padding: 34px 34px 28px; position: relative; display: flex; flex-direction: column; border-left: 1px solid var(--vc-border); }
       .vc-modal-close {
-        position: absolute; top: 18px; right: 18px;
+        position: absolute; top: 20px; right: 20px;
         background: transparent; border: 1px solid var(--vc-border);
-        color: var(--vc-ink); border-radius: 999px; width: 32px; height: 32px;
+        color: var(--vc-ink); border-radius: 50%; width: 32px; height: 32px;
         display: flex; align-items: center; justify-content: center; cursor: pointer;
       }
       .vc-modal-close:hover { border-color: var(--vc-ink); }
-      .vc-modal-cat { color: var(--vc-ink-soft); font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; }
-      .vc-modal-name { font-family: 'Fraunces', serif; font-size: 25px; font-weight: 500; margin: 0 0 12px; padding-right: 30px; color: var(--vc-ink); }
-      .vc-modal-price { color: var(--vc-ink); font-size: 17px; font-weight: 600; margin-bottom: 22px; }
-      .vc-attr-label { font-size: 11px; color: var(--vc-ink-soft); margin-bottom: 9px; text-transform: uppercase; letter-spacing: 0.6px; }
-      .vc-chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+      .vc-modal-cat { color: var(--vc-ink-faint); font-size: 10px; text-transform: uppercase; letter-spacing: 1.4px; margin-bottom: 10px; font-weight: 700; }
+      .vc-modal-name { font-family: 'Bodoni Moda', serif; font-size: 27px; font-weight: 500; margin: 0 0 14px; padding-right: 30px; color: var(--vc-ink); line-height: 1.15; }
+      .vc-modal-price { color: var(--vc-ink); font-size: 17px; font-weight: 600; margin-bottom: 26px; }
+      .vc-attr-label { font-size: 10.5px; color: var(--vc-ink-faint); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+      .vc-chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
       .vc-variant-chip {
         border: 1px solid var(--vc-border);
         background: transparent;
         color: var(--vc-ink);
-        padding: 9px 15px;
-        border-radius: 3px;
+        padding: 9px 16px;
+        border-radius: 0;
         font-size: 12.5px;
         cursor: pointer;
         transition: all .15s;
@@ -522,59 +652,86 @@ function GlobalStyle() {
       .vc-variant-chip:hover { border-color: var(--vc-ink); }
       .vc-variant-chip.active { border-color: var(--vc-ink); background: var(--vc-ink); color: #fff; font-weight: 600; }
       .vc-variant-chip.disabled { opacity: 0.35; cursor: not-allowed; text-decoration: line-through; }
-      .vc-stock-note { font-size: 12px; margin-bottom: 20px; }
+      .vc-stock-note { font-size: 11.5px; margin-bottom: 22px; letter-spacing: 0.2px; }
       .vc-stock-note.low { color: var(--vc-red); }
       .vc-stock-note.ok { color: var(--vc-green); }
 
-      .vc-qty-row { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
-      .vc-stepper { display: flex; align-items: center; border: 1px solid var(--vc-border); border-radius: 3px; overflow: hidden; }
+      .vc-qty-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 24px; }
+      .vc-stepper { display: flex; align-items: center; border: 1px solid var(--vc-border); border-radius: 0; overflow: hidden; }
       .vc-stepper button {
         background: transparent; border: none; color: var(--vc-ink);
         width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer;
       }
       .vc-stepper button:hover:not(:disabled) { background: var(--vc-panel-raised); }
       .vc-stepper button:disabled { opacity: 0.3; cursor: not-allowed; }
-      .vc-stepper span { width: 34px; text-align: center; font-size: 13.5px; }
+      .vc-stepper span { width: 34px; text-align: center; font-size: 13px; }
 
       .vc-btn-primary {
         background: var(--vc-ink);
         color: #fff;
         border: 1px solid var(--vc-ink);
-        border-radius: 3px;
-        padding: 14px 0;
-        font-weight: 600;
-        font-size: 12.5px;
+        border-radius: 0;
+        padding: 15px 0;
+        font-weight: 700;
+        font-size: 11.5px;
         text-transform: uppercase;
-        letter-spacing: 0.6px;
+        letter-spacing: 1.2px;
         cursor: pointer;
         width: 100%;
         transition: opacity .15s, transform .1s;
         margin-top: auto;
       }
-      .vc-btn-primary:hover:not(:disabled) { opacity: 0.82; }
-      .vc-btn-primary:active:not(:disabled) { transform: scale(0.99); }
-      .vc-btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+      .vc-btn-primary:hover:not(:disabled) { opacity: 0.85; }
+      .vc-btn-primary:active:not(:disabled) { transform: scale(0.995); }
+      .vc-btn-primary:disabled { opacity: 0.32; cursor: not-allowed; }
 
       .vc-btn-ghost {
         background: transparent;
         border: 1px solid var(--vc-border);
         color: var(--vc-ink-soft);
-        border-radius: 3px;
-        padding: 12px 0;
-        font-size: 12.5px;
+        border-radius: 0;
+        padding: 13px 0;
+        font-size: 11.5px;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
         cursor: pointer;
         width: 100%;
         margin-top: 10px;
-        display: flex; align-items: center; justify-content: center; gap: 6px;
+        display: flex; align-items: center; justify-content: center; gap: 7px;
       }
       .vc-btn-ghost:hover { border-color: var(--vc-ink); color: var(--vc-ink); }
 
-      /* cart drawer */
+      /* ---------- accordion ---------- */
+      .vc-accordion { border-top: 1px solid var(--vc-border); margin-top: 26px; }
+      .vc-accordion-item { border-bottom: 1px solid var(--vc-border); }
+      .vc-accordion-head {
+        width: 100%;
+        background: none;
+        border: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 15px 0;
+        font-size: 11.5px;
+        font-weight: 700;
+        color: var(--vc-ink);
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        text-align: left;
+      }
+      .vc-accordion-head-title { flex: 1; min-width: 0; overflow-wrap: break-word; }
+      .vc-accordion-chevron { transition: transform .2s ease; color: var(--vc-ink-faint); font-size: 15px; flex: none; }
+      .vc-accordion-chevron.open { transform: rotate(180deg); }
+      .vc-accordion-body { padding: 0 0 18px; color: var(--vc-ink-soft); font-size: 13px; line-height: 1.65; }
+
+      /* ---------- cart drawer ---------- */
       .vc-drawer {
         position: fixed;
         top: 0; right: 0;
         height: 100vh;
-        width: min(420px, 100vw);
+        width: min(430px, 100vw);
         background: var(--vc-panel);
         border-left: 1px solid var(--vc-border);
         z-index: 42;
@@ -586,140 +743,147 @@ function GlobalStyle() {
       .vc-drawer.open { transform: translateX(0); }
       .vc-drawer-head {
         display: flex; align-items: center; justify-content: space-between;
-        padding: 22px; border-bottom: 1px solid var(--vc-border);
+        padding: 24px; border-bottom: 1px solid var(--vc-border);
       }
-      .vc-drawer-head h3 { font-family: 'Fraunces', serif; font-weight: 500; margin: 0; font-size: 18px; color: var(--vc-ink); }
-      .vc-drawer-items { flex: 1; overflow-y: auto; padding: 14px 22px; }
+      .vc-drawer-head h3 { font-family: 'Bodoni Moda', serif; font-weight: 500; margin: 0; font-size: 19px; color: var(--vc-ink); }
+      .vc-drawer-items { flex: 1; overflow-y: auto; padding: 14px 24px; }
       .vc-drawer-empty { color: var(--vc-ink-soft); text-align: center; padding: 60px 10px; font-size: 13.5px; }
-      .vc-drawer-item { display: flex; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--vc-border); }
+      .vc-drawer-item { display: flex; gap: 14px; padding: 18px 0; border-bottom: 1px solid var(--vc-border); }
       .vc-drawer-item img, .vc-drawer-item .vc-noimg {
-        width: 60px; height: 60px; border-radius: 3px; object-fit: cover; background: var(--vc-panel-raised);
+        width: 64px; height: 78px; border-radius: 0; object-fit: cover; background: var(--vc-panel-raised);
         display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--vc-border); flex: none;
       }
       .vc-drawer-item-info { flex: 1; min-width: 0; }
-      .vc-drawer-item-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; font-family: 'Fraunces', serif; color: var(--vc-ink); }
-      .vc-drawer-item-variant { font-size: 11.5px; color: var(--vc-ink-soft); margin-bottom: 8px; }
+      .vc-drawer-item-name { font-size: 13.5px; font-weight: 500; margin-bottom: 3px; font-family: 'Bodoni Moda', serif; color: var(--vc-ink); }
+      .vc-drawer-item-variant { font-size: 11px; color: var(--vc-ink-soft); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
       .vc-drawer-item-row { display: flex; align-items: center; justify-content: space-between; }
-      .vc-drawer-item-remove { background: none; border: none; color: var(--vc-ink-soft); font-size: 11px; cursor: pointer; text-decoration: underline; padding: 0; }
+      .vc-drawer-item-remove { background: none; border: none; color: var(--vc-ink-soft); font-size: 10.5px; cursor: pointer; text-decoration: underline; padding: 0; text-transform: uppercase; letter-spacing: 0.4px; }
       .vc-drawer-item-remove:hover { color: var(--vc-red); }
-      .vc-drawer-foot { padding: 18px 22px 24px; border-top: 1px solid var(--vc-border); }
-      .vc-drawer-total { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 16px; color: var(--vc-ink); }
-      .vc-drawer-total b { color: var(--vc-ink); font-size: 17px; }
+      .vc-drawer-foot { padding: 20px 24px 26px; border-top: 1px solid var(--vc-border); }
+      .vc-drawer-total { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 18px; color: var(--vc-ink); text-transform: uppercase; letter-spacing: 0.5px; }
+      .vc-drawer-total b { color: var(--vc-ink); font-size: 18px; font-family: 'Bodoni Moda', serif; letter-spacing: 0; }
 
-      /* checkout */
-      .vc-checkout-wrap { max-width: 1180px; margin: 0 auto; padding: 30px 20px 80px; display: flex; justify-content: center; }
+      /* ---------- checkout ---------- */
+      .vc-checkout-wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 90px; display: flex; justify-content: center; }
       .vc-checkout-box { width: 100%; max-width: 440px; }
-      .vc-steps-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 28px; }
+      .vc-steps-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 32px; }
       .vc-step-dot {
-        display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--vc-ink-soft);
+        display: flex; align-items: center; gap: 8px; font-size: 10.5px; color: var(--vc-ink-faint);
+        text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600;
       }
       .vc-step-num {
-        width: 21px; height: 21px; border-radius: 999px; border: 1px solid var(--vc-border);
-        display: flex; align-items: center; justify-content: center; font-size: 10.5px; flex: none;
+        width: 21px; height: 21px; border-radius: 50%; border: 1px solid var(--vc-border);
+        display: flex; align-items: center; justify-content: center; font-size: 10px; flex: none;
       }
       .vc-step-dot.active .vc-step-num { background: var(--vc-ink); border-color: var(--vc-ink); color: #fff; font-weight: 700; }
       .vc-step-dot.active { color: var(--vc-ink); }
       .vc-step-line { flex: 1; height: 1px; background: var(--vc-border); }
 
-      .vc-panel-card { background: var(--vc-panel); border: 1px solid var(--vc-border); border-radius: 4px; padding: 26px; }
-      .vc-field-label { font-size: 11px; color: var(--vc-ink-soft); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.6px; }
+      .vc-panel-card { background: var(--vc-panel); border: 1px solid var(--vc-border); border-radius: 0; padding: 30px; }
+      .vc-field-label { font-size: 10.5px; color: var(--vc-ink-faint); margin-bottom: 7px; display: block; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
       .vc-input {
         width: 100%;
-        background: var(--vc-bg);
+        background: transparent;
         color: var(--vc-ink);
-        border: 1px solid var(--vc-border);
-        border-radius: 3px;
-        padding: 11px 13px;
+        border: none;
+        border-bottom: 1px solid var(--vc-border);
+        border-radius: 0;
+        padding: 10px 1px;
         font-size: 13.5px;
-        margin-bottom: 14px;
+        margin-bottom: 18px;
         box-sizing: border-box;
         transition: border-color .15s;
       }
-      .vc-input::placeholder { color: #a29c8c; }
-      .vc-input:focus { border-color: var(--vc-ink); outline: none; }
+      .vc-input::placeholder { color: var(--vc-ink-faint); }
+      .vc-input:focus { border-bottom-color: var(--vc-ink); outline: none; }
 
-      .vc-summary { background: var(--vc-bg); border-radius: 3px; padding: 15px; margin: 16px 0; border: 1px solid var(--vc-border); }
-      .vc-summary-row { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 6px; color: var(--vc-ink-soft); }
-      .vc-summary-row.total { color: var(--vc-ink); font-weight: 700; border-top: 1px solid var(--vc-border); padding-top: 8px; margin-top: 8px; }
-      .vc-summary-row.total b { color: var(--vc-ink); font-size: 16px; }
+      .vc-summary { background: var(--vc-bg-soft); border-radius: 0; padding: 18px; margin: 18px 0; border: 1px solid var(--vc-border); }
+      .vc-summary-row { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 8px; color: var(--vc-ink-soft); }
+      .vc-summary-row.total { color: var(--vc-ink); font-weight: 700; border-top: 1px solid var(--vc-border); padding-top: 10px; margin-top: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
+      .vc-summary-row.total b { color: var(--vc-ink); font-size: 17px; font-family: 'Bodoni Moda', serif; letter-spacing: 0; }
 
-      .vc-error { color: var(--vc-red); font-size: 12.5px; margin-bottom: 12px; }
+      .vc-error { color: var(--vc-red); font-size: 12.5px; margin-bottom: 14px; }
 
       .vc-confirm-wrap { text-align: center; }
       .vc-confirm-icon {
-        width: 62px; height: 62px; border-radius: 999px; background: rgba(76,122,82,0.12);
+        width: 60px; height: 60px; border-radius: 50%; border: 1px solid var(--vc-green);
         color: var(--vc-green); display: flex; align-items: center; justify-content: center;
-        margin: 6px auto 18px;
+        margin: 6px auto 20px;
       }
       .vc-account-card {
-        background: var(--vc-bg); border: 1px solid var(--vc-border); border-radius: 3px;
-        padding: 14px; margin-top: 10px; font-size: 13px; line-height: 1.7; text-align: left; color: var(--vc-ink);
+        background: var(--vc-bg-soft); border: 1px solid var(--vc-border); border-radius: 0;
+        padding: 16px; margin-top: 12px; font-size: 13px; line-height: 1.75; text-align: left; color: var(--vc-ink);
       }
       .vc-upload-label {
-        display: inline-flex; align-items: center; gap: 6px;
-        background: transparent; border: 1px solid var(--vc-border); color: var(--vc-ink);
-        border-radius: 3px; padding: 11px 18px; font-size: 12.5px; cursor: pointer; margin-bottom: 12px;
+        display: inline-flex; align-items: center; gap: 7px;
+        background: transparent; border: 1px solid var(--vc-ink); color: var(--vc-ink);
+        border-radius: 0; padding: 11px 20px; font-size: 11.5px; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; margin-bottom: 14px;
       }
-      .vc-upload-label:hover { border-color: var(--vc-ink); }
-      .vc-proof-preview { width: 100%; max-width: 220px; border-radius: 4px; margin: 0 auto 12px; display: block; }
+      .vc-upload-label:hover { background: var(--vc-ink); color: #fff; }
+      .vc-proof-preview { width: 100%; max-width: 220px; border-radius: 0; margin: 0 auto 14px; display: block; }
 
-      /* footer */
+      /* ---------- footer ---------- */
       .vc-footer {
         max-width: 1180px;
-        margin: 20px auto 0;
-        padding: 50px 20px 56px;
+        margin: 30px auto 0;
+        padding: 60px 24px 40px;
         border-top: 1px solid var(--vc-border);
-        text-align: center;
       }
-      .vc-footer .vc-monogram { margin: 0 auto 14px; }
-      .vc-footer-brand {
-        font-family: 'Fraunces', serif;
-        color: var(--vc-ink);
-        font-size: 16px;
-        margin-bottom: 6px;
+      .vc-footer-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr 1fr;
+        gap: 46px;
+        margin-bottom: 50px;
       }
-      .vc-footer-tag { color: var(--vc-ink-soft); font-size: 12.5px; margin-bottom: 24px; }
-      .vc-trust-row {
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 24px;
+      .vc-footer-brand-block .vc-monogram { margin-bottom: 16px; }
+      .vc-footer-brand { font-family: 'Bodoni Moda', serif; color: var(--vc-ink); font-size: 18px; margin-bottom: 8px; }
+      .vc-footer-tag { color: var(--vc-ink-soft); font-size: 12.5px; line-height: 1.6; max-width: 260px; }
+      .vc-footer-col-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.4px; font-weight: 700; color: var(--vc-ink-faint); margin-bottom: 18px; }
+      .vc-footer-steps { display: flex; flex-direction: column; gap: 14px; }
+      .vc-footer-step { display: flex; gap: 12px; align-items: flex-start; }
+      .vc-footer-step-num {
+        font-family: 'Bodoni Moda', serif; font-size: 13px; color: var(--vc-ink-faint); flex: none; width: 18px;
+      }
+      .vc-footer-step-text { font-size: 12.5px; color: var(--vc-ink-soft); line-height: 1.55; }
+      .vc-footer-contact-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        border: 1px solid var(--vc-ink); color: var(--vc-ink); background: transparent;
+        padding: 11px 18px; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase;
+        text-decoration: none; margin-bottom: 14px; transition: background .15s, color .15s;
+      }
+      .vc-footer-contact-btn:hover { background: var(--vc-ink); color: #fff; }
+      .vc-footer-hours { font-size: 12.5px; color: var(--vc-ink-soft); line-height: 1.6; }
+      .vc-footer-bottom {
+        display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+        padding-top: 26px; border-top: 1px solid var(--vc-border);
+        font-size: 10.5px; letter-spacing: 0.6px; text-transform: uppercase; color: var(--vc-ink-faint);
+      }
+
+      /* ---------- toast ---------- */
+      .vc-toast {
+        position: fixed;
+        left: 50%;
+        bottom: 26px;
+        transform: translateX(-50%);
+        background: var(--vc-ink);
+        color: #fff;
+        padding: 13px 24px;
+        border-radius: 0;
         font-size: 11.5px;
-        color: var(--vc-ink-soft);
+        letter-spacing: 0.5px;
         text-transform: uppercase;
-        letter-spacing: 0.4px;
+        z-index: 60;
+        box-shadow: 0 10px 28px rgba(0,0,0,0.18);
+        animation: vc-toast-in .25s ease;
       }
-      .vc-trust-row span { display: flex; align-items: center; gap: 6px; }
-      .vc-trust-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--vc-ink); }
+      @keyframes vc-toast-in {
+        from { opacity: 0; transform: translate(-50%, 8px); }
+        to { opacity: 1; transform: translate(-50%, 0); }
+      }
 
-      /* toolbar: chips + sort */
-      .vc-toolbar {
-        max-width: 1180px;
-        margin: 0 auto;
-        padding: 0 20px 8px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-      .vc-toolbar .vc-chips { padding: 10px 0 6px; margin: 0; flex: 1; }
-      .vc-sort-wrap { display: flex; align-items: center; gap: 8px; padding: 10px 0; flex: none; }
-      .vc-sort-wrap label { font-size: 11px; color: var(--vc-ink-soft); text-transform: uppercase; letter-spacing: 0.5px; }
-      .vc-sort-select {
-        background: transparent;
-        border: 1px solid var(--vc-border);
-        color: var(--vc-ink);
-        border-radius: 3px;
-        padding: 7px 10px;
-        font-size: 12.5px;
-        cursor: pointer;
-      }
-      .vc-sort-select:focus { border-color: var(--vc-ink); outline: none; }
-
-      /* color swatches */
+      /* ---------- color swatches ---------- */
       .vc-attr-value { color: var(--vc-ink-soft); font-weight: 400; text-transform: none; letter-spacing: 0; }
-      .vc-swatch-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+      .vc-swatch-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
       .vc-swatch {
         width: 34px;
         height: 34px;
@@ -739,74 +903,36 @@ function GlobalStyle() {
       .vc-swatch.active { outline: 2px solid var(--vc-ink); outline-offset: 2px; }
       .vc-swatch.disabled { opacity: 0.3; cursor: not-allowed; }
 
-      /* accordion */
-      .vc-accordion { border-top: 1px solid var(--vc-border); margin-top: 24px; }
-      .vc-accordion-item { border-bottom: 1px solid var(--vc-border); }
-      .vc-accordion-head {
-        width: 100%;
-        background: none;
-        border: none;
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 10px;
-        padding: 14px 0;
-        font-size: 12.5px;
-        font-weight: 600;
-        color: var(--vc-ink);
-        cursor: pointer;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        text-align: left;
-      }
-      .vc-accordion-head-title { flex: 1; min-width: 0; overflow-wrap: break-word; }
-      .vc-accordion-chevron { transition: transform .2s ease; color: var(--vc-ink-soft); font-size: 15px; flex: none; }
-      .vc-accordion-chevron.open { transform: rotate(180deg); }
-      .vc-accordion-body { padding: 0 0 16px; color: var(--vc-ink-soft); font-size: 13px; line-height: 1.6; }
-
-      /* toast */
-      .vc-toast {
-        position: fixed;
-        left: 50%;
-        bottom: 26px;
-        transform: translateX(-50%);
-        background: var(--vc-ink);
-        color: #fff;
-        padding: 12px 22px;
-        border-radius: 999px;
-        font-size: 12.5px;
-        z-index: 60;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-        animation: vc-toast-in .25s ease;
-      }
-      @keyframes vc-toast-in {
-        from { opacity: 0; transform: translate(-50%, 8px); }
-        to { opacity: 1; transform: translate(-50%, 0); }
-      }
-
-      /* shopping bag full page */
+      /* ---------- shopping bag full page ---------- */
       .vc-bag-back {
-        background: transparent; border: 1px solid var(--vc-border); color: var(--vc-ink);
-        border-radius: 999px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+        background: transparent; border: 1px solid var(--vc-ink); color: var(--vc-ink);
+        border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer;
       }
-      .vc-bag-back:hover { border-color: var(--vc-ink); }
-      .vc-bag-page { max-width: 640px; margin: 0 auto; padding: 10px 20px 130px; }
+      .vc-bag-back:hover { background: var(--vc-ink); color: #fff; }
+      .vc-bag-page { max-width: 640px; margin: 0 auto; padding: 12px 24px 140px; }
       .vc-bag-list { display: flex; flex-direction: column; }
       .vc-bag-checkout-bar {
         position: fixed;
         bottom: 0; left: 0; right: 0;
         background: var(--vc-panel);
         border-top: 1px solid var(--vc-border);
-        padding: 16px 20px;
+        padding: 18px 24px;
         z-index: 30;
       }
-
 
       @media (prefers-reduced-motion: reduce) {
         .vc-store *, .vc-store *::before, .vc-store *::after {
           animation-duration: 0.001ms !important;
           transition-duration: 0.001ms !important;
         }
+      }
+
+      @media (max-width: 900px) {
+        .vc-hero-grid { grid-template-columns: 1fr; }
+        .vc-hero-rule { display: none; }
+        .vc-hero-main { padding: 52px 24px 30px; }
+        .vc-hero-meta { padding: 20px 24px 52px; flex-direction: row; flex-wrap: wrap; gap: 26px; border-top: 1px solid var(--vc-border); }
+        .vc-footer-grid { grid-template-columns: 1fr; gap: 34px; }
       }
 
       @media (max-width: 680px) {
@@ -817,35 +943,35 @@ function GlobalStyle() {
           border-radius: 0;
         }
         .vc-modal.open { transform: translate(0,0); }
+        .vc-modal-body { border-left: none; border-top: 1px solid var(--vc-border); }
         .vc-modal-imgwrap { aspect-ratio: 4/3; }
         .vc-drawer { width: 100vw; }
-        .vc-hero { padding: 48px 20px 40px; }
       }
 
       /* floating whatsapp contact button */
       .vc-wa-float {
         position: fixed;
-        right: 20px;
-        bottom: 24px;
-        width: 52px;
-        height: 52px;
+        right: 22px;
+        bottom: 26px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
         background: var(--vc-ink);
-        color: var(--vc-bg);
+        color: #fdfcf9;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 6px 20px rgba(23, 21, 15, 0.28);
+        box-shadow: 0 8px 22px rgba(11,11,10,0.3);
         z-index: 70;
         transition: transform 0.18s ease, box-shadow 0.18s ease;
       }
       .vc-wa-float:hover {
         transform: translateY(-2px) scale(1.04);
-        box-shadow: 0 10px 26px rgba(23, 21, 15, 0.34);
+        box-shadow: 0 12px 28px rgba(11,11,10,0.36);
       }
       .vc-wa-float:active { transform: scale(0.96); }
       @media (max-width: 680px) {
-        .vc-wa-float { right: 16px; bottom: 92px; width: 48px; height: 48px; }
+        .vc-wa-float { right: 16px; bottom: 92px; width: 46px; height: 46px; }
       }
 
       /* whatsapp order-summary button on the confirmation screen */
@@ -856,14 +982,15 @@ function GlobalStyle() {
         gap: 8px;
         width: 100%;
         background: var(--vc-ink);
-        color: var(--vc-bg);
+        color: #fdfcf9;
         border: none;
-        border-radius: 999px;
-        padding: 13px 18px;
+        border-radius: 0;
+        padding: 14px 18px;
         font-family: 'Inter', sans-serif;
-        font-weight: 600;
-        font-size: 13.5px;
-        letter-spacing: 0.2px;
+        font-weight: 700;
+        font-size: 11.5px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
         cursor: pointer;
         transition: opacity 0.15s ease;
         text-decoration: none;
@@ -960,7 +1087,7 @@ export default function Store() {
     }
 
     setLink('manifest', '/tienda-manifest.json')
-    setMeta('theme-color', '#faf8f5')
+    setMeta('theme-color', '#ffffff')
     setMeta('apple-mobile-web-app-title', 'Var. Calero')
   }, [])
 
@@ -1254,16 +1381,16 @@ export default function Store() {
         <GlobalStyle />
         <div className="vc-checkout-wrap">
           <div className="vc-checkout-box vc-confirm-wrap">
-            <div className="vc-monogram" style={{ margin: '0 auto 14px' }}>VC</div>
-            <p className="vc-logo" style={{ marginBottom: 22 }}>Variedades Calero</p>
+            <div className="vc-monogram" style={{ margin: '0 auto 16px' }}>VC</div>
+            <p className="vc-logo" style={{ marginBottom: 24 }}>Variedades Calero</p>
             <div className="vc-confirm-icon"><IconCheck /></div>
-            <h2 className="vc-serif" style={{ fontWeight: 500, margin: '0 0 8px' }}>¡Pedido recibido!</h2>
-            <p style={{ color: 'var(--vc-muted)', fontSize: 14 }}>
+            <h2 className="vc-serif" style={{ fontWeight: 500, margin: '0 0 10px', fontSize: 24 }}>Pedido recibido</h2>
+            <p style={{ color: 'var(--vc-ink-soft)', fontSize: 14 }}>
               Gracias {clientName.split(' ')[0]}, tu pedido por <b style={{ color: 'var(--vc-ink)' }}>${total.toFixed(2)}</b> fue registrado.
             </p>
 
-            <div className="vc-panel-card" style={{ marginTop: 20, textAlign: 'left' }}>
-              <p style={{ margin: 0, fontWeight: 700, fontSize: 14 }}>Para confirmar tu compra, transferí a:</p>
+            <div className="vc-panel-card" style={{ marginTop: 22, textAlign: 'left' }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 12.5, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Para confirmar tu compra, transferí a:</p>
               {accounts.map((a) => (
                 <div key={a.id} className="vc-account-card">
                   <div><b>{a.bank}</b> ({a.currency})</div>
@@ -1273,17 +1400,17 @@ export default function Store() {
               ))}
 
               {proofUploaded ? (
-                <p style={{ color: 'var(--vc-green)', fontWeight: 600, marginTop: 14, fontSize: 13.5 }}>
-                  ✅ Comprobante recibido. ¡Gracias! Vamos a confirmar tu pago pronto.
+                <p style={{ color: 'var(--vc-green)', fontWeight: 600, marginTop: 16, fontSize: 13.5 }}>
+                  Comprobante recibido. Vamos a confirmar tu pago pronto.
                 </p>
               ) : (
-                <div style={{ marginTop: 16, borderTop: '1px dashed var(--vc-border)', paddingTop: 16, textAlign: 'center' }}>
-                  <p style={{ color: 'var(--vc-muted)', fontSize: 13, marginBottom: 10 }}>
+                <div style={{ marginTop: 18, borderTop: '1px dashed var(--vc-border)', paddingTop: 18, textAlign: 'center' }}>
+                  <p style={{ color: 'var(--vc-ink-soft)', fontSize: 13, marginBottom: 12 }}>
                     Subí la foto o captura del comprobante de tu transferencia acá mismo:
                   </p>
                   {proofPreview && <img src={proofPreview} alt="comprobante" className="vc-proof-preview" />}
                   <label className="vc-upload-label">
-                    {proofFile ? 'Cambiar foto' : '📎 Subir comprobante'}
+                    {proofFile ? 'Cambiar foto' : 'Subir comprobante'}
                     <input type="file" accept="image/*" onChange={handleProofChange} style={{ display: 'none' }} />
                   </label>
                   {error && <p className="vc-error">{error}</p>}
@@ -1298,14 +1425,14 @@ export default function Store() {
 
             <a
               className="vc-wa-order-btn"
-              style={{ marginTop: 14 }}
+              style={{ marginTop: 16 }}
               href={buildWhatsappLink(
                 buildOrderWhatsappMessage({ orderId: createdOrderId, clientName, clientAddress, cart, total })
               )}
               target="_blank"
               rel="noopener noreferrer"
             >
-              <IconWhatsapp size={17} /> Enviar mi pedido por WhatsApp
+              <IconWhatsapp size={16} /> Enviar mi pedido por WhatsApp
             </a>
 
             <button className="vc-btn-ghost" onClick={() => window.location.reload()}>
@@ -1332,10 +1459,10 @@ export default function Store() {
 
         <div className="vc-bag-page">
           {cart.length === 0 ? (
-            <div className="vc-drawer-empty" style={{ padding: '80px 20px' }}>
+            <div className="vc-drawer-empty" style={{ padding: '90px 20px' }}>
               Tu bolsa está vacía.<br />Volvé al catálogo para agregar productos.
-              <div style={{ marginTop: 20 }}>
-                <button className="vc-btn-ghost" style={{ width: 'auto', padding: '10px 22px' }} onClick={() => setStep('catalog')}>
+              <div style={{ marginTop: 22 }}>
+                <button className="vc-btn-ghost" style={{ width: 'auto', padding: '11px 26px' }} onClick={() => setStep('catalog')}>
                   Ir al catálogo
                 </button>
               </div>
@@ -1344,7 +1471,7 @@ export default function Store() {
             <div className="vc-bag-list">
               {cart.map((i) => (
                 <div key={i.id} className="vc-drawer-item">
-                  {i.image ? <img src={i.image} alt={i.name} /> : <div className="vc-noimg">📦</div>}
+                  {i.image ? <img src={i.image} alt={i.name} /> : <div className="vc-noimg">—</div>}
                   <div className="vc-drawer-item-info">
                     <div className="vc-drawer-item-name">{i.name}</div>
                     <div className="vc-drawer-item-variant">{i.variantLabel}</div>
@@ -1391,7 +1518,7 @@ export default function Store() {
             </div>
 
             <div className="vc-panel-card">
-              <h2 className="vc-serif" style={{ fontWeight: 500, marginTop: 0, fontSize: 21 }}>Datos de entrega</h2>
+              <h2 className="vc-serif" style={{ fontWeight: 500, marginTop: 0, fontSize: 22 }}>Datos de entrega</h2>
               <label className="vc-field-label">Nombre completo *</label>
               <input className="vc-input" placeholder="Ej. María Pérez" value={clientName} onChange={(e) => setClientName(e.target.value)} />
               <label className="vc-field-label">Teléfono / WhatsApp *</label>
@@ -1448,24 +1575,42 @@ export default function Store() {
         </button>
       </header>
 
+      <MarqueeBar />
+
       <section className="vc-hero">
-        <div className="vc-hero-inner">
-          <div className="vc-eyebrow">Masatepe, Nicaragua</div>
-          <h1>Piezas que se notan.</h1>
-          <p>Ropa, calzado y accesorios elegidos con cuidado. Pedí en línea y coordinamos la entrega directo con vos.</p>
-          <button
-            className="vc-hero-cta"
-            onClick={() => document.getElementById('vc-catalog')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-          >
-            Explorar catálogo
-          </button>
+        <div className="vc-hero-grid">
+          <div className="vc-hero-main">
+            <div className="vc-eyebrow">Masatepe, Nicaragua</div>
+            <h1>Piezas que <em>se notan.</em></h1>
+            <p>Ropa, calzado y accesorios seleccionados con criterio. Pedís en línea y coordinamos la entrega directo con vos.</p>
+            <button
+              className="vc-hero-cta"
+              onClick={() => document.getElementById('vc-catalog')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            >
+              Ver catálogo <IconArrow />
+            </button>
+          </div>
+          <div className="vc-hero-rule" />
+          <div className="vc-hero-meta">
+            <div className="vc-meta-item">
+              <div className="vc-meta-label">Envíos</div>
+              <div className="vc-meta-value">Coordinados por WhatsApp a toda Nicaragua.</div>
+            </div>
+            <div className="vc-meta-item">
+              <div className="vc-meta-label">Pago</div>
+              <div className="vc-meta-value">Transferencia bancaria, con verificación manual del comprobante.</div>
+            </div>
+            <div className="vc-meta-item">
+              <div className="vc-meta-label">Atención</div>
+              <div className="vc-meta-value">Personalizada, directo con nosotros.</div>
+            </div>
+          </div>
         </div>
       </section>
-      <div className="vc-stitch" />
 
       <div className="vc-section-head" id="vc-catalog">
         <div>
-          <div className="vc-eyebrow" style={{ marginBottom: 8 }}>Catálogo</div>
+          <div className="vc-eyebrow" style={{ marginBottom: 10 }}>Catálogo</div>
           <h2>Todo lo disponible ahora</h2>
         </div>
         {!loading && <span className="vc-section-count">{filteredProducts.length} artículo{filteredProducts.length !== 1 ? 's' : ''}</span>}
@@ -1473,7 +1618,7 @@ export default function Store() {
 
       <div className="vc-toolbar">
         {categories.length > 1 && (
-          <div className="vc-chips" style={{ padding: '10px 20px 6px' }}>
+          <div className="vc-chips">
             {categories.map((c) => (
               <button key={c} className={`vc-chip ${activeCategory === c ? 'active' : ''}`} onClick={() => setActiveCategory(c)}>
                 {c}
@@ -1507,19 +1652,17 @@ export default function Store() {
             {filteredProducts.map((p) => (
               <div key={p.id} className="vc-card" onClick={() => openProduct(p)}>
                 <div className="vc-card-imgwrap">
-                  {p.image ? <img src={p.image} alt={p.name} /> : <div className="vc-noimg">📦</div>}
+                  {p.image ? <img src={p.image} alt={p.name} /> : <div className="vc-noimg">—</div>}
                   {p.onSale && <span className="vc-card-sale-badge">-{p.discountPercent}% Liquidación</span>}
                   {!p.onSale && totalStock(p) <= 5 && <span className="vc-card-badge">Últimas unidades</span>}
-                  <div className="vc-card-quick">
-                    <button
-                      className="vc-quick-btn"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        quickAdd(p)
-                      }}
-                    >
-                      {p.variants.length === 1 ? 'Agregar al carrito' : 'Elegir opciones'}
-                    </button>
+                  <div
+                    className="vc-card-addbar"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      quickAdd(p)
+                    }}
+                  >
+                    {p.variants.length === 1 ? 'Agregar a la bolsa' : 'Elegir opciones'}
                   </div>
                 </div>
                 <div className="vc-card-body">
@@ -1537,13 +1680,45 @@ export default function Store() {
       </main>
 
       <footer className="vc-footer">
-        <div className="vc-monogram">VC</div>
-        <div className="vc-footer-brand">Variedades Calero</div>
-        <p className="vc-footer-tag">Hecho con cariño en Masatepe, Nicaragua.</p>
-        <div className="vc-trust-row">
-          <span><span className="vc-trust-dot" />Pago por transferencia</span>
-          <span><span className="vc-trust-dot" />Entrega coordinada</span>
-          <span><span className="vc-trust-dot" />Atención personalizada</span>
+        <div className="vc-footer-grid">
+          <div className="vc-footer-brand-block">
+            <div className="vc-monogram">VC</div>
+            <div className="vc-footer-brand">Variedades Calero</div>
+            <p className="vc-footer-tag">Ropa, calzado y accesorios elegidos con cuidado. Hecho con cariño en Masatepe, Nicaragua.</p>
+          </div>
+          <div>
+            <div className="vc-footer-col-title">Cómo comprar</div>
+            <div className="vc-footer-steps">
+              <div className="vc-footer-step">
+                <span className="vc-footer-step-num">01</span>
+                <span className="vc-footer-step-text">Explorá el catálogo y elegí talla o color.</span>
+              </div>
+              <div className="vc-footer-step">
+                <span className="vc-footer-step-num">02</span>
+                <span className="vc-footer-step-text">Confirmá tu pedido con tus datos de entrega.</span>
+              </div>
+              <div className="vc-footer-step">
+                <span className="vc-footer-step-num">03</span>
+                <span className="vc-footer-step-text">Transferí y coordinamos la entrega por WhatsApp.</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div className="vc-footer-col-title">Contacto</div>
+            <a
+              className="vc-footer-contact-btn"
+              href={buildWhatsappLink('Hola, tengo una consulta sobre Variedades Calero 🙂')}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <IconWhatsapp size={15} /> Escribinos
+            </a>
+            <div className="vc-footer-hours">Lunes a sábado.<br />Respuesta por WhatsApp.</div>
+          </div>
+        </div>
+        <div className="vc-footer-bottom">
+          <span>Variedades Calero — Masatepe, Nicaragua</span>
+          <span>Pago por transferencia · Entrega coordinada</span>
         </div>
       </footer>
 
@@ -1552,7 +1727,7 @@ export default function Store() {
       {selectedProduct && (
         <div className={`vc-modal ${selectedProduct ? 'open' : ''}`}>
           <div className="vc-modal-imgwrap">
-            {selectedProduct.image ? <img src={selectedProduct.image} alt={selectedProduct.name} /> : <div className="vc-noimg">📦</div>}
+            {selectedProduct.image ? <img src={selectedProduct.image} alt={selectedProduct.name} /> : <div className="vc-noimg">—</div>}
           </div>
           <div className="vc-modal-body">
             <button className="vc-modal-close" onClick={closeProduct} aria-label="Cerrar"><IconClose /></button>
