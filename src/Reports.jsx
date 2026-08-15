@@ -117,7 +117,7 @@ export default function Reports({ onBack }) {
             </div>
             <div style={styles.statCard}>
               <div style={styles.muted}>Gastos</div>
-              <div style={{ ...styles.statValue, color: '#ff9b9b' }}>-${totalExpenses.toFixed(2)}</div>
+              <div style={{ ...styles.statValue, color: '#C97A6E' }}>-${totalExpenses.toFixed(2)}</div>
             </div>
           </div>
 
@@ -174,25 +174,25 @@ export default function Reports({ onBack }) {
 }
 
 const styles = {
-  container: { minHeight: '100vh', background: '#0f0f0f', color: '#f5f5f5', fontFamily: 'system-ui, sans-serif', padding: 24 },
+  container: { minHeight: '100vh', background: '#F2EBDB', color: '#2E2618', fontFamily: 'system-ui, sans-serif', padding: 24 },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  backBtn: { background: 'transparent', color: '#999', border: '1px solid #333', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' },
-  title: { color: '#d4af37', margin: 0, fontSize: 20 },
-  muted: { color: '#999', fontSize: 13 },
+  backBtn: { background: 'transparent', color: '#8A7A56', border: '1px solid #C7B689', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' },
+  title: { color: '#3B2E1F', margin: 0, fontSize: 20 },
+  muted: { color: '#8A7A56', fontSize: 13 },
   rangeSelector: { display: 'flex', gap: 8, marginBottom: 20 },
-  rangeBtn: { background: '#1a1a1a', color: '#ccc', border: '1px solid #2a2a2a', borderRadius: 8, padding: '8px 18px', cursor: 'pointer', fontSize: 13 },
-  rangeBtnActive: { background: '#d4af37', color: '#0f0f0f', border: '1px solid #d4af37', borderRadius: 8, padding: '8px 18px', cursor: 'pointer', fontSize: 13, fontWeight: 'bold' },
+  rangeBtn: { background: '#FBF8F0', color: '#5C4E36', border: '1px solid #DACC9E', borderRadius: 8, padding: '8px 18px', cursor: 'pointer', fontSize: 13 },
+  rangeBtnActive: { background: '#3B2E1F', color: '#F2EBDB', border: '1px solid #3B2E1F', borderRadius: 8, padding: '8px 18px', cursor: 'pointer', fontSize: 13, fontWeight: 'bold' },
   statsGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
     gap: 12,
     marginBottom: 16,
   },
-  statCard: { background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: 16 },
-  statValue: { fontSize: 22, fontWeight: 'bold', color: '#f5f5f5', marginTop: 4 },
+  statCard: { background: '#FBF8F0', border: '1px solid #DACC9E', borderRadius: 12, padding: 16 },
+  statValue: { fontSize: 22, fontWeight: 'bold', color: '#2E2618', marginTop: 4 },
   netCard: {
-    background: '#1a1a1a',
-    border: '1px solid #d4af37',
+    background: '#FBF8F0',
+    border: '1px solid #3B2E1F',
     borderRadius: 12,
     padding: 16,
     display: 'flex',
@@ -201,9 +201,9 @@ const styles = {
     marginBottom: 20,
     fontSize: 15,
   },
-  netValue: { color: '#d4af37', fontWeight: 'bold', fontSize: 20 },
+  netValue: { color: '#3B2E1F', fontWeight: 'bold', fontSize: 20 },
   row: { display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 16 },
-  card: { flex: 1, minWidth: 240, background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: 18 },
-  cardTitle: { marginTop: 0, color: '#d4af37', fontSize: 15 },
+  card: { flex: 1, minWidth: 240, background: '#FBF8F0', border: '1px solid #DACC9E', borderRadius: 12, padding: 18 },
+  cardTitle: { marginTop: 0, color: '#3B2E1F', fontSize: 15 },
   lineRow: { display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 8 },
 }
