@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { supabase } from './src/supabaseClient'
+import { supabase } from './supabaseClient'
 
 // Public VAPID key (safe to expose in client code — it's the "public" half).
 const VAPID_PUBLIC_KEY = 'BFfuUTsQdDETGiMyHHYKBbuNO6BKPl9ySHZgVXNE2jmmKW_9At194RxKNGSyyDB1PpTLjmK9G9mMmBRqZU983io'
