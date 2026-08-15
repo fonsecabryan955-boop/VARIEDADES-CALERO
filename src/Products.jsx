@@ -38,6 +38,8 @@ export default function Products({ onBack }) {
   const [description, setDescription] = useState('')
   const [supplier, setSupplier] = useState('')
   const [sharedColor, setSharedColor] = useState('')
+  const [onSale, setOnSale] = useState(false)
+  const [discountPercent, setDiscountPercent] = useState('')
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
   const [uploadingImage, setUploadingImage] = useState(false)
@@ -63,7 +65,7 @@ export default function Products({ onBack }) {
     setLoading(true)
     const { data } = await supabase
       .from('product_variants')
-      .select('id, size, color, stock, price, sku, product_id, products(id, name, base_price, image_url, category_id, description, cost, supplier, categories(id, name))')
+      .select('id, size, color, stock, price, sku, product_id, products(id, name, base_price, image_url, category_id, description, cost, supplier, on_sale, discount_percent, categories(id, name))')
       .order('created_at', { ascending: false })
     setRawVariants(data || [])
     setLoading(false)
@@ -95,6 +97,8 @@ export default function Products({ onBack }) {
           description: v.products?.description || '',
           cost: v.products?.cost ?? 0,
           supplier: v.products?.supplier || '',
+          onSale: v.products?.on_sale || false,
+          discountPercent: v.products?.discount_percent || 0,
           variants: [],
         })
       }
@@ -138,6 +142,8 @@ export default function Products({ onBack }) {
     setDescription('')
     setSupplier('')
     setSharedColor('')
+    setOnSale(false)
+    setDiscountPercent('')
     setImageFile(null)
     setImagePreview(null)
     setRows([])
@@ -202,6 +208,8 @@ export default function Products({ onBack }) {
         cost: cost ? parseFloat(cost) : 0,
         description: description.trim() || null,
         supplier: supplier.trim() || null,
+        on_sale: onSale,
+        discount_percent: onSale ? (parseInt(discountPercent) || 0) : 0,
       }
       if (imageUrl) productPayload.image_url = imageUrl
 
@@ -252,6 +260,8 @@ export default function Products({ onBack }) {
     setCost(String(product.cost ?? ''))
     setDescription(product.description || '')
     setSupplier(product.supplier || '')
+    setOnSale(!!product.onSale)
+    setDiscountPercent(product.discountPercent ? String(product.discountPercent) : '')
     setImageFile(null)
     setImagePreview(product.image)
     setRows([])
@@ -457,6 +467,41 @@ export default function Products({ onBack }) {
             </p>
           )}
 
+          <div style={styles.saleBox}>
+            <label style={styles.saleToggleRow}>
+              <input
+                type="checkbox"
+                checked={onSale}
+                onChange={(e) => setOnSale(e.target.checked)}
+                style={styles.saleCheckbox}
+              />
+              <span style={styles.saleToggleText}>🏷️ Poner en liquidación</span>
+            </label>
+            {onSale && (
+              <div style={styles.saleFields}>
+                <div style={{ ...styles.fieldCol, maxWidth: 160 }}>
+                  <label style={styles.fieldLabel}>% de descuento</label>
+                  <input
+                    style={styles.input}
+                    type="number"
+                    min="1"
+                    max="90"
+                    placeholder="Ej. 20"
+                    value={discountPercent}
+                    onChange={(e) => setDiscountPercent(e.target.value)}
+                  />
+                </div>
+                {basePrice && discountPercent && (
+                  <p style={styles.salePreview}>
+                    Precio normal <span style={styles.saleStrike}>${Number(basePrice).toFixed(2)}</span>
+                    {' '}→ precio en liquidación{' '}
+                    <b>${(Number(basePrice) * (1 - Number(discountPercent) / 100)).toFixed(2)}</b>
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
           <div style={styles.formRow}>
             <div style={{ ...styles.fieldCol, flex: 2 }}>
               <label style={styles.fieldLabel}>Descripción</label>
@@ -599,14 +644,28 @@ export default function Products({ onBack }) {
                   <div style={styles.cardLeft}>
                     {p.image ? <img src={p.image} alt="" style={styles.thumb} /> : <div style={styles.thumbPlaceholder}>📦</div>}
                     <div>
-                      <div style={styles.cardName}>{p.name}</div>
+                      <div style={styles.cardName}>
+                        {p.name}
+                        {p.onSale && p.discountPercent > 0 && (
+                          <span style={styles.saleBadge}>🏷️ -{p.discountPercent}%</span>
+                        )}
+                      </div>
                       <div style={styles.cardMeta}>
                         {p.category} · {p.variants.length} variante{p.variants.length !== 1 ? 's' : ''} · Stock total: {totalStock}
                       </div>
                     </div>
                   </div>
                   <div style={styles.cardRight}>
-                    <div style={styles.cardPrice}>${Number(p.basePrice).toFixed(2)}</div>
+                    {p.onSale && p.discountPercent > 0 ? (
+                      <div style={styles.cardPriceSaleWrap}>
+                        <div style={styles.cardPriceStrike}>${Number(p.basePrice).toFixed(2)}</div>
+                        <div style={styles.cardPriceSale}>
+                          ${(Number(p.basePrice) * (1 - p.discountPercent / 100)).toFixed(2)}
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={styles.cardPrice}>${Number(p.basePrice).toFixed(2)}</div>
+                    )}
                     <span style={styles.expandIcon}>{isOpen ? '▲' : '▼'}</span>
                   </div>
                 </div>
@@ -760,6 +819,21 @@ const styles = {
   rowInput: { background: '#EAE0C7', color: '#2E2618', border: '1px solid #C7B689', borderRadius: 7, padding: '8px 10px', fontSize: 13 },
   rowRemoveBtn: { width: 30, background: 'transparent', border: '1px solid #C7B689', color: '#B5574A', borderRadius: 7, cursor: 'pointer', padding: '8px 0' },
   addRowBtn: { background: 'transparent', border: '1px solid #C7B689', color: '#8A7A56', borderRadius: 8, padding: '9px 14px', fontSize: 13, cursor: 'pointer' },
+
+  saleBox: { background: '#EFE6D5', border: '1px dashed #C7B689', borderRadius: 10, padding: '12px 16px', marginBottom: 14 },
+  saleToggleRow: { display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' },
+  saleCheckbox: { width: 16, height: 16, accentColor: '#B5574A', cursor: 'pointer' },
+  saleToggleText: { fontSize: 13.5, fontWeight: 600, color: '#2E2618' },
+  saleFields: { marginTop: 12, paddingTop: 12, borderTop: '1px solid #DACC9E' },
+  salePreview: { fontSize: 12.5, color: '#B5574A', margin: '10px 0 0', fontStyle: 'italic' },
+  saleStrike: { textDecoration: 'line-through', color: '#8A7A56', fontStyle: 'normal' },
+  saleBadge: {
+    marginLeft: 8, background: '#B5574A', color: '#FBF8F0', fontSize: 10.5, fontWeight: 700,
+    borderRadius: 999, padding: '2px 9px', verticalAlign: 'middle',
+  },
+  cardPriceSaleWrap: { textAlign: 'right' },
+  cardPriceStrike: { color: '#8A7A56', fontSize: 12, textDecoration: 'line-through' },
+  cardPriceSale: { color: '#B5574A', fontWeight: 'bold' },
 
   error: { color: '#B5574A', fontSize: 13, marginBottom: 12 },
   muted: { color: '#8A7A56' },
