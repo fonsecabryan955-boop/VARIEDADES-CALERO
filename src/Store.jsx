@@ -25,6 +25,19 @@ const IconChevronLeft = (p) => (
 const IconCheck = (p) => (
   <svg viewBox="0 0 24 24" width={p.size || 34} height={p.size || 34} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
 )
+const IconWhatsapp = (p) => (
+  <svg viewBox="0 0 24 24" width={p.size || 22} height={p.size || 22} fill="currentColor">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.472-.148-.67.15-.198.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.876 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347Z" />
+    <path d="M12.01 2C6.486 2 2 6.486 2 12.01c0 1.98.578 3.82 1.575 5.37L2 22l4.75-1.545a9.96 9.96 0 0 0 5.26 1.505h.004c5.523 0 10.008-4.486 10.008-10.01C22.023 6.486 17.537 2 12.01 2Zm0 18.19h-.003a8.157 8.157 0 0 1-4.157-1.14l-.298-.177-3.09 1.006 1.024-3.033-.194-.31a8.146 8.146 0 0 1-1.253-4.328c0-4.51 3.664-8.175 8.175-8.175 2.184 0 4.236.852 5.78 2.398a8.12 8.12 0 0 1 2.394 5.782c0 4.51-3.665 8.175-8.175 8.175Z" />
+  </svg>
+)
+
+// ---------- WhatsApp ----------
+const WHATSAPP_NUMBER = '50589110148' // +505 8911 0148, sin espacios ni símbolos
+
+function buildWhatsappLink(message) {
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
+}
 
 // ---------- category-aware care copy for the product accordion ----------
 const CARE_TEXT = {
@@ -35,6 +48,24 @@ const CARE_TEXT = {
   'Accesorios': 'Guardar en un lugar seco. Evitar el contacto con perfumes o productos químicos.',
   'Artículos para el cabello': 'Seguir las instrucciones de uso del empaque. Conservar en un lugar seco.',
   default: 'Conservar en un lugar fresco y seco. Ante cualquier duda, escribinos por WhatsApp.',
+}
+
+// Floating contact button, visible while browsing. Minimalist: ink circle,
+// no green bubble, matches the boutique palette instead of the generic
+// WhatsApp branding.
+function FloatingWhatsapp() {
+  const message = 'Hola, tengo una consulta sobre Variedades Calero 🙂'
+  return (
+    <a
+      className="vc-wa-float"
+      href={buildWhatsappLink(message)}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Escribinos por WhatsApp"
+    >
+      <IconWhatsapp size={22} />
+    </a>
+  )
 }
 
 // ---------- Global styles for this page only ----------
@@ -748,10 +779,74 @@ function GlobalStyle() {
         .vc-drawer { width: 100vw; }
         .vc-hero { padding: 48px 20px 40px; }
       }
+
+      /* floating whatsapp contact button */
+      .vc-wa-float {
+        position: fixed;
+        right: 20px;
+        bottom: 24px;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: var(--vc-ink);
+        color: var(--vc-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 6px 20px rgba(23, 21, 15, 0.28);
+        z-index: 70;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+      }
+      .vc-wa-float:hover {
+        transform: translateY(-2px) scale(1.04);
+        box-shadow: 0 10px 26px rgba(23, 21, 15, 0.34);
+      }
+      .vc-wa-float:active { transform: scale(0.96); }
+      @media (max-width: 680px) {
+        .vc-wa-float { right: 16px; bottom: 92px; width: 48px; height: 48px; }
+      }
+
+      /* whatsapp order-summary button on the confirmation screen */
+      .vc-wa-order-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        background: var(--vc-ink);
+        color: var(--vc-bg);
+        border: none;
+        border-radius: 999px;
+        padding: 13px 18px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        font-size: 13.5px;
+        letter-spacing: 0.2px;
+        cursor: pointer;
+        transition: opacity 0.15s ease;
+        text-decoration: none;
+      }
+      .vc-wa-order-btn:hover { opacity: 0.85; }
     `}</style>
   )
 }
 
+
+function buildOrderWhatsappMessage({ orderId, clientName, clientAddress, cart, total }) {
+  const lines = cart.map((i) => `• ${i.name} (${i.variantLabel}) x${i.qty} — $${(i.price * i.qty).toFixed(2)}`)
+  const parts = [
+    `Hola, soy ${clientName}. Acabo de hacer un pedido en la tienda online (#${orderId}).`,
+    '',
+    ...lines,
+    '',
+    `Total: $${total.toFixed(2)}`,
+  ]
+  if (clientAddress?.trim()) {
+    parts.push('', `Dirección: ${clientAddress.trim()}`)
+  }
+  parts.push('', 'Te comparto el comprobante de pago acá mismo.')
+  return parts.join('\n')
+}
 
 export default function Store() {
   const [rawVariants, setRawVariants] = useState([])
@@ -1144,6 +1239,18 @@ export default function Store() {
               )}
             </div>
 
+            <a
+              className="vc-wa-order-btn"
+              style={{ marginTop: 14 }}
+              href={buildWhatsappLink(
+                buildOrderWhatsappMessage({ orderId: createdOrderId, clientName, clientAddress, cart, total })
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <IconWhatsapp size={17} /> Enviar mi pedido por WhatsApp
+            </a>
+
             <button className="vc-btn-ghost" onClick={() => window.location.reload()}>
               Volver a la tienda
             </button>
@@ -1207,6 +1314,7 @@ export default function Store() {
             </button>
           </div>
         )}
+        <FloatingWhatsapp />
       </div>
     )
   }
@@ -1260,6 +1368,7 @@ export default function Store() {
             </div>
           </div>
         </div>
+        <FloatingWhatsapp />
       </div>
     )
   }
@@ -1498,6 +1607,7 @@ export default function Store() {
       )}
 
       {toast && <div className="vc-toast">{toast}</div>}
+      <FloatingWhatsapp />
     </div>
   )
 }
