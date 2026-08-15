@@ -241,15 +241,15 @@ export default function Cash({ user, onBack }) {
               </div>
               <div style={styles.summaryItem}>
                 <div style={styles.muted}>Ventas en efectivo</div>
-                <div style={{ color: '#7fd88f' }}>${cashSales.toFixed(2)}</div>
+                <div style={{ color: '#4C7A52' }}>${cashSales.toFixed(2)}</div>
               </div>
               <div style={styles.summaryItem}>
                 <div style={styles.muted}>Gastos</div>
-                <div style={{ color: '#ff9b9b' }}>-${totalExpenses.toFixed(2)}</div>
+                <div style={{ color: '#C97A6E' }}>-${totalExpenses.toFixed(2)}</div>
               </div>
             </div>
             <div style={styles.expectedBox}>
-              Esperado en caja: <b style={{ color: '#d4af37' }}>${expected.toFixed(2)}</b>
+              Esperado en caja: <b style={{ color: '#3B2E1F' }}>${expected.toFixed(2)}</b>
             </div>
           </div>
 
@@ -288,7 +288,7 @@ export default function Cash({ user, onBack }) {
                   <div key={e.id} style={styles.expenseRow}>
                     <span>{e.description} {e.category ? `(${e.category})` : ''}</span>
                     <div style={styles.expenseRight}>
-                      <span style={{ color: '#ff9b9b' }}>-${Number(e.amount).toFixed(2)}</span>
+                      <span style={{ color: '#C97A6E' }}>-${Number(e.amount).toFixed(2)}</span>
                       <button
                         style={styles.deleteExpenseBtn}
                         onClick={() => handleDeleteExpense(e.id)}
@@ -326,18 +326,18 @@ export default function Cash({ user, onBack }) {
 }
 
 const styles = {
-  container: { minHeight: '100vh', background: '#0f0f0f', color: '#f5f5f5', fontFamily: 'system-ui, sans-serif', padding: 24 },
+  container: { minHeight: '100vh', background: '#F2EBDB', color: '#2E2618', fontFamily: 'system-ui, sans-serif', padding: 24 },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
-  backBtn: { background: 'transparent', color: '#999', border: '1px solid #333', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' },
-  title: { color: '#d4af37', margin: 0, fontSize: 20 },
-  muted: { color: '#999', fontSize: 13 },
-  card: { background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, padding: 20, marginBottom: 18, maxWidth: 480 },
-  cardTitle: { marginTop: 0, color: '#d4af37', fontSize: 16 },
+  backBtn: { background: 'transparent', color: '#8A7A56', border: '1px solid #C7B689', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' },
+  title: { color: '#3B2E1F', margin: 0, fontSize: 20 },
+  muted: { color: '#8A7A56', fontSize: 13 },
+  card: { background: '#FBF8F0', border: '1px solid #DACC9E', borderRadius: 12, padding: 20, marginBottom: 18, maxWidth: 480 },
+  cardTitle: { marginTop: 0, color: '#3B2E1F', fontSize: 16 },
   cardHeaderRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   deleteSessionBtn: {
     background: 'transparent',
-    color: '#ff6b6b',
-    border: '1px solid #ff6b6b',
+    color: '#B5574A',
+    border: '1px solid #B5574A',
     borderRadius: 8,
     padding: '6px 12px',
     fontSize: 12,
@@ -346,9 +346,9 @@ const styles = {
   },
   input: {
     width: '100%',
-    background: '#242424',
-    color: '#f5f5f5',
-    border: '1px solid #333',
+    background: '#EAE0C7',
+    color: '#2E2618',
+    border: '1px solid #C7B689',
     borderRadius: 8,
     padding: '10px 12px',
     marginBottom: 10,
@@ -357,8 +357,8 @@ const styles = {
   },
   formRow: { display: 'flex', gap: 8, flexWrap: 'wrap' },
   primaryBtn: {
-    background: '#d4af37',
-    color: '#0f0f0f',
+    background: '#3B2E1F',
+    color: '#F2EBDB',
     border: 'none',
     borderRadius: 8,
     padding: '10px 20px',
@@ -367,14 +367,14 @@ const styles = {
   },
   dangerBtn: {
     background: 'transparent',
-    color: '#ff6b6b',
-    border: '1px solid #ff6b6b',
+    color: '#B5574A',
+    border: '1px solid #B5574A',
     borderRadius: 8,
     padding: '10px 20px',
     fontWeight: 'bold',
     cursor: 'pointer',
   },
-  error: { color: '#ff6b6b', fontSize: 13, marginBottom: 10 },
+  error: { color: '#B5574A', fontSize: 13, marginBottom: 10 },
   summaryGrid: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
@@ -383,7 +383,7 @@ const styles = {
   },
   summaryItem: { fontSize: 14 },
   expectedBox: {
-    background: '#0f0f0f',
+    background: '#F2EBDB',
     borderRadius: 8,
     padding: 12,
     fontSize: 14,
@@ -399,14 +399,14 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     fontSize: 13,
-    borderBottom: '1px solid #2a2a2a',
+    borderBottom: '1px solid #DACC9E',
     paddingBottom: 6,
   },
   expenseRight: { display: 'flex', alignItems: 'center', gap: 8 },
   deleteExpenseBtn: {
     background: 'transparent',
-    color: '#ff6b6b',
-    border: '1px solid #ff6b6b',
+    color: '#B5574A',
+    border: '1px solid #B5574A',
     borderRadius: 6,
     padding: '3px 8px',
     fontSize: 11,
