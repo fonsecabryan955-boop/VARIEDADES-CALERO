@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { supabase } from './supabaseClient'
 
 const paymentLabelsMap = { cash: 'Efectivo', card: 'Tarjeta', transfer: 'Transferencia' }
@@ -17,6 +17,7 @@ export default function POS({ user, onBack }) {
   const [receipt, setReceipt] = useState(null)
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('Todos')
+  const [bump, setBump] = useState(false)
 
   const loadVariants = async () => {
     setLoading(true)
@@ -79,6 +80,16 @@ export default function POS({ user, onBack }) {
     const price = i.price ?? i.products?.base_price ?? 0
     return sum + price * i.qty
   }, 0)
+
+  const prevTotalRef = useRef(total)
+  useEffect(() => {
+    if (total !== prevTotalRef.current) {
+      setBump(true)
+      const t = setTimeout(() => setBump(false), 260)
+      prevTotalRef.current = total
+      return () => clearTimeout(t)
+    }
+  }, [total])
 
   const handleCheckout = async () => {
     if (cart.length === 0) return
@@ -173,6 +184,7 @@ export default function POS({ user, onBack }) {
     }
 
     setReceipt({
+      orderRef: (order.id || Date.now()).toString().slice(-6).padStart(6, '0'),
       items: cart,
       subtotal,
       total: subtotal,
@@ -198,10 +210,13 @@ export default function POS({ user, onBack }) {
     return (
       <div className="vc-root">
         <style>{VC_STYLES}</style>
+        <div className="vc-topbar" />
         <div className="vc-receipt-wrap">
           <div className="vc-receipt-box" id="receipt-print">
             <div className="vc-receipt-hole" />
             <h2 className="vc-brand">Variedades Calero</h2>
+            <div className="vc-brand-rule" />
+            <p className="vc-receipt-ref">N.º {receipt.orderRef}</p>
             <p className="vc-muted vc-center">{receipt.date.toLocaleString()}</p>
             <p className="vc-muted vc-center">Vendido por: {receipt.soldBy}</p>
             {receipt.clientName && <p className="vc-muted vc-center">Cliente: {receipt.clientName}</p>}
@@ -260,14 +275,19 @@ export default function POS({ user, onBack }) {
   return (
     <div className="vc-root">
       <style>{VC_STYLES}</style>
+      <div className="vc-topbar" />
 
       <div className="vc-header">
-        <button onClick={onBack} className="vc-back">← Volver</button>
-        <div className="vc-headtext">
-          <div className="vc-wordmark">Variedades Calero</div>
-          <div className="vc-subtitle">Punto de venta</div>
+        <div className="vc-brand-block">
+          <div className="vc-crest">
+            <span className="vc-crest-text">VC</span>
+          </div>
+          <div className="vc-headtext">
+            <div className="vc-wordmark">Variedades Calero</div>
+            <div className="vc-subtitle">Punto de venta</div>
+          </div>
         </div>
-        <div className="vc-header-spacer" />
+        <button onClick={onBack} className="vc-back">← Volver</button>
       </div>
 
       <div className="vc-toolbar">
@@ -337,7 +357,10 @@ export default function POS({ user, onBack }) {
         </div>
 
         <div className="vc-cart">
-          <h3 className="vc-cart-title">Carrito</h3>
+          <div className="vc-cart-head">
+            <h3 className="vc-cart-title">Carrito</h3>
+            <span className="vc-cart-count">{cart.length} {cart.length === 1 ? 'artículo' : 'artículos'}</span>
+          </div>
           {cart.length === 0 ? (
             <p className="vc-muted vc-cart-empty">Vacío. Tocá un producto para agregarlo.</p>
           ) : (
@@ -371,8 +394,8 @@ export default function POS({ user, onBack }) {
           )}
 
           <div className="vc-total-row">
-            <span>Total</span>
-            <span className="vc-total-value vc-num">${total.toFixed(2)}</span>
+            <span className="vc-total-label">Total a pagar</span>
+            <span className={`vc-total-value ${bump ? 'vc-bump' : ''}`}>${total.toFixed(2)}</span>
           </div>
 
           <div className="vc-pay-methods">
@@ -428,25 +451,29 @@ export default function POS({ user, onBack }) {
 
 const VC_STYLES = `
   .vc-root {
-    --bg: #16140F;
-    --surface: #1E1A13;
-    --surface-2: #262015;
-    --border: #362E1E;
-    --gold: #C7A048;
-    --gold-bright: #E7C878;
-    --ivory: #F4EEDD;
-    --muted: #948A72;
-    --success: #7FB88A;
-    --danger: #E08668;
+    --bg: #1C1A17;
+    --surface: #232019;
+    --surface-2: #2A261D;
+    --border: #3A362B;
+    --border-soft: #4A4536;
+    --stitch: rgba(166, 138, 91, 0.22);
+    --accent: #A68A5B;
+    --accent-soft: #8C7449;
+    --accent-text: #1C1A17;
+    --ivory: #ECE6D8;
+    --muted: #928972;
+    --success: #7C9B7F;
+    --danger: #B97A63;
     --display: 'Fraunces', Georgia, serif;
     --body: 'Inter', system-ui, -apple-system, sans-serif;
     --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
 
+    position: relative;
     min-height: 100vh;
     background: var(--bg);
     color: var(--ivory);
     font-family: var(--body);
-    padding: 20px;
+    padding: 24px;
     box-sizing: border-box;
   }
   .vc-root * { box-sizing: border-box; }
@@ -456,49 +483,84 @@ const VC_STYLES = `
   .vc-danger { color: var(--danger) !important; }
   .vc-success { color: var(--success) !important; }
 
+  .vc-topbar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+  }
+
   .vc-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 18px;
+    margin: 6px 0 24px;
     gap: 12px;
   }
-  .vc-back {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 14px;
-    font-family: var(--body);
-    font-size: 13px;
-    cursor: pointer;
-    transition: border-color .15s, color .15s;
+  .vc-brand-block { display: flex; align-items: center; gap: 13px; }
+  .vc-crest {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--border-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
   }
-  .vc-back:hover { border-color: var(--gold); color: var(--gold-bright); }
-  .vc-headtext { text-align: center; }
+  .vc-crest::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+  }
+  .vc-crest-text {
+    font-family: var(--display);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+  }
+  .vc-headtext { text-align: left; }
   .vc-wordmark {
     font-family: var(--display);
     font-style: italic;
     font-weight: 600;
-    font-size: 23px;
-    color: var(--gold-bright);
+    font-size: 21px;
+    color: var(--ivory);
     letter-spacing: 0.2px;
+    line-height: 1.15;
   }
   .vc-subtitle {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: 9.5px;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 2.5px;
     color: var(--muted);
     margin-top: 2px;
   }
-  .vc-header-spacer { width: 78px; }
+  .vc-back {
+    background: var(--surface);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 15px;
+    font-family: var(--body);
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color .2s, color .2s;
+    flex-shrink: 0;
+  }
+  .vc-back:hover { border-color: var(--accent); color: var(--ivory); }
 
   .vc-toolbar {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 18px;
+    gap: 12px;
+    margin-bottom: 22px;
   }
   .vc-search-wrap {
     position: relative;
@@ -506,28 +568,28 @@ const VC_STYLES = `
   }
   .vc-search-icon {
     position: absolute;
-    left: 12px;
+    left: 13px;
     top: 50%;
     transform: translateY(-50%);
     font-size: 13px;
-    opacity: 0.6;
+    opacity: 0.5;
   }
   .vc-search {
     width: 100%;
     background: var(--surface);
     color: var(--ivory);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 12px 10px 34px;
+    border-radius: 9px;
+    padding: 11px 12px 11px 36px;
     font-family: var(--body);
     font-size: 13px;
     outline: none;
-    transition: border-color .15s;
+    transition: border-color .2s;
   }
-  .vc-search:focus { border-color: var(--gold); }
+  .vc-search:focus { border-color: var(--accent); }
   .vc-chips {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     overflow-x: auto;
     padding-bottom: 4px;
     scrollbar-width: none;
@@ -538,89 +600,105 @@ const VC_STYLES = `
     background: var(--surface);
     color: var(--muted);
     border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 6px 14px;
+    border-radius: 3px 0 0 3px;
+    padding: 7px 20px 7px 14px;
     font-size: 12px;
     font-family: var(--body);
     cursor: pointer;
     white-space: nowrap;
-    transition: all .15s;
+    transition: color .2s, border-color .2s, background .2s;
+    clip-path: polygon(0 0, 88% 0, 100% 50%, 88% 100%, 0 100%);
   }
-  .vc-chip:hover { color: var(--ivory); border-color: var(--gold); }
+  .vc-chip:hover { color: var(--ivory); border-color: var(--accent); }
   .vc-chip-active {
-    background: var(--gold);
-    color: var(--bg);
-    border-color: var(--gold);
+    background: var(--accent);
+    color: var(--accent-text);
+    border-color: var(--accent);
     font-weight: 600;
   }
 
-  .vc-layout { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
+  .vc-layout { display: flex; gap: 22px; flex-wrap: wrap; align-items: flex-start; }
   .vc-products { flex: 2; min-width: 280px; }
 
   .vc-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(152px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
+    gap: 16px;
   }
 
   .vc-card {
     position: relative;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 4px 16px 4px 4px;
-    padding: 16px 12px 12px;
+    border-radius: 4px 18px 4px 4px;
+    padding: 18px 13px 13px;
     text-align: left;
     cursor: pointer;
     color: var(--ivory);
     font-family: var(--body);
-    transition: border-color .15s, transform .1s;
+    transition: border-color .2s, transform .18s;
   }
-  .vc-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .vc-card::after {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1px dashed var(--stitch);
+    border-radius: 3px 15px 3px 3px;
+    pointer-events: none;
+  }
+  .vc-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
   .vc-card:active { transform: translateY(0); }
   .vc-card-hole {
     position: absolute;
-    top: 8px;
-    left: 10px;
+    top: 9px;
+    left: 11px;
     width: 9px;
     height: 9px;
     border-radius: 50%;
     background: var(--bg);
     border: 1px solid var(--border);
+    z-index: 1;
   }
   .vc-card-img {
     width: 100%;
-    height: 84px;
+    height: 86px;
     object-fit: cover;
-    border-radius: 6px;
-    margin-bottom: 8px;
+    border-radius: 7px;
+    margin-bottom: 9px;
+    position: relative;
   }
   .vc-card-img-placeholder {
     width: 100%;
-    height: 84px;
+    height: 86px;
     background: var(--surface-2);
-    border-radius: 6px;
-    margin-bottom: 8px;
+    border-radius: 7px;
+    margin-bottom: 9px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 22px;
+    opacity: 0.6;
   }
-  .vc-card-name { font-weight: 600; font-size: 13.5px; line-height: 1.3; }
-  .vc-card-meta { color: var(--muted); font-size: 11px; margin-top: 2px; }
+  .vc-card-name { font-weight: 600; font-size: 13.5px; line-height: 1.3; position: relative; }
+  .vc-card-meta { color: var(--muted); font-size: 11px; margin-top: 3px; position: relative; }
   .vc-card-footer {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    margin-top: 10px;
-    padding-top: 8px;
+    margin-top: 11px;
+    padding-top: 9px;
     border-top: 1px dashed var(--border);
+    position: relative;
   }
-  .vc-card-price { color: var(--gold-bright); font-weight: 600; font-size: 13px; }
+  .vc-card-price { color: var(--accent); font-weight: 600; font-size: 13.5px; }
   .vc-card-stock { color: var(--success); font-size: 10px; font-family: var(--mono); }
 
   .vc-skeleton {
-    height: 176px;
-    border-radius: 4px 16px 4px 4px;
+    height: 180px;
+    border-radius: 4px 18px 4px 4px;
     background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%);
     background-size: 200% 100%;
     animation: vc-pulse 1.4s ease-in-out infinite;
@@ -633,37 +711,52 @@ const VC_STYLES = `
 
   .vc-empty {
     text-align: center;
-    padding: 60px 20px;
+    padding: 64px 20px;
     border: 1px dashed var(--border);
-    border-radius: 12px;
+    border-radius: 14px;
   }
-  .vc-empty-icon { font-size: 28px; margin-bottom: 8px; opacity: 0.6; }
+  .vc-empty-icon { font-size: 30px; margin-bottom: 10px; opacity: 0.5; }
 
   .vc-cart {
     flex: 1;
     min-width: 270px;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 18px;
+    border-radius: 14px;
+    padding: 20px;
     position: sticky;
     top: 16px;
   }
+  .vc-cart-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
   .vc-cart-title {
-    margin: 0 0 12px;
-    color: var(--gold-bright);
+    margin: 0;
+    color: var(--ivory);
     font-family: var(--display);
     font-style: italic;
-    font-size: 18px;
+    font-size: 19px;
   }
-  .vc-cart-empty { padding: 20px 0; text-align: center; font-size: 13px; }
-  .vc-cart-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .vc-cart-count {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .vc-cart-empty { padding: 24px 0; text-align: center; font-size: 13px; }
+  .vc-cart-list { display: flex; flex-direction: column; gap: 11px; margin-bottom: 16px; }
   .vc-cart-item {
     display: flex;
     align-items: center;
     gap: 8px;
     border-bottom: 1px dashed var(--border);
-    padding-bottom: 10px;
+    padding-bottom: 11px;
   }
   .vc-cart-item-info { flex: 1; min-width: 0; }
   .vc-cart-item-name { font-size: 13px; font-weight: 600; }
@@ -679,9 +772,9 @@ const VC_STYLES = `
     cursor: pointer;
     font-size: 13px;
     line-height: 1;
-    transition: border-color .15s;
+    transition: border-color .2s;
   }
-  .vc-qty-btn:hover:not(:disabled) { border-color: var(--gold); }
+  .vc-qty-btn:hover:not(:disabled) { border-color: var(--accent); }
   .vc-qty-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .vc-qty-value { min-width: 16px; text-align: center; font-size: 13px; }
   .vc-cart-item-price { font-size: 13px; min-width: 54px; text-align: right; }
@@ -699,143 +792,183 @@ const VC_STYLES = `
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    font-size: 15px;
-    font-weight: 600;
     border-top: 1px solid var(--border);
-    padding-top: 12px;
-    margin-bottom: 12px;
+    padding-top: 14px;
+    margin-bottom: 14px;
   }
-  .vc-total-value { color: var(--gold-bright); font-size: 18px; }
+  .vc-total-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+  }
+  .vc-total-value {
+    font-family: var(--display);
+    font-style: italic;
+    font-weight: 600;
+    color: var(--accent);
+    font-size: 27px;
+    display: inline-block;
+    transition: transform .18s ease;
+  }
+  .vc-total-value.vc-bump { transform: scale(1.08); }
 
-  .vc-pay-methods { display: flex; gap: 6px; margin-bottom: 14px; }
+  .vc-pay-methods { display: flex; gap: 7px; margin-bottom: 16px; }
   .vc-pay-chip {
     flex: 1;
     background: var(--surface-2);
     color: var(--muted);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 9px 4px;
+    border-radius: 9px;
+    padding: 10px 4px;
     font-size: 11px;
     font-family: var(--body);
     cursor: pointer;
-    transition: all .15s;
+    transition: all .2s;
   }
   .vc-pay-chip:hover { color: var(--ivory); }
   .vc-pay-chip-active {
-    background: var(--gold);
-    color: var(--bg);
-    border-color: var(--gold);
+    background: var(--accent);
+    color: var(--accent-text);
+    border-color: var(--accent);
     font-weight: 600;
   }
 
   .vc-credit {
     border-top: 1px solid var(--border);
-    padding-top: 12px;
-    margin-bottom: 12px;
+    padding-top: 14px;
+    margin-bottom: 14px;
   }
   .vc-credit-label {
     font-size: 10.5px;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     color: var(--muted);
-    margin: 0 0 8px;
+    margin: 0 0 9px;
   }
   .vc-input {
     width: 100%;
     background: var(--surface-2);
     color: var(--ivory);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 9px 10px;
-    margin-bottom: 8px;
+    border-radius: 9px;
+    padding: 10px 11px;
+    margin-bottom: 9px;
     font-size: 13px;
     font-family: var(--body);
     outline: none;
-    transition: border-color .15s;
+    transition: border-color .2s;
   }
-  .vc-input:focus { border-color: var(--gold); }
+  .vc-input:focus { border-color: var(--accent); }
 
   .vc-message { font-size: 13px; margin-bottom: 10px; color: var(--danger); }
 
   .vc-checkout-btn {
     width: 100%;
-    background: var(--gold);
-    color: var(--bg);
+    background: var(--accent);
+    color: var(--accent-text);
     border: none;
-    border-radius: 8px;
-    padding: 13px 0;
+    border-radius: 9px;
+    padding: 14px 0;
     font-weight: 700;
     font-size: 14px;
     font-family: var(--body);
     cursor: pointer;
-    transition: background .15s;
+    transition: background .2s;
   }
-  .vc-checkout-btn:hover:not(:disabled) { background: var(--gold-bright); }
-  .vc-checkout-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .vc-checkout-btn:hover:not(:disabled) { background: var(--accent-soft); }
+  .vc-checkout-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
   .vc-receipt-wrap { max-width: 380px; margin: 0 auto; }
   .vc-brand {
     font-family: var(--display);
     font-style: italic;
-    color: var(--gold-bright);
+    color: var(--ivory);
     text-align: center;
-    margin: 0 0 4px;
-    font-size: 20px;
+    margin: 0;
+    font-size: 21px;
+  }
+  .vc-brand-rule {
+    width: 52px;
+    height: 1px;
+    margin: 9px auto 8px;
+    background: var(--border-soft);
+  }
+  .vc-receipt-ref {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    margin: 0 0 12px;
   }
   .vc-receipt-box {
     position: relative;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 22px 20px 20px;
+    border-radius: 14px;
+    padding: 26px 22px 22px;
   }
   .vc-receipt-hole {
     position: absolute;
     top: -6px;
     left: 50%;
     transform: translateX(-50%);
-    width: 12px;
-    height: 12px;
+    width: 13px;
+    height: 13px;
     border-radius: 50%;
     background: var(--bg);
     border: 1px solid var(--border);
   }
-  .vc-receipt-divider { border-top: 1px dashed var(--border); margin: 10px 0; }
+  .vc-receipt-divider { position: relative; border-top: 1px dashed var(--border); margin: 12px 0; }
+  .vc-receipt-divider::after {
+    content: '❖';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface);
+    color: var(--accent);
+    font-size: 11px;
+    padding: 0 8px;
+  }
   .vc-receipt-line { display: flex; justify-content: space-between; font-size: 13.5px; margin-bottom: 6px; }
   .vc-receipt-total { font-weight: 700; font-size: 15px; }
   .vc-receipt-bold { font-weight: 700; }
-  .vc-receipt-actions { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .vc-receipt-actions { margin-top: 18px; display: flex; flex-direction: column; gap: 9px; }
   .vc-btn-primary {
-    background: var(--gold);
-    color: var(--bg);
+    background: var(--accent);
+    color: var(--accent-text);
     border: none;
-    border-radius: 8px;
-    padding: 12px 0;
+    border-radius: 9px;
+    padding: 13px 0;
     font-weight: 700;
     font-family: var(--body);
     cursor: pointer;
+    transition: background .2s;
   }
-  .vc-btn-primary:hover { background: var(--gold-bright); }
+  .vc-btn-primary:hover { background: var(--accent-soft); }
   .vc-btn-ghost {
     background: transparent;
     color: var(--muted);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 0;
+    border-radius: 9px;
+    padding: 11px 0;
     font-family: var(--body);
     cursor: pointer;
+    transition: border-color .2s, color .2s;
   }
-  .vc-btn-ghost:hover { border-color: var(--gold); color: var(--gold-bright); }
+  .vc-btn-ghost:hover { border-color: var(--accent); color: var(--ivory); }
 
   @media print {
     .vc-root { background: white; color: black; padding: 0; }
+    .vc-topbar { display: none; }
     .vc-receipt-actions { display: none; }
     .vc-receipt-box { border: none; }
   }
 
   @media (max-width: 640px) {
     .vc-header { flex-wrap: wrap; }
-    .vc-header-spacer { display: none; }
     .vc-cart { position: static; }
   }
 `
