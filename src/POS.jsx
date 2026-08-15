@@ -217,6 +217,11 @@ export default function POS({ user, onBack }) {
   }
 
   if (receipt) {
+    const savings = receipt.items.reduce(
+      (s, i) => s + (getBasePrice(i) - getEffectivePrice(i)) * i.qty,
+      0
+    )
+    const itemCount = receipt.items.reduce((s, i) => s + i.qty, 0)
     return (
       <div className="vc-root">
         <style>{VC_STYLES}</style>
@@ -224,24 +229,55 @@ export default function POS({ user, onBack }) {
         <div className="vc-receipt-wrap">
           <div className="vc-receipt-box" id="receipt-print">
             <div className="vc-receipt-hole" />
+
+            <div className="vc-receipt-crest">
+              <span className="vc-crest-text">VC</span>
+            </div>
             <h2 className="vc-brand">Variedades Calero</h2>
+            <p className="vc-receipt-tagline">Boutique · Masatepe, Nicaragua</p>
             <div className="vc-brand-rule" />
             <p className="vc-receipt-ref">N.º {receipt.orderRef}</p>
-            <p className="vc-muted vc-center">{receipt.date.toLocaleString()}</p>
-            <p className="vc-muted vc-center">Vendido por: {receipt.soldBy}</p>
-            {receipt.clientName && <p className="vc-muted vc-center">Cliente: {receipt.clientName}</p>}
+
+            <div className="vc-receipt-meta">
+              <div className="vc-receipt-meta-row"><span>Fecha</span><span>{receipt.date.toLocaleDateString()} · {receipt.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></div>
+              <div className="vc-receipt-meta-row"><span>Atendido por</span><span>{receipt.soldBy}</span></div>
+              {receipt.clientName && <div className="vc-receipt-meta-row"><span>Cliente</span><span>{receipt.clientName}</span></div>}
+            </div>
 
             <div className="vc-receipt-divider" />
 
+            <div className="vc-receipt-cols-head">
+              <span>Artículo</span>
+              <span>Importe</span>
+            </div>
             {receipt.items.map((i) => (
-              <div key={i.id} className="vc-receipt-line">
-                <span>{i.products?.name} ×{i.qty}</span>
-                <span className="vc-num">${(getEffectivePrice(i) * i.qty).toFixed(2)}</span>
+              <div key={i.id} className="vc-receipt-item">
+                <div className="vc-receipt-item-top">
+                  <span className="vc-receipt-item-name">
+                    {i.products?.name}
+                    {isOnSale(i) && <span className="vc-receipt-sale-tag">liquidación</span>}
+                  </span>
+                  <span className="vc-num">${(getEffectivePrice(i) * i.qty).toFixed(2)}</span>
+                </div>
+                <div className="vc-receipt-item-sub">
+                  {i.qty} × ${getEffectivePrice(i).toFixed(2)}
+                  {isOnSale(i) && <span className="vc-receipt-item-strike vc-num">${getBasePrice(i).toFixed(2)}</span>}
+                </div>
               </div>
             ))}
 
             <div className="vc-receipt-divider" />
 
+            <div className="vc-receipt-line">
+              <span>Artículos</span>
+              <span className="vc-num">{itemCount}</span>
+            </div>
+            {savings > 0 && (
+              <div className="vc-receipt-line vc-success">
+                <span>Ahorro por liquidación</span>
+                <span className="vc-num">-${savings.toFixed(2)}</span>
+              </div>
+            )}
             <div className="vc-receipt-line vc-receipt-total">
               <span>Total</span>
               <span className="vc-num">${receipt.total.toFixed(2)}</span>
@@ -264,6 +300,10 @@ export default function POS({ user, onBack }) {
                 </div>
               </>
             )}
+
+            <div className="vc-receipt-divider" />
+            <p className="vc-receipt-thanks">¡Gracias por tu compra!</p>
+            <p className="vc-receipt-footer-tag">Conservá este recibo para cualquier cambio o garantía.</p>
           </div>
 
           <div className="vc-receipt-actions">
@@ -931,6 +971,24 @@ const VC_STYLES = `
   .vc-checkout-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
   .vc-receipt-wrap { max-width: 380px; margin: 0 auto; }
+  .vc-receipt-crest {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    border: 1px solid var(--border-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .vc-receipt-crest::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+  }
   .vc-brand {
     font-family: var(--display);
     font-style: italic;
@@ -939,10 +997,19 @@ const VC_STYLES = `
     margin: 0;
     font-size: 21px;
   }
+  .vc-receipt-tagline {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin: 4px 0 0;
+  }
   .vc-brand-rule {
     width: 52px;
     height: 1px;
-    margin: 9px auto 8px;
+    margin: 11px auto 8px;
     background: var(--border-soft);
   }
   .vc-receipt-ref {
@@ -951,8 +1018,17 @@ const VC_STYLES = `
     font-size: 11px;
     letter-spacing: 1.5px;
     color: var(--accent);
-    margin: 0 0 12px;
+    margin: 0 0 14px;
   }
+  .vc-receipt-meta { margin-bottom: 4px; }
+  .vc-receipt-meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .vc-receipt-meta-row span:last-child { color: var(--ink); font-weight: 500; }
   .vc-receipt-box {
     position: relative;
     background: var(--surface);
@@ -984,9 +1060,60 @@ const VC_STYLES = `
     font-size: 11px;
     padding: 0 8px;
   }
+  .vc-receipt-cols-head {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .vc-receipt-item { margin-bottom: 9px; }
+  .vc-receipt-item-top { display: flex; justify-content: space-between; font-size: 13.5px; font-weight: 500; }
+  .vc-receipt-item-name { padding-right: 10px; }
+  .vc-receipt-sale-tag {
+    display: inline-block;
+    margin-left: 6px;
+    font-family: var(--mono);
+    font-size: 8.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    border-radius: 4px;
+    padding: 1px 5px;
+    vertical-align: middle;
+  }
+  .vc-receipt-item-sub {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .vc-receipt-item-strike {
+    text-decoration: line-through;
+    margin-left: 7px;
+    opacity: 0.7;
+  }
   .vc-receipt-line { display: flex; justify-content: space-between; font-size: 13.5px; margin-bottom: 6px; }
   .vc-receipt-total { font-weight: 700; font-size: 15px; }
   .vc-receipt-bold { font-weight: 700; }
+  .vc-receipt-thanks {
+    text-align: center;
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 16px;
+    color: var(--accent);
+    margin: 4px 0 4px;
+  }
+  .vc-receipt-footer-tag {
+    text-align: center;
+    font-size: 10.5px;
+    color: var(--muted);
+    margin: 0;
+  }
   .vc-receipt-actions { margin-top: 18px; display: flex; flex-direction: column; gap: 9px; }
   .vc-btn-primary {
     background: var(--accent);
