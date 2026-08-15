@@ -87,8 +87,8 @@ export default function App() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#0f0f0f',
-      color: '#f5f5f5',
+      background: '#F2EBDB',
+      color: '#2E2618',
       fontFamily: 'system-ui, sans-serif',
       padding: 24,
     }}>
@@ -97,14 +97,14 @@ export default function App() {
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 24,
-        borderBottom: '1px solid #2a2a2a',
+        borderBottom: '1px solid #DACC9E',
         paddingBottom: 16,
       }}>
         <div>
-          <h1 style={{ color: '#d4af37', fontSize: 20, margin: 0 }}>
+          <h1 style={{ color: '#3B2E1F', fontSize: 20, margin: 0 }}>
             VARIEDADES CALERO
           </h1>
-          <p style={{ color: '#999', fontSize: 13, marginTop: 4 }}>
+          <p style={{ color: '#8A7A56', fontSize: 13, marginTop: 4 }}>
             {user.name} · {user.role === 'admin' ? 'Administrador' : 'Empleado'}
           </p>
         </div>
@@ -112,8 +112,8 @@ export default function App() {
           onClick={handleLogout}
           style={{
             background: 'transparent',
-            color: '#999',
-            border: '1px solid #333',
+            color: '#8A7A56',
+            border: '1px solid #C7B689',
             borderRadius: 8,
             padding: '8px 16px',
             cursor: 'pointer',
@@ -174,11 +174,11 @@ export default function App() {
 }
 
 const cardBtnStyle = {
-  background: '#1a1a1a',
-  border: '1px solid #2a2a2a',
+  background: '#FBF8F0',
+  border: '1px solid #DACC9E',
   borderRadius: 12,
   padding: '24px 32px',
-  color: '#f5f5f5',
+  color: '#2E2618',
   cursor: 'pointer',
   fontSize: 16,
   fontWeight: 'bold',
