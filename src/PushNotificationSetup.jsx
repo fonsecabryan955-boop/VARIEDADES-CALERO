@@ -91,8 +91,8 @@ export default function PushNotificationSetup() {
           animation: vc-pulse-ring 2.4s ease-out infinite;
         }
         .vc-push-btn:hover {
-          border-color: #d4af37 !important;
-          background: linear-gradient(180deg, #1c1c1c 0%, #161616 100%) !important;
+          border-color: #3B2E1F !important;
+          background: linear-gradient(180deg, #FBF8F0 0%, #F2EBDB 100%) !important;
         }
         .vc-push-btn:hover .vc-bell {
           animation: vc-bell-swing 0.5s ease-in-out;
@@ -157,8 +157,8 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: 12,
-    background: 'linear-gradient(180deg, #191919 0%, #141414 100%)',
-    color: '#f5f5f5',
+    background: 'linear-gradient(180deg, #FBF8F0 0%, #F2EBDB 100%)',
+    color: '#2E2618',
     border: '1px solid #2e2a1f',
     borderRadius: 12,
     padding: '12px 18px',
@@ -178,14 +178,14 @@ const styles = {
     filter: 'drop-shadow(0 0 4px rgba(212,175,55,0.35))',
   },
   btnTextWrap: { display: 'flex', flexDirection: 'column', gap: 2, textAlign: 'left' },
-  btnTitle: { color: '#d4af37', fontWeight: 700, fontSize: 13, letterSpacing: 0.2 },
-  btnSub: { color: '#8a8a8a', fontSize: 11.5 },
+  btnTitle: { color: '#3B2E1F', fontWeight: 700, fontSize: 13, letterSpacing: 0.2 },
+  btnSub: { color: '#8A7A56', fontSize: 11.5 },
   badgeOn: {
     display: 'inline-flex',
     alignItems: 'center',
     gap: 10,
     background: 'linear-gradient(180deg, rgba(111,174,116,0.10) 0%, rgba(111,174,116,0.05) 100%)',
-    color: '#7fd88f',
+    color: '#4C7A52',
     border: '1px solid #2d5636',
     borderRadius: 12,
     padding: '10px 16px',
@@ -196,10 +196,10 @@ const styles = {
     width: 8,
     height: 8,
     borderRadius: '50%',
-    background: '#7fd88f',
+    background: '#4C7A52',
     display: 'inline-block',
   },
   badgeOnText: { display: 'flex', flexDirection: 'column', gap: 1 },
   badgeOnSub: { color: '#5f9e6c', fontSize: 11 },
-  error: { color: '#ff9b9b', fontSize: 12, marginTop: 8 },
+  error: { color: '#C97A6E', fontSize: 12, marginTop: 8 },
 }
