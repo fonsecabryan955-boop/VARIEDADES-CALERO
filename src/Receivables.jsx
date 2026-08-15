@@ -120,7 +120,7 @@ export default function Receivables({ onBack }) {
       ) : (
         <>
           <div style={styles.totalBanner}>
-            Total por cobrar: <b style={{ color: '#d4af37' }}>${grandTotal.toFixed(2)}</b>
+            Total por cobrar: <b style={{ color: '#3B2E1F' }}>${grandTotal.toFixed(2)}</b>
           </div>
 
           <div style={styles.list}>
@@ -164,7 +164,7 @@ export default function Receivables({ onBack }) {
                           <div>
                             Total: ${Number(o.total).toFixed(2)} · Pagado: ${Number(o.amount_paid).toFixed(2)}
                           </div>
-                          <div style={{ color: '#ff9b9b', fontWeight: 'bold' }}>
+                          <div style={{ color: '#C97A6E', fontWeight: 'bold' }}>
                             Resta: ${o.remaining.toFixed(2)}
                           </div>
                         </div>
@@ -210,22 +210,22 @@ export default function Receivables({ onBack }) {
 }
 
 const styles = {
-  container: { minHeight: '100vh', background: '#0f0f0f', color: '#f5f5f5', fontFamily: 'system-ui, sans-serif', padding: 24 },
+  container: { minHeight: '100vh', background: '#F2EBDB', color: '#2E2618', fontFamily: 'system-ui, sans-serif', padding: 24 },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  backBtn: { background: 'transparent', color: '#999', border: '1px solid #333', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' },
-  title: { color: '#d4af37', margin: 0, fontSize: 20 },
-  muted: { color: '#999', fontSize: 13 },
-  error: { color: '#ff6b6b', fontSize: 13, marginTop: 10 },
+  backBtn: { background: 'transparent', color: '#8A7A56', border: '1px solid #C7B689', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' },
+  title: { color: '#3B2E1F', margin: 0, fontSize: 20 },
+  muted: { color: '#8A7A56', fontSize: 13 },
+  error: { color: '#B5574A', fontSize: 13, marginTop: 10 },
   totalBanner: {
-    background: '#1a1a1a',
-    border: '1px solid #d4af37',
+    background: '#FBF8F0',
+    border: '1px solid #3B2E1F',
     borderRadius: 12,
     padding: 16,
     marginBottom: 18,
     fontSize: 15,
   },
   list: { display: 'flex', flexDirection: 'column', gap: 12 },
-  card: { background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, overflow: 'hidden' },
+  card: { background: '#FBF8F0', border: '1px solid #DACC9E', borderRadius: 12, overflow: 'hidden' },
   cardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -235,18 +235,18 @@ const styles = {
   },
   clientName: { fontWeight: 'bold' },
   headerRight: { display: 'flex', alignItems: 'center', gap: 10 },
-  clientTotal: { color: '#ff9b9b', fontWeight: 'bold', fontSize: 16 },
+  clientTotal: { color: '#C97A6E', fontWeight: 'bold', fontSize: 16 },
   deleteClientBtn: {
     background: 'transparent',
-    color: '#ff6b6b',
-    border: '1px solid #ff6b6b',
+    color: '#B5574A',
+    border: '1px solid #B5574A',
     borderRadius: 6,
     padding: '6px 10px',
     fontSize: 13,
     cursor: 'pointer',
   },
   ordersList: {
-    borderTop: '1px solid #2a2a2a',
+    borderTop: '1px solid #DACC9E',
     padding: 16,
     display: 'flex',
     flexDirection: 'column',
@@ -258,7 +258,7 @@ const styles = {
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: 10,
-    background: '#0f0f0f',
+    background: '#F2EBDB',
     borderRadius: 8,
     padding: 12,
   },
@@ -266,16 +266,16 @@ const styles = {
   payBox: { display: 'flex', gap: 6 },
   payInput: {
     width: 90,
-    background: '#242424',
-    color: '#f5f5f5',
-    border: '1px solid #333',
+    background: '#EAE0C7',
+    color: '#2E2618',
+    border: '1px solid #C7B689',
     borderRadius: 6,
     padding: '6px 8px',
     fontSize: 13,
   },
   payBtn: {
-    background: '#d4af37',
-    color: '#0f0f0f',
+    background: '#3B2E1F',
+    color: '#F2EBDB',
     border: 'none',
     borderRadius: 6,
     padding: '6px 12px',
@@ -285,8 +285,8 @@ const styles = {
   },
   deleteOrderBtn: {
     background: 'transparent',
-    color: '#ff6b6b',
-    border: '1px solid #ff6b6b',
+    color: '#B5574A',
+    border: '1px solid #B5574A',
     borderRadius: 6,
     padding: '6px 10px',
     fontSize: 12,
