@@ -25,8 +25,8 @@ function GlobalStyle() {
     <style>{`
       .em-page {
         min-height: 100vh;
-        background: #0f0f0f;
-        color: #f5f5f5;
+        background: #F2EBDB;
+        color: #2E2618;
         font-family: system-ui, sans-serif;
         padding: 24px;
       }
@@ -36,95 +36,95 @@ function GlobalStyle() {
         margin-bottom: 22px; flex-wrap: wrap; gap: 12px;
       }
       .em-back {
-        background: transparent; color: #999; border: 1px solid #333;
+        background: transparent; color: #8A7A56; border: 1px solid #C7B689;
         border-radius: 8px; padding: 8px 14px; cursor: pointer;
       }
-      .em-title { color: #d4af37; margin: 0; font-size: 20px; }
+      .em-title { color: #3B2E1F; margin: 0; font-size: 20px; }
       .em-tabs { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
       .em-tab {
-        background: transparent; border: 1px solid #333; color: #999;
+        background: transparent; border: 1px solid #C7B689; color: #8A7A56;
         padding: 9px 16px; border-radius: 8px; cursor: pointer; font-size: 13.5px;
       }
-      .em-tab.active { background: #d4af37; border-color: #d4af37; color: #0f0f0f; font-weight: 700; }
+      .em-tab.active { background: #3B2E1F; border-color: #3B2E1F; color: #F2EBDB; font-weight: 700; }
       .em-add-btn {
-        background: #d4af37; color: #0f0f0f; border: none; border-radius: 8px;
+        background: #3B2E1F; color: #F2EBDB; border: none; border-radius: 8px;
         padding: 10px 16px; font-weight: bold; cursor: pointer;
       }
       .em-form {
-        background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px;
+        background: #FBF8F0; border: 1px solid #DACC9E; border-radius: 12px;
         padding: 20px; margin-bottom: 22px;
       }
       .em-form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
       .em-input {
-        flex: 1; min-width: 140px; background: #242424; color: #f5f5f5;
-        border: 1px solid #333; border-radius: 8px; padding: 10px 12px; font-size: 14px;
+        flex: 1; min-width: 140px; background: #EAE0C7; color: #2E2618;
+        border: 1px solid #C7B689; border-radius: 8px; padding: 10px 12px; font-size: 14px;
       }
       .em-input::placeholder { color: #6b6b6b; }
-      .em-label { display: block; font-size: 11.5px; color: #999; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+      .em-label { display: block; font-size: 11.5px; color: #8A7A56; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
       .em-save-btn {
-        background: #d4af37; color: #0f0f0f; border: none; border-radius: 8px;
+        background: #3B2E1F; color: #F2EBDB; border: none; border-radius: 8px;
         padding: 10px 20px; font-weight: bold; cursor: pointer;
       }
-      .em-error { color: #ff6b6b; font-size: 13px; margin-bottom: 12px; }
-      .em-muted { color: #777; }
+      .em-error { color: #B5574A; font-size: 13px; margin-bottom: 12px; }
+      .em-muted { color: #8A7A56; }
 
       .em-list { display: flex; flex-direction: column; gap: 10px; }
       .em-card {
-        background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px;
+        background: #FBF8F0; border: 1px solid #DACC9E; border-radius: 10px;
         padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
       }
       .em-card-name { font-weight: bold; font-size: 15px; }
-      .em-card-meta { color: #999; font-size: 13px; margin-top: 2px; }
+      .em-card-meta { color: #8A7A56; font-size: 13px; margin-top: 2px; }
       .em-card-right { display: flex; align-items: center; gap: 12px; }
-      .em-salary { color: #d4af37; font-weight: bold; }
+      .em-salary { color: #3B2E1F; font-weight: bold; }
       .em-status { font-size: 11.5px; padding: 3px 9px; border-radius: 999px; }
-      .em-status.active { background: rgba(111,174,116,0.15); color: #7fd88f; }
-      .em-status.inactive { background: rgba(255,107,107,0.12); color: #ff6b6b; }
+      .em-status.active { background: rgba(111,174,116,0.15); color: #4C7A52; }
+      .em-status.inactive { background: rgba(255,107,107,0.12); color: #B5574A; }
       .em-icon-btn {
-        background: #242424; border: 1px solid #333; color: #f5f5f5;
+        background: #EAE0C7; border: 1px solid #C7B689; color: #2E2618;
         border-radius: 8px; padding: 7px 12px; cursor: pointer; font-size: 12.5px;
       }
-      .em-icon-btn:hover { border-color: #d4af37; }
-      .em-delete-btn { color: #ff6b6b; border-color: #5a2323; }
-      .em-delete-btn:hover { border-color: #ff6b6b; }
+      .em-icon-btn:hover { border-color: #3B2E1F; }
+      .em-delete-btn { color: #B5574A; border-color: #D9B9AE; }
+      .em-delete-btn:hover { border-color: #B5574A; }
 
       .em-period-bar {
         display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
-        background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 20px;
+        background: #FBF8F0; border: 1px solid #DACC9E; border-radius: 12px; padding: 16px; margin-bottom: 20px;
       }
       .em-period-field { display: flex; flex-direction: column; gap: 5px; }
       .em-period-field input {
-        background: #242424; color: #f5f5f5; border: 1px solid #333; border-radius: 8px; padding: 9px 10px; font-size: 13.5px;
+        background: #EAE0C7; color: #2E2618; border: 1px solid #C7B689; border-radius: 8px; padding: 9px 10px; font-size: 13.5px;
       }
 
       .em-payroll-row {
-        background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px;
+        background: #FBF8F0; border: 1px solid #DACC9E; border-radius: 10px;
         padding: 14px 16px; margin-bottom: 10px;
       }
       .em-payroll-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
       .em-payroll-name { font-weight: bold; font-size: 15px; }
       .em-payroll-fields { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
       .em-mini-field { display: flex; flex-direction: column; gap: 4px; }
-      .em-mini-field label { font-size: 10.5px; color: #999; text-transform: uppercase; }
+      .em-mini-field label { font-size: 10.5px; color: #8A7A56; text-transform: uppercase; }
       .em-mini-field input {
-        width: 110px; background: #242424; color: #f5f5f5; border: 1px solid #333;
+        width: 110px; background: #EAE0C7; color: #2E2618; border: 1px solid #C7B689;
         border-radius: 7px; padding: 7px 9px; font-size: 13px;
       }
-      .em-net { color: #d4af37; font-weight: bold; font-size: 16px; }
+      .em-net { color: #3B2E1F; font-weight: bold; font-size: 16px; }
       .em-pay-btn {
-        background: #d4af37; color: #0f0f0f; border: none; border-radius: 8px;
+        background: #3B2E1F; color: #F2EBDB; border: none; border-radius: 8px;
         padding: 9px 16px; font-weight: bold; cursor: pointer; font-size: 13px;
       }
       .em-paid-tag {
-        background: rgba(111,174,116,0.15); color: #7fd88f; font-size: 12px;
+        background: rgba(111,174,116,0.15); color: #4C7A52; font-size: 12px;
         padding: 6px 12px; border-radius: 8px; font-weight: 600;
       }
 
       .em-history-row {
-        background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px;
+        background: #FBF8F0; border: 1px solid #DACC9E; border-radius: 10px;
         padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;
       }
-      .em-history-meta { color: #999; font-size: 12.5px; }
+      .em-history-meta { color: #8A7A56; font-size: 12.5px; }
 
       /* ---- receipt (58mm print) ---- */
       .em-receipt-wrap { display: flex; flex-direction: column; align-items: center; }
@@ -146,7 +146,7 @@ function GlobalStyle() {
 
       .em-receipt-actions { display: flex; gap: 10px; margin-top: 20px; }
       .em-print-btn {
-        background: #d4af37; color: #0f0f0f; border: none; border-radius: 8px;
+        background: #3B2E1F; color: #F2EBDB; border: none; border-radius: 8px;
         padding: 11px 22px; font-weight: bold; cursor: pointer;
       }
 
