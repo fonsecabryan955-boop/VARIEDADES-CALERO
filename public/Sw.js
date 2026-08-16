@@ -18,7 +18,6 @@ self.addEventListener('activate', (event) => {
 // Estrategia simple: red primero, y si falla usa lo último cacheado
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return
-
   event.respondWith(
     fetch(event.request)
       .then((response) => {
@@ -44,7 +43,19 @@ self.addEventListener('push', (event) => {
       body: data.body || 'Tenés un nuevo pedido online',
       icon: '/icon-192.png',
       badge: '/icon-192.png',
-      vibrate: [200, 100, 200],
+      // Doble vibración tipo WhatsApp en vez de un solo golpe corto.
+      vibrate: [300, 120, 300, 120, 300],
+      // Suena con el sonido de notificación por defecto del sistema
+      // (no la silenciamos) y se queda visible hasta que la toques,
+      // en vez de desaparecer sola a los pocos segundos.
+      silent: false,
+      requireInteraction: true,
+      renotify: true,
+      // Un tag único por pedido: cada pedido nuevo dispara su propia
+      // alerta con sonido/vibración en vez de reemplazar la anterior
+      // en silencio.
+      tag: data.tag || `pedido-${Date.now()}`,
+      actions: [{ action: 'view', title: 'Ver pedido' }],
       data: { url: data.url || '/' },
     })
   )
