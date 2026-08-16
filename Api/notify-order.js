@@ -4,7 +4,6 @@
 // Supabase llama a esta URL automáticamente (vía Database Webhook) cada vez
 // que se inserta una fila en "orders". Si es un pedido online, le manda una
 // notificación push a todos los dispositivos admin suscritos.
-
 import webpush from 'web-push'
 import { createClient } from '@supabase/supabase-js'
 
@@ -39,14 +38,30 @@ export default async function handler(req, res) {
     )
 
     const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+
     const { data: subs, error } = await supabase.from('push_subscriptions').select('*')
     if (error) throw error
 
+    // Look up the client's name so the notification reads like a real
+    // WhatsApp alert ("Pedido de María — $45.00") instead of a bare amount.
+    let clientName = 'Cliente'
+    if (order.client_id) {
+      const { data: client } = await supabase
+        .from('clients')
+        .select('name')
+        .eq('id', order.client_id)
+        .maybeSingle()
+      if (client?.name) clientName = client.name
+    }
+
     const total = Number(order.total || 0).toFixed(2)
+    const orderRef = (order.id || '').toString().slice(-6).padStart(6, '0')
+
     const notificationPayload = JSON.stringify({
-      title: '🛍️ Nuevo pedido online',
-      body: `Pedido por $${total}. Tocá para verlo.`,
+      title: `🛍️ Nuevo pedido de ${clientName}`,
+      body: `$${total} · Pedido #${orderRef}. Tocá para verlo.`,
       url: '/',
+      tag: `pedido-${order.id || Date.now()}`,
     })
 
     const results = await Promise.allSettled(
