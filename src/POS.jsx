@@ -52,6 +52,8 @@ const getEffectivePrice = (v) => {
 export default function POS({ user, onBack }) {
   const [variants, setVariants] = useState([])
   const [loading, setLoading] = useState(true)
+  const [employees, setEmployees] = useState([])
+  const [soldBy, setSoldBy] = useState(user.name)
   const [cart, setCart] = useState([])
   const [checkingOut, setCheckingOut] = useState(false)
   const [message, setMessage] = useState('')
@@ -78,6 +80,17 @@ export default function POS({ user, onBack }) {
 
   useEffect(() => {
     loadVariants()
+  }, [])
+
+  useEffect(() => {
+    const loadEmployees = async () => {
+      const { data } = await supabase
+        .from('employees')
+        .select('id, name')
+        .order('name', { ascending: true })
+      setEmployees(data || [])
+    }
+    loadEmployees()
   }, [])
 
   const categories = useMemo(() => {
@@ -191,7 +204,7 @@ export default function POS({ user, onBack }) {
         subtotal,
         discount: 0,
         total: subtotal,
-        notes: `Vendido por ${user.name}${(paymentMethod === 'card' || paymentMethod === 'transfer') && cardBank ? ` · Banco: ${cardBank}` : ''}`,
+        notes: `Vendido por ${soldBy}${(paymentMethod === 'card' || paymentMethod === 'transfer') && cardBank ? ` · Banco: ${cardBank}` : ''}`,
       })
       .select('id')
       .single()
@@ -242,7 +255,7 @@ export default function POS({ user, onBack }) {
       paymentMethod,
       cardBank: (paymentMethod === 'card' || paymentMethod === 'transfer') ? cardBank : '',
       date: new Date(),
-      soldBy: user.name,
+      soldBy,
     })
 
     setCart([])
@@ -531,6 +544,22 @@ export default function POS({ user, onBack }) {
               </div>
             </div>
           )}
+
+          <div className="pos-soldby">
+            <p className="pos-credit-label">Atendido por</p>
+            <select
+              className="pos-select"
+              value={soldBy}
+              onChange={(e) => setSoldBy(e.target.value)}
+            >
+              <option value={user.name}>{user.name} (yo)</option>
+              {employees
+                .filter((e) => e.name !== user.name)
+                .map((e) => (
+                  <option key={e.id} value={e.name}>{e.name}</option>
+                ))}
+            </select>
+          </div>
 
           <div className="pos-credit">
             <p className="pos-credit-label">Cliente (opcional, para ventas al crédito)</p>
@@ -972,6 +1001,30 @@ const POS_STYLES = `
   }
   .pos-input::placeholder { color: var(--ink-faint); }
   .pos-input:focus { border-bottom-color: var(--ink); }
+
+  .pos-soldby { border-top: 1px solid var(--border); padding-top: 16px; margin-bottom: 4px; }
+  .pos-select {
+    width: 100%;
+    background: transparent;
+    color: var(--ink);
+    border: none;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    padding: 9px 1px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-family: var(--body);
+    outline: none;
+    cursor: pointer;
+    transition: border-color .2s;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23726d63' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 2px center;
+    background-size: 13px;
+  }
+  .pos-select:focus { border-bottom-color: var(--ink); }
 
   .pos-message { font-size: 12.5px; margin-bottom: 12px; color: var(--danger); }
 
