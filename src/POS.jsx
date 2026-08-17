@@ -32,6 +32,9 @@ const IconCheckCircle = (p) => (
 )
 
 const paymentLabelsMap = { cash: 'Efectivo', card: 'Tarjeta', transfer: 'Transferencia' }
+const cardBanks = ['BAC', 'Lafise', 'BanPro']
+const formatPaymentLabel = (method, bank) =>
+  method === 'card' && bank ? `${paymentLabelsMap.card} · ${bank}` : paymentLabelsMap[method]
 
 // A variant can have its own price, otherwise falls back to the product's
 // base price. If the product is marked as "en liquidación", the discount
@@ -53,6 +56,7 @@ export default function POS({ user, onBack }) {
   const [checkingOut, setCheckingOut] = useState(false)
   const [message, setMessage] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('cash')
+  const [cardBank, setCardBank] = useState('')
   const [clientName, setClientName] = useState('')
   const [clientPhone, setClientPhone] = useState('')
   const [amountPaid, setAmountPaid] = useState('')
@@ -132,6 +136,10 @@ export default function POS({ user, onBack }) {
 
   const handleCheckout = async () => {
     if (cart.length === 0) return
+    if (paymentMethod === 'card' && !cardBank) {
+      setMessage('Seleccioná el banco de la tarjeta.')
+      return
+    }
     setCheckingOut(true)
     setMessage('')
 
@@ -183,7 +191,7 @@ export default function POS({ user, onBack }) {
         subtotal,
         discount: 0,
         total: subtotal,
-        notes: `Vendido por ${user.name}`,
+        notes: `Vendido por ${user.name}${paymentMethod === 'card' && cardBank ? ` · Banco: ${cardBank}` : ''}`,
       })
       .select('id')
       .single()
@@ -232,12 +240,14 @@ export default function POS({ user, onBack }) {
       clientName: clientName.trim(),
       clientBalance,
       paymentMethod,
+      cardBank: paymentMethod === 'card' ? cardBank : '',
       date: new Date(),
       soldBy: user.name,
     })
 
     setCart([])
     setPaymentMethod('cash')
+    setCardBank('')
     setClientName('')
     setClientPhone('')
     setAmountPaid('')
@@ -270,6 +280,7 @@ export default function POS({ user, onBack }) {
               <div className="pos-receipt-meta-row"><span>Fecha</span><span>{receipt.date.toLocaleDateString()} · {receipt.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></div>
               <div className="pos-receipt-meta-row"><span>Atendido por</span><span>{receipt.soldBy}</span></div>
               {receipt.clientName && <div className="pos-receipt-meta-row"><span>Cliente</span><span>{receipt.clientName}</span></div>}
+              {receipt.cardBank && <div className="pos-receipt-meta-row"><span>Banco</span><span>{receipt.cardBank}</span></div>}
             </div>
 
             <div className="pos-receipt-divider" />
@@ -311,7 +322,7 @@ export default function POS({ user, onBack }) {
               <span className="pos-num">${receipt.total.toFixed(2)}</span>
             </div>
             <div className="pos-receipt-line">
-              <span>Abonado ({paymentLabelsMap[receipt.paymentMethod]})</span>
+              <span>Abonado ({formatPaymentLabel(receipt.paymentMethod, receipt.cardBank)})</span>
               <span className="pos-num">${receipt.paid.toFixed(2)}</span>
             </div>
             <div className={`pos-receipt-line pos-receipt-bold ${receipt.remaining > 0 ? 'pos-danger' : 'pos-success'}`}>
@@ -493,12 +504,33 @@ export default function POS({ user, onBack }) {
               <button
                 key={key}
                 className={`pos-pay-chip ${paymentMethod === key ? 'pos-pay-chip-active' : ''}`}
-                onClick={() => setPaymentMethod(key)}
+                onClick={() => {
+                  setPaymentMethod(key)
+                  if (key !== 'card') setCardBank('')
+                  setMessage('')
+                }}
               >
                 {paymentLabelsMap[key]}
               </button>
             ))}
           </div>
+
+          {paymentMethod === 'card' && (
+            <div className="pos-bank-row">
+              <p className="pos-credit-label">Banco de la tarjeta</p>
+              <div className="pos-pay-methods pos-bank-methods">
+                {cardBanks.map((bank) => (
+                  <button
+                    key={bank}
+                    className={`pos-pay-chip ${cardBank === bank ? 'pos-pay-chip-active' : ''}`}
+                    onClick={() => { setCardBank(bank); setMessage('') }}
+                  >
+                    {bank}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="pos-credit">
             <p className="pos-credit-label">Cliente (opcional, para ventas al crédito)</p>
@@ -887,6 +919,8 @@ const POS_STYLES = `
   .pos-total-value.pos-bump { transform: scale(1.07); }
 
   .pos-pay-methods { display: flex; border: 1px solid var(--border); margin-bottom: 18px; }
+  .pos-bank-row { margin-top: -10px; margin-bottom: 4px; animation: pos-receipt-rise .25s ease both; }
+  .pos-bank-methods { margin-bottom: 18px; }
   .pos-pay-chip {
     flex: 1;
     background: transparent;
