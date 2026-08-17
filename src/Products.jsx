@@ -31,6 +31,7 @@ export default function Products({ onBack }) {
 
   // product-level fields
   const [name, setName] = useState('')
+  const [brand, setBrand] = useState('')
   const [categoryName, setCategoryName] = useState('Ropa')
   const [customCategory, setCustomCategory] = useState('')
   const [basePrice, setBasePrice] = useState('')
@@ -65,7 +66,7 @@ export default function Products({ onBack }) {
     setLoading(true)
     const { data } = await supabase
       .from('product_variants')
-      .select('id, size, color, stock, price, sku, product_id, products(id, name, base_price, image_url, category_id, description, cost, supplier, on_sale, discount_percent, categories(id, name))')
+      .select('id, size, color, stock, price, sku, product_id, products(id, name, brand, base_price, image_url, category_id, description, cost, supplier, on_sale, discount_percent, categories(id, name))')
       .order('created_at', { ascending: false })
     setRawVariants(data || [])
     setLoading(false)
@@ -90,6 +91,7 @@ export default function Products({ onBack }) {
         map.set(pid, {
           id: pid,
           name: v.products?.name || 'Producto',
+          brand: v.products?.brand || '',
           image: v.products?.image_url || null,
           category: v.products?.categories?.name || 'Sin categoría',
           categoryId: v.products?.category_id || null,
@@ -135,6 +137,7 @@ export default function Products({ onBack }) {
 
   const resetForm = () => {
     setName('')
+    setBrand('')
     setCategoryName('Ropa')
     setCustomCategory('')
     setBasePrice('')
@@ -203,6 +206,7 @@ export default function Products({ onBack }) {
 
       const productPayload = {
         name: name.trim(),
+        brand: brand.trim() || null,
         category_id: categoryId,
         base_price: parseFloat(basePrice),
         cost: cost ? parseFloat(cost) : 0,
@@ -254,6 +258,7 @@ export default function Products({ onBack }) {
   const openEditProduct = (product) => {
     setEditingProductId(product.id)
     setName(product.name)
+    setBrand(product.brand || '')
     setCategoryName(CATEGORY_PRESETS.some((c) => c.name === product.category) ? product.category : '__custom__')
     setCustomCategory(CATEGORY_PRESETS.some((c) => c.name === product.category) ? '' : product.category)
     setBasePrice(String(product.basePrice ?? ''))
@@ -422,6 +427,10 @@ export default function Products({ onBack }) {
             <div style={styles.fieldCol}>
               <label style={styles.fieldLabel}>Nombre del producto *</label>
               <input style={styles.input} placeholder="Ej. Camisa a cuadros" value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+            <div style={styles.fieldCol}>
+              <label style={styles.fieldLabel}>Marca</label>
+              <input style={styles.input} placeholder="Ej. Levi's, Nike, Genérico" value={brand} onChange={(e) => setBrand(e.target.value)} />
             </div>
             <div style={styles.fieldCol}>
               <label style={styles.fieldLabel}>Categoría *</label>
@@ -646,6 +655,7 @@ export default function Products({ onBack }) {
                     <div>
                       <div style={styles.cardName}>
                         {p.name}
+                        {p.brand && <span style={styles.brandBadge}>{p.brand}</span>}
                         {p.onSale && p.discountPercent > 0 && (
                           <span style={styles.saleBadge}>🏷️ -{p.discountPercent}%</span>
                         )}
@@ -672,8 +682,14 @@ export default function Products({ onBack }) {
 
                 {isOpen && (
                   <div style={styles.cardExpand}>
-                    {(p.cost > 0 || p.supplier || p.description) && (
+                    {(p.cost > 0 || p.supplier || p.description || p.brand) && (
                       <div style={styles.detailBox}>
+                        {p.brand && (
+                          <div style={styles.detailRow}>
+                            <span style={styles.detailLabel}>Marca</span>
+                            <span>{p.brand}</span>
+                          </div>
+                        )}
                         {p.cost > 0 && (
                           <div style={styles.detailRow}>
                             <span style={styles.detailLabel}>Costo de compra</span>
@@ -830,6 +846,10 @@ const styles = {
   saleBadge: {
     marginLeft: 8, background: '#B5574A', color: '#FBF8F0', fontSize: 10.5, fontWeight: 700,
     borderRadius: 999, padding: '2px 9px', verticalAlign: 'middle',
+  },
+  brandBadge: {
+    marginLeft: 8, background: '#EAE0C7', color: '#5C4E36', fontSize: 10.5, fontWeight: 700,
+    borderRadius: 999, padding: '2px 9px', verticalAlign: 'middle', border: '1px solid #C7B689',
   },
   cardPriceSaleWrap: { textAlign: 'right' },
   cardPriceStrike: { color: '#8A7A56', fontSize: 12, textDecoration: 'line-through' },
