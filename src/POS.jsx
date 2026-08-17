@@ -34,7 +34,7 @@ const IconCheckCircle = (p) => (
 const paymentLabelsMap = { cash: 'Efectivo', card: 'Tarjeta', transfer: 'Transferencia' }
 const cardBanks = ['BAC', 'Lafise', 'BanPro']
 const formatPaymentLabel = (method, bank) =>
-  method === 'card' && bank ? `${paymentLabelsMap.card} · ${bank}` : paymentLabelsMap[method]
+  (method === 'card' || method === 'transfer') && bank ? `${paymentLabelsMap[method]} · ${bank}` : paymentLabelsMap[method]
 
 // A variant can have its own price, otherwise falls back to the product's
 // base price. If the product is marked as "en liquidación", the discount
@@ -136,8 +136,8 @@ export default function POS({ user, onBack }) {
 
   const handleCheckout = async () => {
     if (cart.length === 0) return
-    if (paymentMethod === 'card' && !cardBank) {
-      setMessage('Seleccioná el banco de la tarjeta.')
+    if ((paymentMethod === 'card' || paymentMethod === 'transfer') && !cardBank) {
+      setMessage('Seleccioná el banco.')
       return
     }
     setCheckingOut(true)
@@ -191,7 +191,7 @@ export default function POS({ user, onBack }) {
         subtotal,
         discount: 0,
         total: subtotal,
-        notes: `Vendido por ${user.name}${paymentMethod === 'card' && cardBank ? ` · Banco: ${cardBank}` : ''}`,
+        notes: `Vendido por ${user.name}${(paymentMethod === 'card' || paymentMethod === 'transfer') && cardBank ? ` · Banco: ${cardBank}` : ''}`,
       })
       .select('id')
       .single()
@@ -240,7 +240,7 @@ export default function POS({ user, onBack }) {
       clientName: clientName.trim(),
       clientBalance,
       paymentMethod,
-      cardBank: paymentMethod === 'card' ? cardBank : '',
+      cardBank: (paymentMethod === 'card' || paymentMethod === 'transfer') ? cardBank : '',
       date: new Date(),
       soldBy: user.name,
     })
@@ -506,7 +506,7 @@ export default function POS({ user, onBack }) {
                 className={`pos-pay-chip ${paymentMethod === key ? 'pos-pay-chip-active' : ''}`}
                 onClick={() => {
                   setPaymentMethod(key)
-                  if (key !== 'card') setCardBank('')
+                  if (key !== 'card' && key !== 'transfer') setCardBank('')
                   setMessage('')
                 }}
               >
@@ -515,9 +515,9 @@ export default function POS({ user, onBack }) {
             ))}
           </div>
 
-          {paymentMethod === 'card' && (
+          {(paymentMethod === 'card' || paymentMethod === 'transfer') && (
             <div className="pos-bank-row">
-              <p className="pos-credit-label">Banco de la tarjeta</p>
+              <p className="pos-credit-label">Banco</p>
               <div className="pos-pay-methods pos-bank-methods">
                 {cardBanks.map((bank) => (
                   <button
