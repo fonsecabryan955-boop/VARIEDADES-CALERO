@@ -22,6 +22,12 @@ const IconPlus = (p) => (
 const IconChevronLeft = (p) => (
   <svg viewBox="0 0 24 24" width={p.size || 16} height={p.size || 16} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
 )
+const IconSearch = (p) => (
+  <svg viewBox="0 0 24 24" width={p.size || 15} height={p.size || 15} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+)
+const IconBell = (p) => (
+  <svg viewBox="0 0 24 24" width={p.size || 14} height={p.size || 14} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 12 6 8Z" /><path d="M9.5 17a2.5 2.5 0 0 0 5 0" /></svg>
+)
 const IconArrow = (p) => (
   <svg viewBox="0 0 24 24" width={p.size || 15} height={p.size || 15} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
 )
@@ -51,6 +57,35 @@ const CARE_TEXT = {
   'Accesorios': 'Guardar en un lugar seco. Evitar el contacto con perfumes o productos químicos.',
   'Artículos para el cabello': 'Seguir las instrucciones de uso del empaque. Conservar en un lugar seco.',
   default: 'Conservar en un lugar fresco y seco. Ante cualquier duda, escribinos por WhatsApp.',
+}
+
+// ---------- size charts shown as a table inside the product accordion ----------
+// Only categories with a real, useful chart are listed here — everything
+// else simply doesn't get a "Guía de tallas" section, since a fabricated
+// chart would be worse than none.
+const SIZE_GUIDES = {
+  'Ropa': {
+    headers: ['Talla', 'Busto (cm)', 'Cintura (cm)', 'Cadera (cm)'],
+    rows: [
+      ['S', '82–86', '64–68', '90–94'],
+      ['M', '87–91', '69–73', '95–99'],
+      ['L', '92–97', '74–79', '100–105'],
+      ['XL', '98–104', '80–86', '106–112'],
+    ],
+    note: 'Medidas de referencia tomadas sobre el cuerpo, no sobre la prenda. Si estás entre dos tallas, te recomendamos la más grande.',
+  },
+  'Calzado': {
+    headers: ['Talla NIC', 'Talla US', 'Largo del pie (cm)'],
+    rows: [
+      ['35', '5', '22.5'],
+      ['36', '6', '23.1'],
+      ['37', '7', '23.8'],
+      ['38', '8', '24.4'],
+      ['39', '9', '25.0'],
+      ['40', '10', '25.6'],
+    ],
+    note: 'Medí tu pie descalzo, de talón a punta, al final del día. Ante la duda entre dos tallas, escribinos antes de pedir.',
+  },
 }
 
 // Floating contact button, visible while browsing. Minimalist ink circle —
@@ -423,6 +458,83 @@ function GlobalStyle() {
         background-size: 13px;
       }
       .vc-sort-select:focus { border-bottom-color: var(--vc-ink); outline: none; }
+
+      /* ---------- search bar ---------- */
+      .vc-search-row {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 18px 24px 0;
+      }
+      .vc-search-wrap { position: relative; max-width: 380px; }
+      .vc-search-icon {
+        position: absolute; left: 1px; top: 50%; transform: translateY(-50%);
+        color: var(--vc-ink-faint); display: flex;
+      }
+      .vc-search-input {
+        width: 100%;
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid var(--vc-border);
+        color: var(--vc-ink);
+        padding: 10px 4px 10px 24px;
+        font-size: 13.5px;
+        outline: none;
+        transition: border-color .15s;
+      }
+      .vc-search-input::placeholder { color: var(--vc-ink-faint); }
+      .vc-search-input:focus { border-bottom-color: var(--vc-ink); }
+
+      /* ---------- sold out / notify me ---------- */
+      .vc-card.vc-soldout .vc-card-imgwrap img { filter: grayscale(0.75); opacity: 0.55; }
+      .vc-soldout-badge {
+        position: absolute; top: 0; left: 0; z-index: 1;
+        background: var(--vc-ink); color: #fdfcf9;
+        font-size: 9.5px; font-weight: 700; letter-spacing: 1px;
+        padding: 6px 11px; text-transform: uppercase;
+      }
+      .vc-card-addbar.vc-notify { background: var(--vc-ink-soft); }
+      .vc-modal-soldout-note {
+        font-size: 11.5px; color: var(--vc-ink-soft); margin-bottom: 22px; letter-spacing: 0.2px;
+      }
+      .vc-btn-notify {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        background: transparent;
+        border: 1px solid var(--vc-ink);
+        color: var(--vc-ink);
+        border-radius: 0;
+        padding: 15px 0;
+        font-weight: 700;
+        font-size: 11.5px;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        cursor: pointer;
+        width: 100%;
+        transition: background .15s, color .15s;
+        margin-top: auto;
+        text-decoration: none;
+      }
+      .vc-btn-notify:hover { background: var(--vc-ink); color: #fff; }
+
+      /* ---------- size guide table ---------- */
+      .vc-size-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+      .vc-size-table th, .vc-size-table td {
+        text-align: left; padding: 7px 8px; font-size: 12px; border-bottom: 1px solid var(--vc-border);
+      }
+      .vc-size-table th { color: var(--vc-ink-faint); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; }
+      .vc-size-note { font-size: 11.5px; color: var(--vc-ink-soft); margin-top: 10px; line-height: 1.5; }
+
+      /* ---------- related products ---------- */
+      .vc-related { margin-top: 30px; border-top: 1px solid var(--vc-border); padding-top: 22px; }
+      .vc-related-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700; color: var(--vc-ink-faint); margin-bottom: 14px; }
+      .vc-related-scroll { display: flex; gap: 14px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+      .vc-related-scroll::-webkit-scrollbar { display: none; }
+      .vc-related-card {
+        flex: none; width: 118px; cursor: pointer; background: none; border: none; padding: 0; text-align: left;
+      }
+      .vc-related-imgwrap { width: 118px; height: 148px; background: var(--vc-panel-raised); overflow: hidden; margin-bottom: 8px; }
+      .vc-related-imgwrap img { width: 100%; height: 100%; object-fit: cover; }
+      .vc-related-name { font-family: 'Bodoni Moda', serif; font-size: 12.5px; line-height: 1.3; color: var(--vc-ink); margin-bottom: 3px; }
+      .vc-related-price { font-size: 11.5px; color: var(--vc-ink-soft); }
 
       /* ---------- grid ---------- */
       .vc-main { max-width: 1180px; margin: 0 auto; padding: 12px 24px 96px; }
@@ -1022,6 +1134,7 @@ export default function Store() {
   const [loading, setLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState('Todos')
   const [sortBy, setSortBy] = useState('recent') // recent | price_asc | price_desc
+  const [search, setSearch] = useState('')
 
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [modalColor, setModalColor] = useState(null)
@@ -1050,10 +1163,12 @@ export default function Store() {
   useEffect(() => {
     const load = async () => {
       setLoading(true)
+      // No filtramos por stock > 0 acá: los productos agotados se siguen
+      // trayendo para poder mostrarlos con "Avisame cuando vuelva" en vez
+      // de que desaparezcan del catálogo sin dejar rastro.
       const { data } = await supabase
         .from('product_variants')
         .select('id, size, color, stock, price, product_id, products(name, base_price, image_url, on_sale, discount_percent, categories(name))')
-        .gt('stock', 0)
         .order('created_at', { ascending: false })
       setRawVariants(data || [])
       setLoading(false)
@@ -1133,11 +1248,17 @@ export default function Store() {
 
   const filteredProducts = useMemo(() => {
     let list = activeCategory === 'Todos' ? products : products.filter((p) => p.category === activeCategory)
+    const q = search.trim().toLowerCase()
+    if (q) list = list.filter((p) => p.name.toLowerCase().includes(q))
     const minPrice = (p) => Math.min(...p.variants.map((v) => v.price))
     if (sortBy === 'price_asc') list = [...list].sort((a, b) => minPrice(a) - minPrice(b))
     if (sortBy === 'price_desc') list = [...list].sort((a, b) => minPrice(b) - minPrice(a))
+    // Los agotados se mandan al final del listado sin importar el orden
+    // elegido, para que no ocupen los primeros lugares del catálogo.
+    const inStock = (p) => p.variants.reduce((s, v) => s + v.stock, 0) > 0
+    list = [...list.filter(inStock), ...list.filter((p) => !inStock(p))]
     return list
-  }, [products, activeCategory, sortBy])
+  }, [products, activeCategory, sortBy, search])
 
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0)
   const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0)
@@ -1616,6 +1737,18 @@ export default function Store() {
         {!loading && <span className="vc-section-count">{filteredProducts.length} artículo{filteredProducts.length !== 1 ? 's' : ''}</span>}
       </div>
 
+      <div className="vc-search-row">
+        <div className="vc-search-wrap">
+          <span className="vc-search-icon"><IconSearch /></span>
+          <input
+            className="vc-search-input"
+            placeholder="Buscar producto..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
+
       <div className="vc-toolbar">
         {categories.length > 1 && (
           <div className="vc-chips">
@@ -1649,32 +1782,43 @@ export default function Store() {
           <div className="vc-empty">No hay productos disponibles en esta categoría por ahora.</div>
         ) : (
           <div className="vc-grid">
-            {filteredProducts.map((p) => (
-              <div key={p.id} className="vc-card" onClick={() => openProduct(p)}>
-                <div className="vc-card-imgwrap">
-                  {p.image ? <img src={p.image} alt={p.name} /> : <div className="vc-noimg">—</div>}
-                  {p.onSale && <span className="vc-card-sale-badge">-{p.discountPercent}% Liquidación</span>}
-                  {!p.onSale && totalStock(p) <= 5 && <span className="vc-card-badge">Últimas unidades</span>}
-                  <div
-                    className="vc-card-addbar"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      quickAdd(p)
-                    }}
-                  >
-                    {p.variants.length === 1 ? 'Agregar a la bolsa' : 'Elegir opciones'}
+            {filteredProducts.map((p) => {
+              const soldOut = totalStock(p) === 0
+              return (
+                <div key={p.id} className={`vc-card ${soldOut ? 'vc-soldout' : ''}`} onClick={() => openProduct(p)}>
+                  <div className="vc-card-imgwrap">
+                    {p.image ? <img src={p.image} alt={p.name} /> : <div className="vc-noimg">—</div>}
+                    {soldOut && <span className="vc-soldout-badge">Agotado</span>}
+                    {!soldOut && p.onSale && <span className="vc-card-sale-badge">-{p.discountPercent}% Liquidación</span>}
+                    {!soldOut && !p.onSale && totalStock(p) <= 5 && <span className="vc-card-badge">Últimas unidades</span>}
+                    <div
+                      className={`vc-card-addbar ${soldOut ? 'vc-notify' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (soldOut) {
+                          window.open(
+                            buildWhatsappLink(`Hola! Quiero que me avisen cuando "${p.name}" vuelva a tener stock.`),
+                            '_blank'
+                          )
+                        } else {
+                          quickAdd(p)
+                        }
+                      }}
+                    >
+                      {soldOut ? 'Avisame cuando vuelva' : p.variants.length === 1 ? 'Agregar a la bolsa' : 'Elegir opciones'}
+                    </div>
+                  </div>
+                  <div className="vc-card-body">
+                    <div className="vc-card-cat">{p.category}</div>
+                    <p className="vc-card-name">{p.name}</p>
+                    <div className="vc-card-price">
+                      {!soldOut && p.onSale && <span className="vc-card-price-strike">{originalPriceDisplay(p)}</span>}
+                      <span className={!soldOut && p.onSale ? 'vc-card-price-sale' : ''}>{priceDisplay(p)}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="vc-card-body">
-                  <div className="vc-card-cat">{p.category}</div>
-                  <p className="vc-card-name">{p.name}</p>
-                  <div className="vc-card-price">
-                    {p.onSale && <span className="vc-card-price-strike">{originalPriceDisplay(p)}</span>}
-                    <span className={p.onSale ? 'vc-card-price-sale' : ''}>{priceDisplay(p)}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </main>
@@ -1798,7 +1942,9 @@ export default function Store() {
               </>
             )}
 
-            {activeModalVariant ? (
+            {totalStock(selectedProduct) === 0 ? (
+              <p className="vc-modal-soldout-note">Este producto está agotado por ahora. Dejanos tu WhatsApp y te avisamos apenas vuelva.</p>
+            ) : activeModalVariant ? (
               <p className={`vc-stock-note ${activeModalVariant.stock <= 5 ? 'low' : 'ok'}`}>
                 {activeModalVariant.stock <= 5 ? `Solo quedan ${activeModalVariant.stock} disponibles` : 'Disponible'}
               </p>
@@ -1806,34 +1952,50 @@ export default function Store() {
               <p className="vc-stock-note low">Esa combinación no está disponible</p>
             )}
 
-            <div className="vc-qty-row">
-              <div className="vc-attr-label" style={{ margin: 0 }}>Cantidad</div>
-              <div className="vc-stepper">
-                <button onClick={() => setModalQty((q) => Math.max(1, q - 1))} disabled={modalQty <= 1}><IconMinus /></button>
-                <span>{modalQty}</span>
-                <button
-                  onClick={() => setModalQty((q) => Math.min(activeModalVariant?.stock || 1, q + 1))}
-                  disabled={!activeModalVariant || modalQty >= activeModalVariant.stock}
-                >
-                  <IconPlus />
-                </button>
-              </div>
-            </div>
+            {totalStock(selectedProduct) === 0 ? (
+              <a
+                className="vc-btn-notify"
+                href={buildWhatsappLink(`Hola! Quiero que me avisen cuando "${selectedProduct.name}" vuelva a tener stock.`)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Avisame cuando vuelva
+              </a>
+            ) : (
+              <>
+                <div className="vc-qty-row">
+                  <div className="vc-attr-label" style={{ margin: 0 }}>Cantidad</div>
+                  <div className="vc-stepper">
+                    <button onClick={() => setModalQty((q) => Math.max(1, q - 1))} disabled={modalQty <= 1}><IconMinus /></button>
+                    <span>{modalQty}</span>
+                    <button
+                      onClick={() => setModalQty((q) => Math.min(activeModalVariant?.stock || 1, q + 1))}
+                      disabled={!activeModalVariant || modalQty >= activeModalVariant.stock}
+                    >
+                      <IconPlus />
+                    </button>
+                  </div>
+                </div>
 
-            <button
-              className="vc-btn-primary"
-              disabled={!activeModalVariant || activeModalVariant.stock === 0}
-              onClick={() => {
-                addToCart(selectedProduct, activeModalVariant, modalQty)
-                closeProduct()
-              }}
-            >
-              Agregar a la bolsa
-            </button>
+                <button
+                  className="vc-btn-primary"
+                  disabled={!activeModalVariant || activeModalVariant.stock === 0}
+                  onClick={() => {
+                    addToCart(selectedProduct, activeModalVariant, modalQty)
+                    closeProduct()
+                  }}
+                >
+                  Agregar a la bolsa
+                </button>
+              </>
+            )}
 
             <div className="vc-accordion">
               {[
                 { key: 'details', title: 'Detalles del producto', body: `${selectedProduct.name} — categoría ${selectedProduct.category}. Pieza seleccionada por Variedades Calero.` },
+                ...(SIZE_GUIDES[selectedProduct.category] && uniqueSizes(selectedProduct).length > 0
+                  ? [{ key: 'sizes', title: 'Guía de tallas', body: null }]
+                  : []),
                 { key: 'care', title: 'Cuidados', body: CARE_TEXT[selectedProduct.category] || CARE_TEXT.default },
                 { key: 'shipping', title: 'Envío y devoluciones', body: 'Coordinamos la entrega directo con vos por WhatsApp después de confirmar tu pedido. Si algo no calza, escribinos dentro de las 48 horas siguientes a la entrega.' },
               ].map((s) => (
@@ -1846,10 +2008,55 @@ export default function Store() {
                     <span className="vc-accordion-head-title">{s.title}</span>
                     <span className={`vc-accordion-chevron ${openSection === s.key ? 'open' : ''}`}>⌄</span>
                   </button>
-                  {openSection === s.key && <div className="vc-accordion-body">{s.body}</div>}
+                  {openSection === s.key && (
+                    <div className="vc-accordion-body">
+                      {s.key === 'sizes' ? (
+                        <>
+                          <table className="vc-size-table">
+                            <thead>
+                              <tr>
+                                {SIZE_GUIDES[selectedProduct.category].headers.map((h) => <th key={h}>{h}</th>)}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {SIZE_GUIDES[selectedProduct.category].rows.map((row, ri) => (
+                                <tr key={ri}>
+                                  {row.map((cell, ci) => <td key={ci}>{cell}</td>)}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                          <p className="vc-size-note">{SIZE_GUIDES[selectedProduct.category].note}</p>
+                        </>
+                      ) : (
+                        s.body
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
+
+            {(() => {
+              const related = products.filter((rp) => rp.id !== selectedProduct.id && rp.category === selectedProduct.category).slice(0, 4)
+              if (related.length === 0) return null
+              return (
+                <div className="vc-related">
+                  <div className="vc-related-title">También te puede gustar</div>
+                  <div className="vc-related-scroll">
+                    {related.map((rp) => (
+                      <button key={rp.id} className="vc-related-card" onClick={() => openProduct(rp)}>
+                        <div className="vc-related-imgwrap">
+                          {rp.image ? <img src={rp.image} alt={rp.name} /> : null}
+                        </div>
+                        <div className="vc-related-name">{rp.name}</div>
+                        <div className="vc-related-price">{priceDisplay(rp)}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
           </div>
         </div>
       )}
