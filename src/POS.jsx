@@ -255,6 +255,11 @@ export default function POS({ user, onBack }) {
       <div className="pos-root">
         <style>{POS_STYLES}</style>
         <div className="pos-receipt-wrap">
+          <div className="pos-receipt-success">
+            <span className="pos-receipt-success-icon"><IconCheckCircle size={26} /></span>
+            <p className="pos-receipt-success-text">Venta completada</p>
+          </div>
+
           <div className="pos-receipt-box" id="receipt-print">
             <div className="pos-receipt-monogram">VC</div>
             <h2 className="pos-brand">Variedades Calero</h2>
@@ -547,6 +552,7 @@ const POS_STYLES = `
     --ink-faint: #a39d8f;
     --success: #3f6b4a;
     --danger: #9c3b2e;
+    --gold: #9c7a3c;
     --display: 'Bodoni Moda', serif;
     --body: 'Inter', system-ui, -apple-system, sans-serif;
     --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
@@ -954,7 +960,54 @@ const POS_STYLES = `
   .pos-checkout-btn:disabled { opacity: 0.32; cursor: not-allowed; }
 
   /* ---------- receipt (perforated ticket) ---------- */
-  .pos-receipt-wrap { max-width: 380px; margin: 0 auto; }
+  .pos-receipt-wrap { max-width: 380px; margin: 0 auto; position: relative; }
+  .pos-receipt-wrap::before {
+    content: 'VC';
+    position: absolute;
+    top: 70px; left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 190px;
+    letter-spacing: -10px;
+    color: var(--ink);
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .pos-receipt-box, .pos-receipt-actions { position: relative; z-index: 1; }
+
+  .pos-receipt-success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+    position: relative;
+    z-index: 1;
+    animation: pos-receipt-pop .5s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  .pos-receipt-success-icon {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    background: var(--ink);
+    box-shadow: 0 0 0 5px var(--bg), 0 0 0 6px var(--gold);
+  }
+  .pos-receipt-success-text {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    margin: 0;
+    letter-spacing: .3px;
+  }
+  @keyframes pos-receipt-pop {
+    0% { opacity: 0; transform: scale(.6); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
   .pos-receipt-monogram {
     width: 38px;
     height: 38px;
@@ -967,6 +1020,7 @@ const POS_STYLES = `
     font-family: var(--display);
     font-weight: 600;
     font-size: 13px;
+    box-shadow: 0 0 0 4px var(--bg), 0 0 0 5px var(--gold);
   }
   .pos-brand {
     font-family: var(--display);
@@ -985,17 +1039,26 @@ const POS_STYLES = `
     margin: 5px 0 0;
     font-weight: 600;
   }
+  .pos-receipt-tagline::after {
+    content: '';
+    display: block;
+    width: 34px; height: 1px;
+    background: var(--gold);
+    margin: 12px auto 0;
+  }
   .pos-receipt-ref {
+    display: table;
     text-align: center;
     font-family: var(--mono);
     font-size: 11px;
-    letter-spacing: 1.5px;
+    letter-spacing: 3px;
     color: var(--ink);
-    margin: 14px 0 16px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
+    margin: 18px auto 4px;
+    padding: 7px 16px 16px;
+    padding: 7px 16px;
+    border: 1px solid var(--gold);
   }
-  .pos-receipt-meta { margin-bottom: 4px; }
+  .pos-receipt-meta { margin: 16px 0 4px; }
   .pos-receipt-meta-row {
     display: flex;
     justify-content: space-between;
@@ -1007,10 +1070,19 @@ const POS_STYLES = `
   .pos-receipt-box {
     position: relative;
     background: var(--panel);
+    background-image: radial-gradient(var(--border) 0.5px, transparent 0.5px);
+    background-size: 14px 14px;
+    background-position: -7px -7px;
     border: 1px solid var(--border);
     border-radius: 0;
     padding: 30px 24px 24px;
     margin: 10px 0;
+    box-shadow: 0 1px 2px rgba(11,11,10,.04), 0 20px 44px -24px rgba(11,11,10,.4);
+    animation: pos-receipt-rise .5s .08s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes pos-receipt-rise {
+    0% { opacity: 0; transform: translateY(14px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
   .pos-receipt-box::before, .pos-receipt-box::after {
     content: '';
@@ -1023,7 +1095,17 @@ const POS_STYLES = `
   }
   .pos-receipt-box::before { top: -4.5px; }
   .pos-receipt-box::after { bottom: -4.5px; transform: scaleY(-1); }
-  .pos-receipt-divider { border-top: 1px dashed var(--border); margin: 14px 0; }
+  .pos-receipt-divider { position: relative; border-top: 1px dashed var(--border); margin: 18px 0; }
+  .pos-receipt-divider::after {
+    content: '◆';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--panel);
+    color: var(--gold);
+    font-size: 8px;
+    padding: 0 9px;
+  }
   .pos-receipt-cols-head {
     display: flex;
     justify-content: space-between;
@@ -1060,14 +1142,16 @@ const POS_STYLES = `
     opacity: 0.7;
   }
   .pos-receipt-line { display: flex; justify-content: space-between; font-size: 13.5px; margin-bottom: 7px; }
-  .pos-receipt-total { font-weight: 700; font-size: 15px; }
+  .pos-receipt-total { font-weight: 700; font-size: 16px; }
+  .pos-receipt-total span:last-child { color: var(--gold); }
   .pos-receipt-bold { font-weight: 700; }
   .pos-receipt-thanks {
     text-align: center;
     font-family: var(--display);
-    font-size: 16px;
+    font-style: italic;
+    font-size: 19px;
     color: var(--ink);
-    margin: 6px 0 4px;
+    margin: 12px 0 4px;
   }
   .pos-receipt-footer-tag {
     text-align: center;
@@ -1110,7 +1194,9 @@ const POS_STYLES = `
   @media print {
     .pos-root { background: white; color: black; padding: 0; }
     .pos-receipt-actions { display: none; }
-    .pos-receipt-box { border: none; }
+    .pos-receipt-success { display: none; }
+    .pos-receipt-wrap::before { display: none; }
+    .pos-receipt-box { border: none; box-shadow: none; animation: none; }
     .pos-receipt-box::before, .pos-receipt-box::after { display: none; }
   }
 
