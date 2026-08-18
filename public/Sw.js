@@ -1,4 +1,4 @@
-const CACHE_NAME = 'variedades-calero-v1'
+const CACHE_NAME = 'variedades-calero-v2' // bump: fuerza a purgar todo lo cacheado por versiones anteriores
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -15,9 +15,22 @@ self.addEventListener('activate', (event) => {
   self.clients.claim()
 })
 
-// Estrategia simple: red primero, y si falla usa lo último cacheado
+// Estrategia:
+// - Navegación (el documento HTML principal): SIEMPRE red, nunca cache.
+//   Esto evita que quede un index.html viejo apuntando a chunks JS que
+//   ya no existen en el servidor (o mezclado con chunks de otra versión).
+// - Todo lo demás (JS, CSS, imágenes): red primero, y si falla se
+//   usa lo último cacheado (para que funcione offline).
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return
+
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(event.request))
+    )
+    return
+  }
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
@@ -37,23 +50,15 @@ self.addEventListener('push', (event) => {
   } catch {
     data = { title: 'Variedades Calero', body: event.data ? event.data.text() : 'Tenés un nuevo pedido' }
   }
-
   event.waitUntil(
     self.registration.showNotification(data.title || 'Variedades Calero', {
       body: data.body || 'Tenés un nuevo pedido online',
       icon: '/icon-192.png',
       badge: '/icon-192.png',
-      // Doble vibración tipo WhatsApp en vez de un solo golpe corto.
       vibrate: [300, 120, 300, 120, 300],
-      // Suena con el sonido de notificación por defecto del sistema
-      // (no la silenciamos) y se queda visible hasta que la toques,
-      // en vez de desaparecer sola a los pocos segundos.
       silent: false,
       requireInteraction: true,
       renotify: true,
-      // Un tag único por pedido: cada pedido nuevo dispara su propia
-      // alerta con sonido/vibración en vez de reemplazar la anterior
-      // en silencio.
       tag: data.tag || `pedido-${Date.now()}`,
       actions: [{ action: 'view', title: 'Ver pedido' }],
       data: { url: data.url || '/' },
