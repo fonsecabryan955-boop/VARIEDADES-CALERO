@@ -1,15 +1,35 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense, lazy } from 'react'
 import Login from './Login.jsx'
-import Products from './Products.jsx'
-import POS from './POS.jsx'
-import Store from './Store.jsx'
-import Orders from './Orders.jsx'
-import Cash from './Cash.jsx'
-import Reports from './Reports.jsx'
-import Receivables from './Receivables.jsx'
-import Clients from './Clients.jsx'
-import Employees from './Employees.jsx'
-import PushNotificationSetup from './PushNotificationSetup.jsx'
+
+// Cada vista se carga como su propio chunk, en vez de ir todas
+// empaquetadas juntas en el bundle principal.
+const Products = lazy(() => import('./Products.jsx'))
+const POS = lazy(() => import('./POS.jsx'))
+const Store = lazy(() => import('./Store.jsx'))
+const Orders = lazy(() => import('./Orders.jsx'))
+const Cash = lazy(() => import('./Cash.jsx'))
+const Reports = lazy(() => import('./Reports.jsx'))
+const Receivables = lazy(() => import('./Receivables.jsx'))
+const Clients = lazy(() => import('./Clients.jsx'))
+const Employees = lazy(() => import('./Employees.jsx'))
+const PushNotificationSetup = lazy(() => import('./PushNotificationSetup.jsx'))
+
+function ViewLoader() {
+  return (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: '#F2EBDB',
+      color: '#8A7A56',
+      fontFamily: 'system-ui, sans-serif',
+      fontSize: 14,
+    }}>
+      Cargando...
+    </div>
+  )
+}
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -45,7 +65,11 @@ export default function App() {
   if (checking) return null
 
   if (isPublicStore) {
-    return <Store />
+    return (
+      <Suspense fallback={<ViewLoader />}>
+        <Store />
+      </Suspense>
+    )
   }
 
   if (!user) {
@@ -53,35 +77,67 @@ export default function App() {
   }
 
   if (view === 'products') {
-    return <Products onBack={() => setView('home')} />
+    return (
+      <Suspense fallback={<ViewLoader />}>
+        <Products onBack={() => setView('home')} />
+      </Suspense>
+    )
   }
 
   if (view === 'pos') {
-    return <POS user={user} onBack={() => setView('home')} />
+    return (
+      <Suspense fallback={<ViewLoader />}>
+        <POS user={user} onBack={() => setView('home')} />
+      </Suspense>
+    )
   }
 
   if (view === 'orders') {
-    return <Orders onBack={() => setView('home')} />
+    return (
+      <Suspense fallback={<ViewLoader />}>
+        <Orders onBack={() => setView('home')} />
+      </Suspense>
+    )
   }
 
   if (view === 'cash') {
-    return <Cash user={user} onBack={() => setView('home')} />
+    return (
+      <Suspense fallback={<ViewLoader />}>
+        <Cash user={user} onBack={() => setView('home')} />
+      </Suspense>
+    )
   }
 
   if (view === 'reports') {
-    return <Reports onBack={() => setView('home')} />
+    return (
+      <Suspense fallback={<ViewLoader />}>
+        <Reports onBack={() => setView('home')} />
+      </Suspense>
+    )
   }
 
   if (view === 'receivables') {
-    return <Receivables onBack={() => setView('home')} />
+    return (
+      <Suspense fallback={<ViewLoader />}>
+        <Receivables onBack={() => setView('home')} />
+      </Suspense>
+    )
   }
 
   if (view === 'clients') {
-    return <Clients onBack={() => setView('home')} />
+    return (
+      <Suspense fallback={<ViewLoader />}>
+        <Clients onBack={() => setView('home')} />
+      </Suspense>
+    )
   }
 
   if (view === 'employees') {
-    return <Employees onBack={() => setView('home')} />
+    return (
+      <Suspense fallback={<ViewLoader />}>
+        <Employees onBack={() => setView('home')} />
+      </Suspense>
+    )
   }
 
   return (
@@ -123,7 +179,11 @@ export default function App() {
         </button>
       </div>
 
-      {user.role === 'admin' && <PushNotificationSetup />}
+      {user.role === 'admin' && (
+        <Suspense fallback={null}>
+          <PushNotificationSetup />
+        </Suspense>
+      )}
 
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
         <button
