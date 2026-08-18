@@ -34,6 +34,13 @@ const IconArrow = (p) => (
 const IconCheck = (p) => (
   <svg viewBox="0 0 24 24" width={p.size || 30} height={p.size || 30} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
 )
+const IconDownload = (p) => (
+  <svg width={p.size || 18} height={p.size || 18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 3v13" />
+    <path d="M7 11l5 5 5-5" />
+    <path d="M4 20h16" />
+  </svg>
+)
 const IconWhatsapp = (p) => (
   <svg viewBox="0 0 24 24" width={p.size || 22} height={p.size || 22} fill="currentColor">
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.472-.148-.67.15-.198.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.876 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347Z" />
@@ -263,6 +270,54 @@ function GlobalStyle() {
         transition: background .2s, color .2s;
       }
       .vc-cart-btn:hover { background: var(--vc-ink); color: #fff; }
+      .vc-install-btn {
+        position: relative;
+        background: transparent;
+        border: 1px solid var(--vc-ink);
+        color: var(--vc-ink);
+        border-radius: 0;
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background .2s, color .2s;
+      }
+      .vc-install-btn:hover { background: var(--vc-ink); color: #fff; }
+      .vc-install-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        background: var(--vc-ink);
+        color: #fff;
+        padding: 11px 18px;
+        font-size: 12.5px;
+        letter-spacing: 0.2px;
+      }
+      .vc-install-banner button {
+        background: #fff;
+        color: var(--vc-ink);
+        border: none;
+        border-radius: 0;
+        padding: 7px 14px;
+        font-size: 11.5px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .vc-install-banner .vc-install-dismiss {
+        background: transparent;
+        color: #fff;
+        border: none;
+        font-size: 18px;
+        line-height: 1;
+        padding: 0 4px;
+        cursor: pointer;
+      }
       .vc-cart-badge {
         position: absolute;
         top: -7px;
@@ -1160,6 +1215,42 @@ export default function Store() {
   const [uploadingProof, setUploadingProof] = useState(false)
   const [proofUploaded, setProofUploaded] = useState(false)
 
+  // ---------- Install as app (beforeinstallprompt) ----------
+  const [installPrompt, setInstallPrompt] = useState(null)
+  const [showInstallBanner, setShowInstallBanner] = useState(false)
+
+  useEffect(() => {
+    // Ya instalada (abierta como app standalone) -> no mostramos nada
+    const isStandalone =
+      window.matchMedia?.('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true
+    if (isStandalone) return
+
+    // El usuario ya cerró el banner antes en este dispositivo
+    if (localStorage.getItem('vc-install-dismissed') === '1') return
+
+    const onBeforeInstallPrompt = (e) => {
+      e.preventDefault()
+      setInstallPrompt(e)
+      setShowInstallBanner(true)
+    }
+    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt)
+    return () => window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt)
+  }, [])
+
+  const handleInstallClick = async () => {
+    if (!installPrompt) return
+    installPrompt.prompt()
+    await installPrompt.userChoice
+    setInstallPrompt(null)
+    setShowInstallBanner(false)
+  }
+
+  const dismissInstallBanner = () => {
+    setShowInstallBanner(false)
+    localStorage.setItem('vc-install-dismissed', '1')
+  }
+
   useEffect(() => {
     const load = async () => {
       setLoading(true)
@@ -1690,11 +1781,28 @@ export default function Store() {
             <p className="vc-logo-sub">Tienda online</p>
           </div>
         </div>
-        <button className="vc-cart-btn" onClick={() => setStep('bag')} aria-label="Ver bolsa de compras">
-          <IconBag />
-          {cartCount > 0 && <span className="vc-cart-badge">{cartCount}</span>}
-        </button>
+        <div className="vc-header-left" style={{ marginLeft: 'auto', gap: 8 }}>
+          {installPrompt && (
+            <button className="vc-install-btn" onClick={handleInstallClick} aria-label="Instalar app">
+              <IconDownload size={18} />
+            </button>
+          )}
+          <button className="vc-cart-btn" onClick={() => setStep('bag')} aria-label="Ver bolsa de compras">
+            <IconBag />
+            {cartCount > 0 && <span className="vc-cart-badge">{cartCount}</span>}
+          </button>
+        </div>
       </header>
+
+      {showInstallBanner && (
+        <div className="vc-install-banner">
+          <span>Instalá la app de Variedades Calero en tu celular</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <button onClick={handleInstallClick}>Instalar</button>
+            <button className="vc-install-dismiss" onClick={dismissInstallBanner} aria-label="Cerrar">×</button>
+          </div>
+        </div>
+      )}
 
       <MarqueeBar />
 
