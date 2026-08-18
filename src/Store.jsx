@@ -1253,10 +1253,10 @@ export default function Store() {
     const minPrice = (p) => Math.min(...p.variants.map((v) => v.price))
     if (sortBy === 'price_asc') list = [...list].sort((a, b) => minPrice(a) - minPrice(b))
     if (sortBy === 'price_desc') list = [...list].sort((a, b) => minPrice(b) - minPrice(a))
-    // Los agotados se mandan al final del listado sin importar el orden
-    // elegido, para que no ocupen los primeros lugares del catálogo.
+    // Los productos agotados (stock total 0) se eliminan del catálogo:
+    // no se muestran en la tienda online.
     const inStock = (p) => p.variants.reduce((s, v) => s + v.stock, 0) > 0
-    list = [...list.filter(inStock), ...list.filter((p) => !inStock(p))]
+    list = list.filter(inStock)
     return list
   }, [products, activeCategory, sortBy, search])
 
