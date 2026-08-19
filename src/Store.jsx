@@ -1256,10 +1256,11 @@ export default function Store() {
       setLoading(true)
       // No filtramos por stock > 0 acá: los productos agotados se siguen
       // trayendo para poder mostrarlos con "Avisame cuando vuelva" en vez
-      // de que desaparezcan del catálogo sin dejar rastro.
+      // de que desaparezcan del catálogo sin dejar rastro. Los productos
+      // ocultos manualmente (products.active = false) sí se excluyen abajo.
       const { data } = await supabase
         .from('product_variants')
-        .select('id, size, color, stock, price, product_id, products(name, base_price, image_url, on_sale, discount_percent, categories(name))')
+        .select('id, size, color, stock, price, product_id, products(name, base_price, image_url, on_sale, discount_percent, active, categories(name))')
         .order('created_at', { ascending: false })
       setRawVariants(data || [])
       setLoading(false)
@@ -1301,6 +1302,8 @@ export default function Store() {
   const products = useMemo(() => {
     const map = new Map()
     rawVariants.forEach((v) => {
+      // producto marcado como oculto de la tienda online -> no se agrupa
+      if (v.products?.active === false) return
       const pid = v.product_id
       if (!map.has(pid)) {
         map.set(pid, {
