@@ -66,7 +66,7 @@ export default function Products({ onBack }) {
     setLoading(true)
     const { data } = await supabase
       .from('product_variants')
-      .select('id, size, color, stock, price, sku, product_id, products(id, name, brand, base_price, image_url, category_id, description, cost, supplier, on_sale, discount_percent, categories(id, name))')
+      .select('id, size, color, stock, price, sku, product_id, products(id, name, brand, base_price, image_url, category_id, description, cost, supplier, on_sale, discount_percent, active, categories(id, name))')
       .order('created_at', { ascending: false })
     setRawVariants(data || [])
     setLoading(false)
@@ -75,6 +75,27 @@ export default function Products({ onBack }) {
   const loadCategories = async () => {
     const { data } = await supabase.from('categories').select('name').order('name')
     setExistingCategoryNames((data || []).map((c) => c.name))
+  }
+
+  // ---------- toggle: mostrar/ocultar producto en la tienda online ----------
+  const [togglingStoreId, setTogglingStoreId] = useState(null)
+  const toggleShowInStore = async (product) => {
+    setTogglingStoreId(product.id)
+    const nextValue = !product.showInStore
+    const { error } = await supabase
+      .from('products')
+      .update({ active: nextValue })
+      .eq('id', product.id)
+    if (!error) {
+      setRawVariants((prev) =>
+        prev.map((v) =>
+          v.product_id === product.id
+            ? { ...v, products: { ...v.products, active: nextValue } }
+            : v
+        )
+      )
+    }
+    setTogglingStoreId(null)
   }
 
   useEffect(() => {
@@ -101,6 +122,9 @@ export default function Products({ onBack }) {
           supplier: v.products?.supplier || '',
           onSale: v.products?.on_sale || false,
           discountPercent: v.products?.discount_percent || 0,
+          // los productos existentes no tienen este campo tocado nunca,
+          // así que null/undefined cuenta como "sí visible" (true)
+          showInStore: v.products?.active !== false,
           variants: [],
         })
       }
@@ -659,6 +683,9 @@ export default function Products({ onBack }) {
                         {p.onSale && p.discountPercent > 0 && (
                           <span style={styles.saleBadge}>🏷️ -{p.discountPercent}%</span>
                         )}
+                        {!p.showInStore && (
+                          <span style={styles.hiddenBadge}>🚫 Oculto de la tienda</span>
+                        )}
                       </div>
                       <div style={styles.cardMeta}>
                         {p.category} · {p.variants.length} variante{p.variants.length !== 1 ? 's' : ''} · Stock total: {totalStock}
@@ -676,6 +703,14 @@ export default function Products({ onBack }) {
                     ) : (
                       <div style={styles.cardPrice}>${Number(p.basePrice).toFixed(2)}</div>
                     )}
+                    <button
+                      style={p.showInStore ? styles.storeToggleOn : styles.storeToggleOff}
+                      disabled={togglingStoreId === p.id}
+                      onClick={(e) => { e.stopPropagation(); toggleShowInStore(p) }}
+                      title={p.showInStore ? 'Visible en la tienda online — clic para ocultar' : 'Oculto de la tienda online — clic para mostrar'}
+                    >
+                      {togglingStoreId === p.id ? '...' : p.showInStore ? '👁️ En tienda' : '🚫 Oculto'}
+                    </button>
                     <span style={styles.expandIcon}>{isOpen ? '▲' : '▼'}</span>
                   </div>
                 </div>
@@ -850,6 +885,18 @@ const styles = {
   brandBadge: {
     marginLeft: 8, background: '#EAE0C7', color: '#5C4E36', fontSize: 10.5, fontWeight: 700,
     borderRadius: 999, padding: '2px 9px', verticalAlign: 'middle', border: '1px solid #C7B689',
+  },
+  hiddenBadge: {
+    marginLeft: 8, background: '#F2EBDB', color: '#B5574A', fontSize: 10.5, fontWeight: 700,
+    borderRadius: 999, padding: '2px 9px', verticalAlign: 'middle', border: '1px solid #B5574A',
+  },
+  storeToggleOn: {
+    background: '#E7EFE3', color: '#4C7A52', border: '1px solid #4C7A52', borderRadius: 999,
+    padding: '5px 12px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
+  },
+  storeToggleOff: {
+    background: '#F7E9E6', color: '#B5574A', border: '1px solid #B5574A', borderRadius: 999,
+    padding: '5px 12px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
   },
   cardPriceSaleWrap: { textAlign: 'right' },
   cardPriceStrike: { color: '#8A7A56', fontSize: 12, textDecoration: 'line-through' },
