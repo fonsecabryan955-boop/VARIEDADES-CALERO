@@ -107,6 +107,7 @@ export default function Receivables({ onBack }) {
 
   return (
     <div style={styles.container}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700&family=Inter:wght@400;500;600;700&display=swap');`}</style>
       <div style={styles.header}>
         <button onClick={onBack} style={styles.backBtn}>← Volver</button>
         <h2 style={styles.title}>Cuentas por Cobrar</h2>
@@ -120,7 +121,7 @@ export default function Receivables({ onBack }) {
       ) : (
         <>
           <div style={styles.totalBanner}>
-            Total por cobrar: <b style={{ color: '#3B2E1F' }}>${grandTotal.toFixed(2)}</b>
+            Total por cobrar: <b style={{ color: '#0b0b0a' }}>${grandTotal.toFixed(2)}</b>
           </div>
 
           <div style={styles.list}>
@@ -164,7 +165,7 @@ export default function Receivables({ onBack }) {
                           <div>
                             Total: ${Number(o.total).toFixed(2)} · Pagado: ${Number(o.amount_paid).toFixed(2)}
                           </div>
-                          <div style={{ color: '#C97A6E', fontWeight: 'bold' }}>
+                          <div style={{ color: '#b5574a', fontWeight: 'bold' }}>
                             Resta: ${o.remaining.toFixed(2)}
                           </div>
                         </div>
@@ -210,22 +211,22 @@ export default function Receivables({ onBack }) {
 }
 
 const styles = {
-  container: { minHeight: '100vh', background: '#F2EBDB', color: '#2E2618', fontFamily: 'system-ui, sans-serif', padding: 24 },
+  container: { minHeight: '100vh', background: '#f5f4f1', color: '#0b0b0a', fontFamily: "'Inter', system-ui, sans-serif", padding: 24 },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  backBtn: { background: 'transparent', color: '#8A7A56', border: '1px solid #C7B689', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' },
-  title: { color: '#3B2E1F', margin: 0, fontSize: 20 },
-  muted: { color: '#8A7A56', fontSize: 13 },
-  error: { color: '#B5574A', fontSize: 13, marginTop: 10 },
+  backBtn: { background: 'transparent', color: '#726d63', border: '1px solid #e2ded5', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' },
+  title: { color: '#0b0b0a', margin: 0, fontSize: 20, fontFamily: "'Bodoni Moda', serif", letterSpacing: 0.5, fontWeight: 500 },
+  muted: { color: '#726d63', fontSize: 13 },
+  error: { color: '#9c3b2e', fontSize: 13, marginTop: 10 },
   totalBanner: {
-    background: '#FBF8F0',
-    border: '1px solid #3B2E1F',
+    background: '#ffffff',
+    border: '1px solid #0b0b0a',
     borderRadius: 12,
     padding: 16,
     marginBottom: 18,
     fontSize: 15,
   },
   list: { display: 'flex', flexDirection: 'column', gap: 12 },
-  card: { background: '#FBF8F0', border: '1px solid #DACC9E', borderRadius: 12, overflow: 'hidden' },
+  card: { background: '#ffffff', border: '1px solid #e2ded5', borderRadius: 12, overflow: 'hidden' },
   cardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -235,18 +236,18 @@ const styles = {
   },
   clientName: { fontWeight: 'bold' },
   headerRight: { display: 'flex', alignItems: 'center', gap: 10 },
-  clientTotal: { color: '#C97A6E', fontWeight: 'bold', fontSize: 16 },
+  clientTotal: { color: '#b5574a', fontWeight: 'bold', fontSize: 16 },
   deleteClientBtn: {
     background: 'transparent',
-    color: '#B5574A',
-    border: '1px solid #B5574A',
+    color: '#9c3b2e',
+    border: '1px solid #9c3b2e',
     borderRadius: 6,
     padding: '6px 10px',
     fontSize: 13,
     cursor: 'pointer',
   },
   ordersList: {
-    borderTop: '1px solid #DACC9E',
+    borderTop: '1px solid #e2ded5',
     padding: 16,
     display: 'flex',
     flexDirection: 'column',
@@ -258,7 +259,7 @@ const styles = {
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: 10,
-    background: '#F2EBDB',
+    background: '#f5f4f1',
     borderRadius: 8,
     padding: 12,
   },
@@ -266,16 +267,16 @@ const styles = {
   payBox: { display: 'flex', gap: 6 },
   payInput: {
     width: 90,
-    background: '#EAE0C7',
-    color: '#2E2618',
-    border: '1px solid #C7B689',
+    background: '#f2f0ec',
+    color: '#0b0b0a',
+    border: '1px solid #e2ded5',
     borderRadius: 6,
     padding: '6px 8px',
     fontSize: 13,
   },
   payBtn: {
-    background: '#3B2E1F',
-    color: '#F2EBDB',
+    background: '#0b0b0a',
+    color: '#f5f4f1',
     border: 'none',
     borderRadius: 6,
     padding: '6px 12px',
@@ -285,8 +286,8 @@ const styles = {
   },
   deleteOrderBtn: {
     background: 'transparent',
-    color: '#B5574A',
-    border: '1px solid #B5574A',
+    color: '#9c3b2e',
+    border: '1px solid #9c3b2e',
     borderRadius: 6,
     padding: '6px 10px',
     fontSize: 12,
