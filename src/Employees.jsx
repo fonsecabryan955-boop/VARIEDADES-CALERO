@@ -23,11 +23,12 @@ const currentQuincena = () => {
 function GlobalStyle() {
   return (
     <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700&family=Inter:wght@400;500;600;700&display=swap');
       .em-page {
         min-height: 100vh;
-        background: #F2EBDB;
-        color: #2E2618;
-        font-family: system-ui, sans-serif;
+        background: #f5f4f1;
+        color: #0b0b0a;
+        font-family: 'Inter', system-ui, sans-serif;
         padding: 24px;
       }
       .em-page * { box-sizing: border-box; }
@@ -36,101 +37,101 @@ function GlobalStyle() {
         margin-bottom: 22px; flex-wrap: wrap; gap: 12px;
       }
       .em-back {
-        background: transparent; color: #8A7A56; border: 1px solid #C7B689;
+        background: transparent; color: #726d63; border: 1px solid #e2ded5;
         border-radius: 8px; padding: 8px 14px; cursor: pointer;
       }
-      .em-title { color: #3B2E1F; margin: 0; font-size: 20px; }
+      .em-title { color: #0b0b0a; margin: 0; font-size: 20px; font-family: 'Bodoni Moda', serif; letter-spacing: 0.5px; }
       .em-tabs { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
       .em-tab {
-        background: transparent; border: 1px solid #C7B689; color: #8A7A56;
+        background: transparent; border: 1px solid #e2ded5; color: #726d63;
         padding: 9px 16px; border-radius: 8px; cursor: pointer; font-size: 13.5px;
       }
-      .em-tab.active { background: #3B2E1F; border-color: #3B2E1F; color: #F2EBDB; font-weight: 700; }
+      .em-tab.active { background: #0b0b0a; border-color: #0b0b0a; color: #f5f4f1; font-weight: 700; }
       .em-add-btn {
-        background: #3B2E1F; color: #F2EBDB; border: none; border-radius: 8px;
+        background: #0b0b0a; color: #f5f4f1; border: none; border-radius: 8px;
         padding: 10px 16px; font-weight: bold; cursor: pointer;
       }
       .em-form {
-        background: #FBF8F0; border: 1px solid #DACC9E; border-radius: 12px;
+        background: #ffffff; border: 1px solid #e2ded5; border-radius: 12px;
         padding: 20px; margin-bottom: 22px;
       }
       .em-form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
       .em-input {
-        flex: 1; min-width: 140px; background: #EAE0C7; color: #2E2618;
-        border: 1px solid #C7B689; border-radius: 8px; padding: 10px 12px; font-size: 14px;
+        flex: 1; min-width: 140px; background: #f2f0ec; color: #0b0b0a;
+        border: 1px solid #e2ded5; border-radius: 8px; padding: 10px 12px; font-size: 14px;
       }
-      .em-input::placeholder { color: #6b6b6b; }
-      .em-label { display: block; font-size: 11.5px; color: #8A7A56; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+      .em-input::placeholder { color: #726d63; }
+      .em-label { display: block; font-size: 11.5px; color: #726d63; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
       .em-save-btn {
-        background: #3B2E1F; color: #F2EBDB; border: none; border-radius: 8px;
+        background: #0b0b0a; color: #f5f4f1; border: none; border-radius: 8px;
         padding: 10px 20px; font-weight: bold; cursor: pointer;
       }
-      .em-error { color: #B5574A; font-size: 13px; margin-bottom: 12px; }
-      .em-muted { color: #8A7A56; }
+      .em-error { color: #9c3b2e; font-size: 13px; margin-bottom: 12px; }
+      .em-muted { color: #726d63; }
 
       .em-list { display: flex; flex-direction: column; gap: 10px; }
       .em-card {
-        background: #FBF8F0; border: 1px solid #DACC9E; border-radius: 10px;
+        background: #ffffff; border: 1px solid #e2ded5; border-radius: 10px;
         padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
       }
       .em-card-name { font-weight: bold; font-size: 15px; }
-      .em-card-meta { color: #8A7A56; font-size: 13px; margin-top: 2px; }
+      .em-card-meta { color: #726d63; font-size: 13px; margin-top: 2px; }
       .em-card-right { display: flex; align-items: center; gap: 12px; }
-      .em-salary { color: #3B2E1F; font-weight: bold; }
+      .em-salary { color: #0b0b0a; font-weight: bold; }
       .em-status { font-size: 11.5px; padding: 3px 9px; border-radius: 999px; }
-      .em-status.active { background: rgba(111,174,116,0.15); color: #4C7A52; }
-      .em-status.inactive { background: rgba(255,107,107,0.12); color: #B5574A; }
+      .em-status.active { background: rgba(111,174,116,0.15); color: #3f6b4a; }
+      .em-status.inactive { background: rgba(255,107,107,0.12); color: #9c3b2e; }
       .em-icon-btn {
-        background: #EAE0C7; border: 1px solid #C7B689; color: #2E2618;
+        background: #f2f0ec; border: 1px solid #e2ded5; color: #0b0b0a;
         border-radius: 8px; padding: 7px 12px; cursor: pointer; font-size: 12.5px;
       }
-      .em-icon-btn:hover { border-color: #3B2E1F; }
-      .em-delete-btn { color: #B5574A; border-color: #D9B9AE; }
-      .em-delete-btn:hover { border-color: #B5574A; }
+      .em-icon-btn:hover { border-color: #0b0b0a; }
+      .em-delete-btn { color: #9c3b2e; border-color: #d9cfc0; }
+      .em-delete-btn:hover { border-color: #9c3b2e; }
 
       .em-period-bar {
         display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
-        background: #FBF8F0; border: 1px solid #DACC9E; border-radius: 12px; padding: 16px; margin-bottom: 20px;
+        background: #ffffff; border: 1px solid #e2ded5; border-radius: 12px; padding: 16px; margin-bottom: 20px;
       }
       .em-period-field { display: flex; flex-direction: column; gap: 5px; }
       .em-period-field input {
-        background: #EAE0C7; color: #2E2618; border: 1px solid #C7B689; border-radius: 8px; padding: 9px 10px; font-size: 13.5px;
+        background: #f2f0ec; color: #0b0b0a; border: 1px solid #e2ded5; border-radius: 8px; padding: 9px 10px; font-size: 13.5px;
       }
 
       .em-payroll-row {
-        background: #FBF8F0; border: 1px solid #DACC9E; border-radius: 10px;
+        background: #ffffff; border: 1px solid #e2ded5; border-radius: 10px;
         padding: 14px 16px; margin-bottom: 10px;
       }
       .em-payroll-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
       .em-payroll-name { font-weight: bold; font-size: 15px; }
       .em-payroll-fields { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
       .em-mini-field { display: flex; flex-direction: column; gap: 4px; }
-      .em-mini-field label { font-size: 10.5px; color: #8A7A56; text-transform: uppercase; }
+      .em-mini-field label { font-size: 10.5px; color: #726d63; text-transform: uppercase; }
       .em-mini-field input {
-        width: 110px; background: #EAE0C7; color: #2E2618; border: 1px solid #C7B689;
+        width: 110px; background: #f2f0ec; color: #0b0b0a; border: 1px solid #e2ded5;
         border-radius: 7px; padding: 7px 9px; font-size: 13px;
       }
-      .em-net { color: #3B2E1F; font-weight: bold; font-size: 16px; }
+      .em-net { color: #0b0b0a; font-weight: bold; font-size: 16px; }
       .em-pay-btn {
-        background: #3B2E1F; color: #F2EBDB; border: none; border-radius: 8px;
+        background: #0b0b0a; color: #f5f4f1; border: none; border-radius: 8px;
         padding: 9px 16px; font-weight: bold; cursor: pointer; font-size: 13px;
       }
       .em-paid-tag {
-        background: rgba(111,174,116,0.15); color: #4C7A52; font-size: 12px;
+        background: rgba(111,174,116,0.15); color: #3f6b4a; font-size: 12px;
         padding: 6px 12px; border-radius: 8px; font-weight: 600;
       }
 
       .em-history-row {
-        background: #FBF8F0; border: 1px solid #DACC9E; border-radius: 10px;
+        background: #ffffff; border: 1px solid #e2ded5; border-radius: 10px;
         padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;
       }
-      .em-history-meta { color: #8A7A56; font-size: 12.5px; }
+      .em-history-meta { color: #726d63; font-size: 12.5px; }
 
       /* ---- receipt (58mm print) ---- */
       .em-receipt-wrap { display: flex; flex-direction: column; align-items: center; }
       .em-ticket-frame {
-        background: #FBF8F0;
-        border: 1px solid #DACC9E;
+        background: #ffffff;
+        border: 1px solid #e2ded5;
         border-radius: 14px;
         padding: 22px 18px;
         box-shadow: 0 10px 28px -14px rgba(59,46,31,0.35);
@@ -138,36 +139,36 @@ function GlobalStyle() {
       .em-receipt {
         width: 58mm;
         background: #fff;
-        color: #111;
+        color: #0b0b0a;
         padding: 10px 8px;
         font-family: 'Courier New', monospace;
         font-size: 11px;
         line-height: 1.55;
         box-shadow: 0 1px 6px rgba(0,0,0,0.12);
       }
-      .em-receipt hr { border: none; border-top: 1px dashed #111; margin: 7px 0; }
+      .em-receipt hr { border: none; border-top: 1px dashed #0b0b0a; margin: 7px 0; }
       .em-receipt .center { text-align: center; }
       .em-receipt .bold { font-weight: 700; }
       .em-receipt .row { display: flex; justify-content: space-between; }
       .em-receipt .brand { font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: 2px; }
-      .em-receipt .tagline { font-size: 8px; text-transform: uppercase; letter-spacing: 1px; color: #444; margin: 2px 0 4px; }
+      .em-receipt .tagline { font-size: 8px; text-transform: uppercase; letter-spacing: 1px; color: #726d63; margin: 2px 0 4px; }
       .em-receipt .subtitle { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
       .em-receipt .folio { font-size: 9.5px; letter-spacing: 1px; margin-top: 2px; }
-      .em-receipt .section-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 3px; }
-      .em-receipt .muted-line { color: #444; }
+      .em-receipt .section-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #726d63; margin-bottom: 3px; }
+      .em-receipt .muted-line { color: #726d63; }
       .em-receipt .small { font-size: 9.5px; }
       .em-receipt .thanks { font-size: 10.5px; font-style: italic; }
       .em-receipt .total-row { font-size: 13px; margin-top: 4px; }
       .em-r-crest {
         width: 26px; height: 26px; margin: 0 auto 4px;
-        border: 1px solid #111; border-radius: 50%;
+        border: 1px solid #0b0b0a; border-radius: 50%;
         display: flex; align-items: center; justify-content: center;
         font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
       }
 
       .em-receipt-actions { display: flex; gap: 10px; margin-top: 20px; }
       .em-print-btn {
-        background: #3B2E1F; color: #F2EBDB; border: none; border-radius: 8px;
+        background: #0b0b0a; color: #f5f4f1; border: none; border-radius: 8px;
         padding: 11px 22px; font-weight: bold; cursor: pointer;
       }
 
