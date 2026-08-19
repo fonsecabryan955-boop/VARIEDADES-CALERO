@@ -193,6 +193,7 @@ export default function Cash({ user, onBack }) {
 
   return (
     <div style={styles.container}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700&family=Inter:wght@400;500;600;700&display=swap');`}</style>
       <div style={styles.header}>
         <button onClick={onBack} style={styles.backBtn}>← Volver</button>
         <h2 style={styles.title}>Caja</h2>
@@ -241,15 +242,15 @@ export default function Cash({ user, onBack }) {
               </div>
               <div style={styles.summaryItem}>
                 <div style={styles.muted}>Ventas en efectivo</div>
-                <div style={{ color: '#4C7A52' }}>${cashSales.toFixed(2)}</div>
+                <div style={{ color: '#3f6b4a' }}>${cashSales.toFixed(2)}</div>
               </div>
               <div style={styles.summaryItem}>
                 <div style={styles.muted}>Gastos</div>
-                <div style={{ color: '#C97A6E' }}>-${totalExpenses.toFixed(2)}</div>
+                <div style={{ color: '#b5574a' }}>-${totalExpenses.toFixed(2)}</div>
               </div>
             </div>
             <div style={styles.expectedBox}>
-              Esperado en caja: <b style={{ color: '#3B2E1F' }}>${expected.toFixed(2)}</b>
+              Esperado en caja: <b style={{ color: '#0b0b0a' }}>${expected.toFixed(2)}</b>
             </div>
           </div>
 
@@ -288,7 +289,7 @@ export default function Cash({ user, onBack }) {
                   <div key={e.id} style={styles.expenseRow}>
                     <span>{e.description} {e.category ? `(${e.category})` : ''}</span>
                     <div style={styles.expenseRight}>
-                      <span style={{ color: '#C97A6E' }}>-${Number(e.amount).toFixed(2)}</span>
+                      <span style={{ color: '#b5574a' }}>-${Number(e.amount).toFixed(2)}</span>
                       <button
                         style={styles.deleteExpenseBtn}
                         onClick={() => handleDeleteExpense(e.id)}
@@ -326,18 +327,18 @@ export default function Cash({ user, onBack }) {
 }
 
 const styles = {
-  container: { minHeight: '100vh', background: '#F2EBDB', color: '#2E2618', fontFamily: 'system-ui, sans-serif', padding: 24 },
+  container: { minHeight: '100vh', background: '#f5f4f1', color: '#0b0b0a', fontFamily: "'Inter', system-ui, sans-serif", padding: 24 },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
-  backBtn: { background: 'transparent', color: '#8A7A56', border: '1px solid #C7B689', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' },
-  title: { color: '#3B2E1F', margin: 0, fontSize: 20 },
-  muted: { color: '#8A7A56', fontSize: 13 },
-  card: { background: '#FBF8F0', border: '1px solid #DACC9E', borderRadius: 12, padding: 20, marginBottom: 18, maxWidth: 480 },
-  cardTitle: { marginTop: 0, color: '#3B2E1F', fontSize: 16 },
+  backBtn: { background: 'transparent', color: '#726d63', border: '1px solid #e2ded5', borderRadius: 8, padding: '8px 14px', cursor: 'pointer' },
+  title: { color: '#0b0b0a', margin: 0, fontSize: 20, fontFamily: "'Bodoni Moda', serif", letterSpacing: 0.5, fontWeight: 500 },
+  muted: { color: '#726d63', fontSize: 13 },
+  card: { background: '#ffffff', border: '1px solid #e2ded5', borderRadius: 12, padding: 20, marginBottom: 18, maxWidth: 480 },
+  cardTitle: { marginTop: 0, color: '#0b0b0a', fontSize: 16 },
   cardHeaderRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   deleteSessionBtn: {
     background: 'transparent',
-    color: '#B5574A',
-    border: '1px solid #B5574A',
+    color: '#9c3b2e',
+    border: '1px solid #9c3b2e',
     borderRadius: 8,
     padding: '6px 12px',
     fontSize: 12,
@@ -346,9 +347,9 @@ const styles = {
   },
   input: {
     width: '100%',
-    background: '#EAE0C7',
-    color: '#2E2618',
-    border: '1px solid #C7B689',
+    background: '#f2f0ec',
+    color: '#0b0b0a',
+    border: '1px solid #e2ded5',
     borderRadius: 8,
     padding: '10px 12px',
     marginBottom: 10,
@@ -357,8 +358,8 @@ const styles = {
   },
   formRow: { display: 'flex', gap: 8, flexWrap: 'wrap' },
   primaryBtn: {
-    background: '#3B2E1F',
-    color: '#F2EBDB',
+    background: '#0b0b0a',
+    color: '#f5f4f1',
     border: 'none',
     borderRadius: 8,
     padding: '10px 20px',
@@ -367,14 +368,14 @@ const styles = {
   },
   dangerBtn: {
     background: 'transparent',
-    color: '#B5574A',
-    border: '1px solid #B5574A',
+    color: '#9c3b2e',
+    border: '1px solid #9c3b2e',
     borderRadius: 8,
     padding: '10px 20px',
     fontWeight: 'bold',
     cursor: 'pointer',
   },
-  error: { color: '#B5574A', fontSize: 13, marginBottom: 10 },
+  error: { color: '#9c3b2e', fontSize: 13, marginBottom: 10 },
   summaryGrid: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
@@ -383,7 +384,7 @@ const styles = {
   },
   summaryItem: { fontSize: 14 },
   expectedBox: {
-    background: '#F2EBDB',
+    background: '#f5f4f1',
     borderRadius: 8,
     padding: 12,
     fontSize: 14,
@@ -399,14 +400,14 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     fontSize: 13,
-    borderBottom: '1px solid #DACC9E',
+    borderBottom: '1px solid #e2ded5',
     paddingBottom: 6,
   },
   expenseRight: { display: 'flex', alignItems: 'center', gap: 8 },
   deleteExpenseBtn: {
     background: 'transparent',
-    color: '#B5574A',
-    border: '1px solid #B5574A',
+    color: '#9c3b2e',
+    border: '1px solid #9c3b2e',
     borderRadius: 6,
     padding: '3px 8px',
     fontSize: 11,
