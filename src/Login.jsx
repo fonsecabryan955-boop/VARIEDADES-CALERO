@@ -57,43 +57,45 @@ export default function Login({ onLogin }) {
   const digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫']
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>VARIEDADES CALERO</h1>
-        <p style={styles.subtitle}>Ingresá tu PIN</p>
+    <div className="vclogin-root">
+      <style>{LOGIN_STYLES}</style>
+      <div className="vclogin-card">
+        <div className="vclogin-monogram">VC</div>
+        <h1 className="vclogin-title">VARIEDADES CALERO</h1>
+        <p className="vclogin-subtitle">Ingresá tu PIN</p>
 
-        <div style={styles.pinDisplay}>
+        <div className="vclogin-pindisplay">
           {[0, 1, 2, 3, 4, 5].map((i) => (
-            <div key={i} style={styles.pinDot(i < pin.length)} />
+            <div key={i} className={`vclogin-pindot ${i < pin.length ? 'filled' : ''}`} />
           ))}
         </div>
 
-        {error && <p style={styles.error}>{error}</p>}
+        {error && <p className="vclogin-error">{error}</p>}
 
-        <div style={styles.keypad}>
+        <div className="vclogin-keypad">
           {digits.map((d, i) => {
             if (d === '') return <div key={i} />
             if (d === '⌫') {
               return (
-                <button key={i} style={styles.key} onClick={handleBackspace}>
+                <button key={i} className="vclogin-key" onClick={handleBackspace}>
                   ⌫
                 </button>
               )
             }
             return (
-              <button key={i} style={styles.key} onClick={() => handleDigit(d)}>
+              <button key={i} className="vclogin-key" onClick={() => handleDigit(d)}>
                 {d}
               </button>
             )
           })}
         </div>
 
-        <div style={styles.actions}>
-          <button style={styles.clearBtn} onClick={handleClear}>
+        <div className="vclogin-actions">
+          <button className="vclogin-clear" onClick={handleClear}>
             Borrar
           </button>
           <button
-            style={styles.submitBtn}
+            className="vclogin-submit"
             onClick={handleSubmit}
             disabled={loading}
           >
@@ -105,92 +107,135 @@ export default function Login({ onLogin }) {
   )
 }
 
-const styles = {
-  container: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: '#F2EBDB',
-    fontFamily: 'system-ui, sans-serif',
-    padding: 16,
-  },
-  card: {
-    background: '#FBF8F0',
-    borderRadius: 20,
-    padding: 32,
-    width: '100%',
-    maxWidth: 360,
-    textAlign: 'center',
-    border: '1px solid #DACC9E',
-  },
-  title: {
-    color: '#3B2E1F',
-    fontSize: 24,
-    letterSpacing: 1,
-    marginBottom: 4,
-  },
-  subtitle: {
-    color: '#8A7A56',
-    fontSize: 14,
-    marginBottom: 24,
-  },
-  pinDisplay: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: 10,
-    marginBottom: 16,
-  },
-  pinDot: (filled) => ({
-    width: 14,
-    height: 14,
-    borderRadius: '50%',
-    background: filled ? '#3B2E1F' : 'transparent',
-    border: '2px solid #3B2E1F',
-    transition: 'background 0.15s',
-  }),
-  error: {
-    color: '#B5574A',
-    fontSize: 13,
-    marginBottom: 12,
-    minHeight: 16,
-  },
-  keypad: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: 12,
-    marginBottom: 20,
-  },
-  key: {
-    background: '#EAE0C7',
-    color: '#2E2618',
-    border: '1px solid #C7B689',
-    borderRadius: 12,
-    fontSize: 20,
-    padding: '16px 0',
-    cursor: 'pointer',
-  },
-  actions: {
-    display: 'flex',
-    gap: 12,
-  },
-  clearBtn: {
-    flex: 1,
-    background: 'transparent',
-    color: '#8A7A56',
-    border: '1px solid #C7B689',
-    borderRadius: 10,
-    padding: '12px 0',
-    cursor: 'pointer',
-  },
-  submitBtn: {
-    flex: 2,
-    background: '#3B2E1F',
-    color: '#F2EBDB',
-    border: 'none',
-    borderRadius: 10,
-    padding: '12px 0',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-  },
-}
+const LOGIN_STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;1,6..96,500&family=Inter:wght@400;500;600;700&display=swap');
+
+  .vclogin-root {
+    --bg: #f5f4f1;
+    --panel: #ffffff;
+    --panel-raised: #f2f0ec;
+    --border: #e2ded5;
+    --ink: #0b0b0a;
+    --ink-soft: #726d63;
+    --ink-faint: #a39d8f;
+    --danger: #9c3b2e;
+    --gold: #9c7a3c;
+    --display: 'Bodoni Moda', serif;
+    --body: 'Inter', system-ui, -apple-system, sans-serif;
+
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    font-family: var(--body);
+    padding: 16px;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+  }
+  .vclogin-root * { box-sizing: border-box; }
+  .vclogin-root button { font-family: var(--body); }
+
+  .vclogin-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 40px 32px 32px;
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+  }
+  .vclogin-monogram {
+    width: 46px;
+    height: 46px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    border: 1px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--display);
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    color: var(--ink);
+  }
+  .vclogin-title {
+    font-family: var(--display);
+    color: var(--ink);
+    font-size: 21px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    margin: 0 0 6px;
+  }
+  .vclogin-subtitle {
+    color: var(--ink-soft);
+    font-size: 13px;
+    margin: 0 0 26px;
+  }
+  .vclogin-pindisplay {
+    display: flex;
+    justify-content: center;
+    gap: 11px;
+    margin-bottom: 18px;
+  }
+  .vclogin-pindot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1.5px solid var(--ink);
+    transition: background 0.15s;
+  }
+  .vclogin-pindot.filled { background: var(--ink); }
+  .vclogin-error {
+    color: var(--danger);
+    font-size: 12.5px;
+    margin: 0 0 12px;
+    min-height: 16px;
+  }
+  .vclogin-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .vclogin-key {
+    background: var(--panel-raised);
+    color: var(--ink);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    font-family: var(--display);
+    font-size: 19px;
+    padding: 15px 0;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .vclogin-key:hover { background: var(--ink); color: #fff; }
+  .vclogin-actions { display: flex; gap: 10px; }
+  .vclogin-clear {
+    flex: 1;
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    padding: 12px 0;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .vclogin-clear:hover { border-color: var(--ink); color: var(--ink); }
+  .vclogin-submit {
+    flex: 2;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 0;
+    padding: 12px 0;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+  .vclogin-submit:hover { opacity: 0.85; }
+  .vclogin-submit:disabled { opacity: 0.5; cursor: default; }
+`
